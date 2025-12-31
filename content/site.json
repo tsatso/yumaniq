@@ -1,0 +1,132 @@
+{
+  "brand": "Yumaniq",
+  "tagline": "Motor Intelligence Infrastructure for Physical AI",
+  "hero": {
+    "kicker": "Yumaniq",
+    "headline": "Motor Intelligence Infrastructure for Physical AI",
+    "body": "We build the execution layer that makes physical AI systems actually work,\nacross changing environments, with safety guarantees, personalized to each\nuser.",
+    "primaryCta": {
+      "label": "Contact Us",
+      "href": "/contact"
+    },
+    "secondaryCta": {
+      "label": "RAST",
+      "href": "/rast"
+    },
+    "backgroundImage": "/art/hero-atlas.png",
+    "watermarkOpacity": 0.48,
+    "washOpacity": 0.32,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "problem": {
+    "kicker": "The Problem",
+    "headline": "Physical AI has a transfer problem",
+    "body": [
+      "Physical AI has a transfer problem.",
+      "AI models can learn to control robots in simulation. But when the physics change - different gravity, different bodies, different environments - policies trained in one context fail in another.",
+      "The gap between AI intent and physical execution is where most systems break."
+    ],
+    "backgroundImage": "/art/problem-treadmill.jpeg",
+    "watermarkOpacity": 0.22,
+    "washOpacity": 0.4,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "product": {
+    "kicker": "The Product",
+    "headline": "What you integrate",
+    "intro": "RAST is a software stack you integrate into a physical system. It turns expert demonstrations into a deployable intent package, executes locally under current physics, and enforces deterministic safety constraints at runtime.",
+    "cards": [
+      {
+        "title": "Intent Studio",
+        "body": "Offline/cloud tooling that extracts the cost function / motor signature (IOC) from demonstrations and exports a deployable intent package."
+      },
+      {
+        "title": "RAST Runtime",
+        "body": "On-device software integrated alongside the existing control stack. Uses the intent package + live state to compute local execution (OFC/MPC-style)."
+      },
+      {
+        "title": "Safety Guardian",
+        "body": "Deterministic constraint enforcement and monitoring. Clamps unsafe actions and produces audit logs for safety-critical use."
+      }
+    ],
+    "backgroundImage": "/art/approach-decoupling.jpeg",
+    "watermarkOpacity": 0.22,
+    "washOpacity": 0.42,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "applications": {
+    "kicker": "Applications",
+    "headline": "Examples",
+    "items": [
+      {
+        "title": "Space Robotics",
+        "body": "Teleoperation with long delays requires a different paradigm. RAST enables intent transfer: send objectives, let the robot optimize locally."
+      },
+      {
+        "title": "Clinical Rehabilitation",
+        "body": "Precision motor guidance: instead of generic protocols, capture each person\u2019s motor signature and guide change within their own optimization preferences."
+      },
+      {
+        "title": "Autonomous Systems",
+        "body": "Physical AI that must generalize across environments, users, or operating conditions benefits from an execution layer that adapts under constraints."
+      }
+    ],
+    "backgroundImage": "/art/problem-mars.png",
+    "watermarkOpacity": 0.18,
+    "washOpacity": 0.45,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "technology": {
+    "kicker": "Technology",
+    "headline": "Built on established science, applied in new ways.",
+    "bullets": [
+      "Optimal Motor Control: The physics of how skilled movement emerges from real-time optimization",
+      "Inverse Optimal Control: Extracting the hidden cost function from observed behavior",
+      "Minimal Intervention Principle: Correct only what matters to the task",
+      "Deterministic Safety Architecture: 1kHz control loops with hard guarantees"
+    ],
+    "closing": "We don't invent new physics. We build the engineering bridge from theory to deployment.",
+    "backgroundImage": "/art/approach-decoupling.jpeg",
+    "watermarkOpacity": 0.2,
+    "washOpacity": 0.42,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "team": {
+    "kicker": "Team",
+    "headline": "Nitsan Sharon",
+    "role": "Founder & CEO",
+    "bio": "Decades of building enterprise-scale distributed systems. Former CTO of Oracle Israel Enterprise Division. Head of Technology at Amdocs. Now building Yumaniq at the frontier of Physical AI.",
+    "collaborations": [
+      "Technion BCI Lab - Scientific validation of motor intelligence extraction",
+      "Leading Cardiac Rehabilitation Center (Israel) - Clinical deployment and data partnership"
+    ],
+    "backgroundImage": "/art/approach-decoupling.jpeg",
+    "watermarkOpacity": 0.14,
+    "washOpacity": 0.48,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "contact": {
+    "kicker": "Contact",
+    "headline": "Contact",
+    "line": "Building something where AI meets physics? We'd like to hear about it.",
+    "email": "nitsan.sharon@yumaniq.com",
+    "backgroundImage": "/art/hero-atlas.png",
+    "watermarkOpacity": 0.14,
+    "washOpacity": 0.48,
+    "blurPx": 0,
+    "position": "center"
+  },
+  "footer": {
+    "line": "\u00a9 2026 Yumaniq | Tel Aviv, Israel"
+  },
+  "social": {
+    "twitter": "",
+    "linkedin": ""
+  }
+}
