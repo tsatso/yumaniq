@@ -13,7 +13,7 @@
       "label": "RAST",
       "href": "/rast"
     },
-    "backgroundImage": "/art/hhero-motor-intelligence.png",
+    "backgroundImage": "/art/hero-motor-intelligence-clean.png",
     "watermarkOpacity": 0.48,
     "washOpacity": 0.32,
     "blurPx": 0,
@@ -74,7 +74,7 @@
         "body": "Physical AI that must generalize across environments, users, or operating conditions benefits from an execution layer that adapts under constraints."
       }
     ],
-    "backgroundImage": "/art/problem-mars.png",
+    "backgroundImage": "/art/problem-transfer-clean.png",
     "watermarkOpacity": 0.18,
     "washOpacity": 0.45,
     "blurPx": 0,
