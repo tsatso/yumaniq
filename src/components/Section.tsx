@@ -20,7 +20,7 @@ export function Section({
   children,
   backgroundImage,
   watermarkOpacity = 0.16,
-  washOpacity = 0.55,
+  washOpacity = 0.25,
   blurPx = 2,
   position
 }: Props) {

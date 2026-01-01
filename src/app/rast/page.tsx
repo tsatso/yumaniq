@@ -10,7 +10,7 @@ export default function RastPage() {
         <div className="max-w-3xl space-y-4 text-white/85">
           <p>
             RAST decouples what a system wants to achieve from how it moves.
-            Using Inverse Optimal Control, we extract the optimization strategy — the cost structure — behind expert movement.
+            Using Inverse Optimal Control, we extract the optimization strategy, the cost structure, behind expert movement.
             This “motor signature” captures intent, not trajectory, enabling transfer across physics changes where imitation learning breaks.
           </p>
           <p>

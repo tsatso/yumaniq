@@ -8,47 +8,48 @@ export default function HomePage() {
 
   return (
     <main>
-    {/* HERO */}
-    <section className="relative overflow-hidden py-20 md:py-28 border-b border-white/10">
-    <SectionBackground
-      image={s.hero.backgroundImage}
-      opacity={0.30}
-      blurPx={0}
-      washOpacity={0.35}
-      position="center"
-    />
+      {/* HERO */}
+      <section className="relative isolate overflow-hidden py-20 md:py-28">
+        <SectionBackground
+          image={s.hero.backgroundImage}
+          opacity={s.hero.watermarkOpacity ?? 0.22}
+          blurPx={s.hero.blurPx ?? 4}
+          washOpacity={s.hero.washOpacity ?? 0.35}
+          position={s.hero.position || "center"}
+        />
 
-        {/* Readability gradient: keeps art visible while protecting text contrast */}
+        {/* Readability gradient (keeps art visible on the right) */}
         <div
           className="absolute inset-0 -z-10 pointer-events-none"
           style={{
             background:
-              "linear-gradient(90deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.58) 42%, rgba(5,7,10,0.32) 100%)"
+              "linear-gradient(90deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.58) 45%, rgba(5,7,10,0.18) 100%)"
           }}
         />
 
-
-      {/* Force content above background stack */}
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="max-w-3xl">
-          <div className="text-xs uppercase tracking-widest text-white/60">{s.hero.kicker}</div>
-          <h1 className="mt-4 text-4xl md:text-6xl font-semibold tracking-tight">
-            {s.hero.headline}
-          </h1>
-          <p className="mt-6 text-base md:text-lg text-white/85 whitespace-pre-line">
-            {s.hero.body}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button href={s.hero.primaryCta.href} variant="primary">
-              {s.hero.primaryCta.label}
-            </Button>
-            <Button href={s.hero.secondaryCta.href} variant="secondary">
-              {s.hero.secondaryCta.label}
-            </Button>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="max-w-3xl">
+            <div className="text-xs uppercase tracking-widest text-white/70">{s.hero.kicker}</div>
+            <h1 className="mt-4 text-4xl md:text-6xl font-semibold tracking-tight">
+              {s.hero.headline}
+            </h1>
+            <p className="mt-6 text-base md:text-lg text-white/85 whitespace-pre-line">
+              {s.hero.body}
+            </p>
+            {s.hero.underTheHood ? (
+              <p className="mt-4 text-sm text-white/70 whitespace-pre-line">{s.hero.underTheHood}</p>
+            ) : null}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href={s.hero.primaryCta.href} variant="primary">
+                {s.hero.primaryCta.label}
+              </Button>
+              <Button href={s.hero.secondaryCta.href} variant="secondary">
+                {s.hero.secondaryCta.label}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* PROBLEM */}
       <Section
@@ -88,6 +89,9 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        {s.product.deepLine ? (
+          <p className="mt-6 max-w-3xl text-sm text-white/70">{s.product.deepLine}</p>
+        ) : null}
       </Section>
 
       {/* APPLICATIONS */}
@@ -147,7 +151,6 @@ export default function HomePage() {
             <div className="mt-1 text-sm text-white/70">{s.team.role}</div>
             <p className="mt-4 text-sm text-white/80">{s.team.bio}</p>
           </div>
-
           {s.team.collaborations?.length ? (
             <div className="rounded-2xl border border-white/15 bg-white/7 p-6">
               <div className="text-sm font-semibold">Research collaborations</div>

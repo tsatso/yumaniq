@@ -9,7 +9,7 @@ This is a **content-as-code** site: pages + layout in code, content in JSON + Ma
 
 ## Images
 Put background/illustration assets in `public/art/` and reference them from `content/site.json` like:
-`/art/hero-atlas.png`
+`/art/hero-motor-intelligence.png`
 
 ## Run locally
 ```bash

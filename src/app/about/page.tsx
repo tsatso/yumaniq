@@ -9,7 +9,7 @@ export default function AboutPage() {
       <Section kicker="About" title="About Yumaniq" backgroundImage={s.team.backgroundImage} watermarkOpacity={0.06}>
         <div className="max-w-3xl space-y-6 text-white/85">
           <p>
-            Yumaniq builds motor intelligence infrastructure for Physical AI — focusing on transfer across changing environments,
+            Yumaniq builds motor intelligence infrastructure for Physical AI - focusing on transfer across changing environments,
             safety constraints, and personalization to each user.
           </p>
 

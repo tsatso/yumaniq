@@ -13,7 +13,7 @@
       "label": "RAST",
       "href": "/rast"
     },
-    "backgroundImage": "/art/hero-atlas.png",
+    "backgroundImage": "/art/hhero-motor-intelligence.png",
     "watermarkOpacity": 0.48,
     "washOpacity": 0.32,
     "blurPx": 0,
@@ -116,7 +116,7 @@
     "headline": "Contact",
     "line": "Building something where AI meets physics? We'd like to hear about it.",
     "email": "nitsan.sharon@yumaniq.com",
-    "backgroundImage": "/art/hero-atlas.png",
+    "backgroundImage": "/art/hero-motor-intelligence.png",
     "watermarkOpacity": 0.14,
     "washOpacity": 0.48,
     "blurPx": 0,
