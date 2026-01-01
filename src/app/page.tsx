@@ -28,7 +28,7 @@ export default function HomePage() {
         />
 
         <div className="mx-auto max-w-6xl px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <div className="text-xs uppercase tracking-widest text-white/70">{s.hero.kicker}</div>
             <h1 className="mt-4 text-4xl md:text-6xl font-semibold tracking-tight">
               {s.hero.headline}
