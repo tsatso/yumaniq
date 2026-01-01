@@ -36,7 +36,7 @@ export function Section({
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
         {kicker ? (
-          <div className="text-xs uppercase tracking-widest text-white/60">{kicker}</div>
+          <div className="text-sm uppercase tracking-[0.22em] text-white/75">{kicker}</div>
         ) : null}
         {title ? (
           <h2 className="mt-3 text-2xl md:text-4xl font-semibold tracking-tight">{title}</h2>

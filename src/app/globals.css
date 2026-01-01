@@ -2,7 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body { height: 100%; background: #0B0F16; color: white; }
-a { text-decoration: none; }
+:root {
+  --ink: #070B14;
+  --ink-grad: linear-gradient(
+    180deg,
+    #070B14 0%,
+    #090F1A 55%,
+    #05070C 100%
+  );
+}
 
-.prose a { text-decoration: underline; text-underline-offset: 4px; }
+html, body {
+  height: 100%;
+  background: var(--ink-grad);
+  color: white;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: var(--font-heading), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+  }
+}
+
+/* Optional: make prose content more readable */
+.prose {
+  line-height: 1.75;
+}

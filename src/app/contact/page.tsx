@@ -6,11 +6,19 @@ export default function ContactPage() {
 
   return (
     <main>
-      <Section kicker={s.contact.kicker} title="Contact" backgroundImage={s.contact.backgroundImage} watermarkOpacity={0.05}>
-        <div className="max-w-3xl space-y-4 text-white/85">
-          <p>{s.contact.line}</p>
-          <p>
-            Email:{" "}
+      <Section
+        id="contact"
+        kicker={s.contact.kicker}
+        title={s.contact.headline}
+        backgroundImage={s.contact.backgroundImage}
+        watermarkOpacity={s.contact.watermarkOpacity}
+        washOpacity={s.contact.washOpacity}
+        blurPx={s.contact.blurPx}
+        position={s.contact.position}
+      >
+        <div className="max-w-3xl">
+          <p className="text-white/85">{s.contact.line}</p>
+          <p className="mt-4 text-sm">
             <a className="text-white underline underline-offset-4" href={`mailto:${s.contact.email}`}>
               {s.contact.email}
             </a>
