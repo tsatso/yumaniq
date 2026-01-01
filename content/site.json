@@ -13,7 +13,7 @@
       "label": "RAST",
       "href": "/rast"
     },
-    "backgroundImage": "/art/hero-atlas.png",
+    "backgroundImage": "/art/hhero-motor-intelligence.png",
     "watermarkOpacity": 0.48,
     "washOpacity": 0.32,
     "blurPx": 0,
@@ -96,40 +96,27 @@
     "blurPx": 0,
     "position": "center"
   },
-"team": {
-  "kicker": "Team",
-  "headline": "Team",
-  "foundingTitle": "Founding team",
-
-  "founder": {
-    "name": "Nitsan Sharon",
-    "role": "Founder and CEO",
-    "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."
+  "team": {
+    "kicker": "Team",
+    "headline": "Nitsan Sharon",
+    "role": "Founder & CEO",
+    "bio": "Decades of building enterprise-scale distributed systems. Former CTO of Oracle Israel Enterprise Division. Head of Technology at Amdocs. Now building Yumaniq at the frontier of Physical AI.",
+    "collaborations": [
+      "Technion BCI Lab - Scientific validation of motor intelligence extraction",
+      "Leading Cardiac Rehabilitation Center (Israel) - Clinical deployment and data partnership"
+    ],
+    "backgroundImage": "/art/approach-decoupling.jpeg",
+    "watermarkOpacity": 0.14,
+    "washOpacity": 0.48,
+    "blurPx": 0,
+    "position": "center"
   },
-
-  "chiefScientist": {
-    "name": "Tomer Sela",
-    "role": "Chief Scientist",
-    "bio": "I am an MSc in Mechanical Engineering from the Technion BCI Lab, focused on motor control. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael on mission-critical autonomous systems."
-  },
-
-  "collaborations": [
-    "Technion BCI Lab - validation of motor intelligence inference",
-    "Clinical partner in Israel - first deployment focus in a Cardiac Rehabilitation Center, with outcomes measurement"
-  ],
-
-  "backgroundImage": "/art/approach-decoupling.jpeg",
-  "watermarkOpacity": 0.14,
-  "washOpacity": 0.48,
-  "blurPx": 0,
-  "position": "center"
-},
   "contact": {
     "kicker": "Contact",
     "headline": "Contact",
     "line": "Building something where AI meets physics? We'd like to hear about it.",
     "email": "nitsan.sharon@yumaniq.com",
-    "backgroundImage": "/art/hero-atlas.png",
+    "backgroundImage": "/art/hero-motor-intelligence.png",
     "watermarkOpacity": 0.14,
     "washOpacity": 0.48,
     "blurPx": 0,
