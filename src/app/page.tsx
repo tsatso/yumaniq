@@ -13,18 +13,18 @@ export default function HomePage() {
         <SectionBackground
           image={s.hero.backgroundImage}
           opacity={s.hero.watermarkOpacity ?? 0.22}
-          blurPx={s.hero.blurPx ?? 4}
-          washOpacity={s.hero.washOpacity ?? 0.35}
-          position={s.hero.position || "center"}
-        />
+          blurPx={s.hero.blurPx ?? 0}
+          washOpacity={s.hero.washOpacity ?? 0.85}
+          washType="gradient"
+          position={s.hero.position ?? "center right"}
+          // Darken bright art a bit
+          artBrightness={s.hero.artBrightness ?? 0.58}
+          artSaturation={s.hero.artSaturation ?? 0.92}
+          artContrast={s.hero.artContrast ?? 1.05}
 
-        {/* Readability gradient (keeps art visible on the right) */}
-        <div
-          className="absolute inset-0 -z-10 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.58) 45%, rgba(5,7,10,0.18) 100%)"
-          }}
+          // Keep seams hidden
+          edgeFade={true}
+          edgeFadeStrength={0.90}
         />
 
         <div className="mx-auto max-w-6xl px-6">
@@ -94,19 +94,23 @@ export default function HomePage() {
         ) : null}
       </Section>
 
-      {/* APPLICATIONS */}
+      {/* SOLUTIONS */}
       <Section
-        id="applications"
-        kicker={s.applications.kicker}
-        title={s.applications.headline}
-        backgroundImage={s.applications.backgroundImage}
-        watermarkOpacity={s.applications.watermarkOpacity}
-        washOpacity={s.applications.washOpacity}
-        blurPx={s.applications.blurPx}
-        position={s.applications.position}
+        id="solutions"
+        kicker={s.solutions.kicker}
+        title={s.solutions.headline}
+        backgroundImage={s.solutions.backgroundImage}
+        watermarkOpacity={s.solutions.watermarkOpacity}
+        washOpacity={s.solutions.washOpacity}
+        blurPx={s.solutions.blurPx}
+        position={s.solutions.position}
       >
-        <div className="grid gap-5 md:grid-cols-3">
-          {s.applications.items.map((it: any) => (
+        {s.solutions.intro ? (
+          <p className="max-w-3xl text-white/85">{s.solutions.intro}</p>
+        ) : null}
+
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
+          {s.solutions.items.map((it: any) => (
             <div key={it.title} className="rounded-2xl border border-white/15 bg-white/7 p-6">
               <div className="text-sm font-semibold">{it.title}</div>
               <p className="mt-3 text-sm text-white/80">{it.body}</p>
@@ -145,12 +149,36 @@ export default function HomePage() {
         blurPx={s.team.blurPx}
         position={s.team.position}
       >
-        <div className="max-w-3xl space-y-4">
+           {/* Founding team */}
           <div className="rounded-2xl border border-white/15 bg-white/7 p-6">
-            <div className="text-sm font-semibold">{s.team.headline}</div>
-            <div className="mt-1 text-sm text-white/70">{s.team.role}</div>
-            <p className="mt-4 text-sm text-white/80">{s.team.bio}</p>
+            <div className="text-sm font-semibold">
+              {"Founding team"}
+            </div>
+
+            {/* Founder */}
+            
+              <div className="mt-5">
+                <div className="text-sm font-semibold">{"Nitsan Sharon"}</div>
+                <div className="mt-1 text-sm text-white/70">{"Founder and CEO"}</div>
+                <p className="mt-3 text-sm text-white/80">{"I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."}</p>
+              </div>
+           
+
+            {/* Divider */}
+            <div className="my-6 h-px bg-white/10" /> 
+
+            {/* Chief Scientist */}
+            
+              <div>
+                <div className="text-sm font-semibold">{"Tomer Sela"}</div>
+                <div className="mt-1 text-sm text-white/70">{"Chief Scientist"}</div>
+                <p className="mt-3 text-sm text-white/80">{"I am an MSc in Mechanical Engineering from the Technion BCI Lab, focused on motor control. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael on mission-critical autonomous systems."}</p>
+              </div>
+            
+
+     
           </div>
+                    {/* Collaborations */}
           {s.team.collaborations?.length ? (
             <div className="rounded-2xl border border-white/15 bg-white/7 p-6">
               <div className="text-sm font-semibold">Research collaborations</div>
@@ -161,9 +189,8 @@ export default function HomePage() {
               </ul>
             </div>
           ) : null}
-        </div>
-      </Section>
 
+         </Section>
       {/* CONTACT */}
       <Section
         id="contact"

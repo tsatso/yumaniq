@@ -5,91 +5,71 @@
     "kicker": "Yumaniq",
     "headline": "Motor Intelligence Infrastructure for Physical AI",
     "body": "We build the execution layer that makes physical AI systems actually work,\nacross changing environments, with safety guarantees, personalized to each\nuser.",
+    "underTheHood": "Under the hood: state-aware control, objective inference from expert behavior, and hard safety limits, so systems keep working when the body, environment, or dynamics change.",
     "primaryCta": {
-      "label": "Contact Us",
+      "label": "Talk to us",
       "href": "/contact"
     },
     "secondaryCta": {
-      "label": "RAST",
+      "label": "Explore RAST",
       "href": "/rast"
     },
-    "backgroundImage": "/art/hhero-motor-intelligence.png",
-    "watermarkOpacity": 0.48,
-    "washOpacity": 0.32,
+    "backgroundImage": "/art/hero-motor-intelligence-clean.png",
+    "watermarkOpacity": 0.30,
+    "washOpacity": 0.70,
     "blurPx": 0,
-    "position": "center"
+    "position": "center right"
   },
   "problem": {
     "kicker": "The Problem",
     "headline": "Physical AI has a transfer problem",
     "body": [
-      "Physical AI has a transfer problem.",
-      "AI models can learn to control robots in simulation. But when the physics change - different gravity, different bodies, different environments - policies trained in one context fail in another.",
-      "The gap between AI intent and physical execution is where most systems break."
+      "Physical AI can look impressive in a controlled setting, until the dynamics change.",
+      "Different bodies. Different environments. Different constraints. Small shifts in dynamics create big failures.",
+      "The gap is not more AI. It is the missing execution layer: a system that adapts actions in real time to the dynamics that actually exist, while staying safe and auditable."
     ],
-    "backgroundImage": "/art/problem-treadmill.jpeg",
-    "watermarkOpacity": 0.22,
-    "washOpacity": 0.4,
+    "backgroundImage": "/art/problem-transfer-motor-minimal.png",
+    "watermarkOpacity": 0.50,
+    "washOpacity": 0.70,
     "blurPx": 0,
     "position": "center"
   },
-  "product": {
+    "product": {
     "kicker": "The Product",
-    "headline": "What you integrate",
-    "intro": "RAST is a software stack you integrate into a physical system. It turns expert demonstrations into a deployable intent package, executes locally under current physics, and enforces deterministic safety constraints at runtime.",
+    "headline": "RAST, the execution layer",
+    "intro": "RAST is a software stack that runs alongside an existing control system. It converts expert demonstrations into a compact intent package, then computes actions continuously from live state while enforcing hard safety limits.",
     "cards": [
       {
         "title": "Intent Studio",
-        "body": "Offline/cloud tooling that extracts the cost function / motor signature (IOC) from demonstrations and exports a deployable intent package."
+        "body": "Offline tooling that infers the motor objective behind expert behavior from demonstrations, and exports a deployable intent package."
       },
       {
         "title": "RAST Runtime",
-        "body": "On-device software integrated alongside the existing control stack. Uses the intent package + live state to compute local execution (OFC/MPC-style)."
+        "body": "On-device execution that recomputes actions from live state and intent, staying aligned as operating conditions shift instead of replaying a brittle policy."
       },
       {
         "title": "Safety Guardian",
-        "body": "Deterministic constraint enforcement and monitoring. Clamps unsafe actions and produces audit logs for safety-critical use."
+        "body": "Deterministic constraint enforcement. Clamps unsafe actions, monitors execution, and produces audit logs for safety-critical use."
       }
     ],
+    "deepLine": "Not a policy library. A state aware execution loop with hard constraint projection.",
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.22,
     "washOpacity": 0.42,
     "blurPx": 0,
     "position": "center"
   },
-  "applications": {
-    "kicker": "Applications",
-    "headline": "Examples",
-    "items": [
-      {
-        "title": "Space Robotics",
-        "body": "Teleoperation with long delays requires a different paradigm. RAST enables intent transfer: send objectives, let the robot optimize locally."
-      },
-      {
-        "title": "Clinical Rehabilitation",
-        "body": "Precision motor guidance: instead of generic protocols, capture each person\u2019s motor signature and guide change within their own optimization preferences."
-      },
-      {
-        "title": "Autonomous Systems",
-        "body": "Physical AI that must generalize across environments, users, or operating conditions benefits from an execution layer that adapts under constraints."
-      }
-    ],
-    "backgroundImage": "/art/problem-mars.png",
-    "watermarkOpacity": 0.18,
-    "washOpacity": 0.45,
-    "blurPx": 0,
-    "position": "center"
-  },
+
   "technology": {
     "kicker": "Technology",
-    "headline": "Built on established science, applied in new ways.",
+    "headline": "State-aware control, in the loop",
     "bullets": [
-      "Optimal Motor Control: The physics of how skilled movement emerges from real-time optimization",
-      "Inverse Optimal Control: Extracting the hidden cost function from observed behavior",
-      "Minimal Intervention Principle: Correct only what matters to the task",
-      "Deterministic Safety Architecture: 1kHz control loops with hard guarantees"
+      "State-aware action computation: actions are computed continuously from live state, not selected from a static script.",
+      "Objective inference from experts: infer what experts optimize for, not only what they did.",
+      "Minimal-change corrections: adjust only what matters to the task, preserve the rest of the natural strategy.",
+      "Hard safety limits: bounds enforced in the loop with auditability and predictable behavior."
     ],
-    "closing": "We don't invent new physics. We build the engineering bridge from theory to deployment.",
+    "closing": "We do not claim magic. We engineer the bridge from mathematical movement models to deployable systems.",
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.2,
     "washOpacity": 0.42,
@@ -97,28 +77,83 @@
     "position": "center"
   },
   "team": {
-    "kicker": "Team",
-    "headline": "Nitsan Sharon",
-    "role": "Founder & CEO",
-    "bio": "Decades of building enterprise-scale distributed systems. Former CTO of Oracle Israel Enterprise Division. Head of Technology at Amdocs. Now building Yumaniq at the frontier of Physical AI.",
-    "collaborations": [
-      "Technion BCI Lab - Scientific validation of motor intelligence extraction",
-      "Leading Cardiac Rehabilitation Center (Israel) - Clinical deployment and data partnership"
-    ],
-    "backgroundImage": "/art/approach-decoupling.jpeg",
-    "watermarkOpacity": 0.14,
-    "washOpacity": 0.48,
-    "blurPx": 0,
-    "position": "center"
+  "kicker": "Team",
+  "headline": "Team",
+  "foundingTitle": "Founding team",
+
+  "founder": {
+    "name": "Nitsan Sharon",
+    "role": "Founder and CEO",
+    "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."
+  },
+
+  "chiefScientist": {
+    "name": "Tomer Sela",
+    "role": "Chief Scientist",
+    "bio": "I am an MSc in Mechanical Engineering from the Technion BCI Lab, focused on motor control. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael on mission-critical autonomous systems."
+  },
+
+  "collaborations": [
+    "Technion BCI Lab - validation of motor intelligence inference",
+    "Clinical partner in Israel - first deployment focus in a Cardiac Rehabilitation Center, with outcomes measurement"
+  ],
+
+  "backgroundImage": "/art/approach-decoupling.jpeg",
+  "watermarkOpacity": 0.14,
+  "washOpacity": 0.48,
+  "blurPx": 0,
+  "position": "center"
+},
+  "solutions": {
+      "kicker": "Solutions",
+      "headline": "Cardiac rehab first. Built to expand.",
+      "intro": "We start with cardiac rehabilitation to validate outcomes, workflow fit, and safety constraints. The same execution layer extends to other domains where conditions shift and correctness matters.",
+      "items": [
+        {
+          "title": "Cardiac Rehabilitation",
+          "body": "Objective baseline, dose aware progression, and payer ready reporting. State aware guidance with hard safety limits, designed for clinic workflows."
+        },
+        {
+          "title": "Neuro and MSK Rehabilitation",
+          "body": "Personalized movement change is not just harder exercises. RAST models each person’s movement strategy and guides minimal, safe adjustments that can be measured session by session."
+        },
+        {
+          "title": "Robotics and Teleoperation",
+          "body": "When latency or environments break direct control, send intent and let the system execute locally under current conditions, inside explicit constraints."
+        }
+      ],
+      "backgroundImage": "/art/problem-transfer-motor-minimal.png",
+      "watermarkOpacity": 0.06,
+      "washOpacity": 0.70,
+      "blurPx": 1,
+      "position": "center"
   },
   "contact": {
     "kicker": "Contact",
     "headline": "Contact",
-    "line": "Building something where AI meets physics? We'd like to hear about it.",
+    "line": "If you are building a system where intent meets dynamics - robotics, rehab, or safety-critical automation - let’s talk about deployment paths and pilot design.",
     "email": "nitsan.sharon@yumaniq.com",
-    "backgroundImage": "/art/hero-motor-intelligence.png",
-    "watermarkOpacity": 0.14,
-    "washOpacity": 0.48,
+    "backgroundImage": "/art/hero-motor-intelligence-minimal.png",
+    "watermarkOpacity": 0.10,
+    "washOpacity": 0.70,
+    "blurPx": 0,
+    "position": "center right"
+  },
+  "about": {
+    "kicker": "About",
+    "headline": "About",
+    "backgroundImage": "/art/hero-motor-intelligence-minimal.png",
+    "watermarkOpacity": 0.10,
+    "washOpacity": 0.70,
+    "blurPx": 0,
+    "position": "center right"
+  },
+  "insights": {
+    "kicker": "Insights",
+    "headline": "Insights",
+    "backgroundImage": "/art/problem-transfer-motor-minimal.png",
+    "watermarkOpacity": 0.08,
+    "washOpacity": 0.72,
     "blurPx": 0,
     "position": "center"
   },
