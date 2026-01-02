@@ -172,7 +172,7 @@ export default function HomePage() {
               <div>
                 <div className="text-sm font-semibold">{"Tomer Sela"}</div>
                 <div className="mt-1 text-sm text-white/70">{"Chief Scientist"}</div>
-                <p className="mt-3 text-sm text-white/80">{"I am an MSc in Mechanical Engineering from the Technion BCI Lab, focused on motor control. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael on mission-critical autonomous systems."}</p>
+                <p className="mt-3 text-sm text-white/80">{"I am an MSc in Autonomous System and Robotics from the Technion, focused on Deep RL and Control Theory in Complex environments. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael and The Technion advanced robotic lab."}</p>
               </div>
             
 
