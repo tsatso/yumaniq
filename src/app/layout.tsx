@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="border-t border-white/10 py-10">
           <div className="mx-auto max-w-6xl px-6 text-sm text-white/60">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <span>© 2025 Yumaniq | Tel Aviv, Israel</span>
+              <span>© 2026 Yumaniq | Tel Aviv, Israel</span>
               <div className="flex gap-4">
                 <Link href="/privacy" className="hover:text-white">
                   Privacy
