@@ -7,7 +7,7 @@ export default function Licenses() {
     <main>
       <Section kicker="Legal" title="Licenses" backgroundImage={s.problem.backgroundImage} watermarkOpacity={0.04}>
         <div className="max-w-3xl space-y-4 text-white/85">
-          <p>Placeholder page. Add third-party notices if required.</p>
+          <p>Placeholder. TBD</p>
         </div>
       </Section>
     </main>

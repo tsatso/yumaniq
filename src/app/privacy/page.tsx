@@ -7,7 +7,7 @@ export default function Privacy() {
     <main>
       <Section kicker="Legal" title="Privacy Policy" backgroundImage={s.problem.backgroundImage} watermarkOpacity={0.04}>
         <div className="max-w-3xl space-y-4 text-white/85">
-          <p>This is a placeholder. Replace with your actual privacy policy.</p>
+          <p>Placeholder. Actual privacy policy to be added.</p>
         </div>
       </Section>
     </main>
