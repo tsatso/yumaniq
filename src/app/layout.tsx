@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Montserrat, Inter, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -39,10 +40,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/80 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <Link href="/" className="text-sm font-semibold tracking-wide">
-              Yumaniq
-            </Link>
-
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logo-mark.png"
+              alt="Yumaniq"
+              width={36}
+              height={36}
+              className="h-7 w-7 md:h-9 md:w-9 rounded-sm"
+              priority
+            />
+            <span className="text-sm font-semibold tracking-wide">Yumaniq</span>
+          </Link>
             <nav className="flex items-center gap-6 text-sm text-white/80">
               <Link href="/rast" className="hover:text-white">
                 Product
