@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import "./globals.css";
 import { Montserrat, Inter, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
@@ -24,16 +25,17 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata = {
   title: "Yumaniq",
-  description: "Motor Intelligence Infrastructure for Physical AI"
+  description: "Motor Intelligence Infrastructure for Physical AI",
+  icons: {
+    apple: "/apple-touch-icon.png",
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${montserrat.variable} ${inter.variable} ${plexMono.variable}`}
-      suppressHydrationWarning
-    >
+    
+    <html lang="en" className={montserrat.className} suppressHydrationWarning>  
       <body>
         <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/80 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
