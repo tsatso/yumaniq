@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RAST-CR Demo — Cardiac Rehabilitation</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    :root{
+        --bg:#fbfcff;
+        --bg2:#f3f6ff;
+        --panel:#ffffff;
+        --panel2:#ffffff;
+        --line: rgba(15,23,42,.10);
+        --text:#0b1220;
+        --muted:#4b5565;
+        --muted2:#6b7280;
+        --accent:#2563eb;
+        --accent2:#7c3aed;
+        --ok:#059669;
+        --warn:#b45309;
+        --bad:#be123c;
+        --cardiac:#dc2626;
+        --shadow: 0 18px 38px rgba(2,6,23,.10);
+        --radius: 18px;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    body{
+        margin:0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+            radial-gradient(900px 520px at 70% 0%, rgba(220,38,38,.06), transparent 60%),
+            radial-gradient(850px 560px at 10% 15%, rgba(37,99,235,.08), transparent 60%),
+            linear-gradient(180deg, #fbfcff, #f3f6ff);
+        background-repeat: no-repeat;
+        overflow:hidden;
+    }
+    
+    html, body { height: 100%; }
+
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:14px;
+      padding:18px;
+      box-sizing:border-box;
+    }
+
+    .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:14px 18px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logoMark{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        border:1px solid rgba(15,23,42,.12);
+        background: linear-gradient(135deg, rgba(220,38,38,.15), rgba(37,99,235,.15));
+        display:grid;
+        place-items:center;
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+    }
+    .logoMark svg { width: 28px; height: 28px; }
+    .brand h1{ margin:0; font-size:18px; font-weight:850; letter-spacing:.2px; line-height:1.1; }
+    .brand .sub{ margin:0; font-size:13.5px; color:var(--muted); line-height:1.2; }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    
+    button, .pill{
+        border:1px solid rgba(15,23,42,.12);
+        background: rgba(255,255,255,.92);
+        color: #0b1220;
+        padding:12px 14px;
+        border-radius: 14px;
+        cursor:pointer;
+        font-weight:700;
+        font-size:13px;
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+        transition: all 0.2s ease;
+    }
+    button:hover{ border-color: rgba(37,99,235,.25); background: rgba(255,255,255,1); }
+    button.primary{
+        background: linear-gradient(135deg, rgba(220,38,38,.90), rgba(37,99,235,.85));
+        color:#ffffff;
+        border-color: transparent;
+    }
+    button.primary:hover{ filter: brightness(1.05); }
+    .pill{ cursor:default; color: var(--muted); font-family: var(--mono); font-size:12px; padding:9px 11px; }
+
+    .stage{
+      display:grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap:14px;
+      min-height:0;
+    }
+
+    .main{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        display:grid;
+        grid-template-rows: auto 1fr;
+        min-height:0;
+    }
+    
+    .header{
+      padding:16px 18px 10px 18px;
+      border-bottom:1px solid rgba(15,23,42,.06);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .sceneTitle{ display:flex; flex-direction:column; gap:6px; max-width:78%; }
+    .sceneTitle .kicker{ font-size:12px; color: var(--muted2); letter-spacing:.16em; text-transform:uppercase; }
+    .sceneTitle h2{ margin:0; font-size:32px; font-weight:900; letter-spacing:.2px; line-height:1.18; }
+    .sceneTitle p{ margin:0; color: var(--muted); font-size:16px; line-height:1.5; }
+
+    .badgeRow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
+    .badge{
+        font-size:11px;
+        color: rgba(11,18,32,.78);
+        border:1px solid rgba(15,23,42,.12);
+        background: rgba(255,255,255,.88);
+        padding:7px 10px;
+        border-radius: 999px;
+        display:flex;
+        gap:8px;
+        align-items:center;
+        white-space:nowrap;
+        box-shadow: 0 10px 22px rgba(2,6,23,.06);
+    }
+    .dot{ width:8px;height:8px;border-radius:99px; background: var(--accent); box-shadow: 0 0 18px rgba(125,211,252,.35); }
+    .dot.purple{ background: var(--accent2); box-shadow: 0 0 18px rgba(167,139,250,.30); }
+    .dot.green{ background: var(--ok); box-shadow: 0 0 18px rgba(52,211,153,.24); }
+    .dot.yellow{ background: var(--warn); box-shadow: 0 0 18px rgba(251,191,36,.22); }
+    .dot.red{ background: var(--cardiac); box-shadow: 0 0 18px rgba(220,38,38,.30); }
+
+    .canvasWrap{
+      position:relative;
+      padding:14px;
+      min-height:0;
+      display:grid;
+      grid-template-rows: 1fr auto;
+      gap:12px;
+      overflow:auto;
+    
+    }
+
+    .vizGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      grid-template-rows: 1fr;
+      gap:14px;
+      min-height:0;
+    }
+
+    .card{
+      border-radius:16px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 22px rgba(2,6,23,.06);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:10px 14px;
+      border-bottom:1px solid rgba(15,23,42,.06);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .cardHead .title{ font-weight:800; font-size:13px; }
+    .cardHead .hint{ font-family: var(--mono); font-size:11px; color: var(--muted2); }
+    .cardBody{ flex:1; padding:14px; overflow:auto; min-height:0; }
+
+    .bottomStrip{
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.88);
+      padding:12px 16px;
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    .bottomStrip .title{ font-weight:800; font-size:13px; min-width:140px; }
+    .bottomStrip .hint{ font-family: var(--mono); font-size:11px; color: var(--muted2); }
+    .bottomStrip .body{ flex:1; }
+
+    .sidebar{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        display:flex;
+        flex-direction:column;
+        min-height:0;
+    }
+    .sideHead{ padding:14px 16px; border-bottom:1px solid rgba(15,23,42,.06); font-weight:800; font-size:14px; }
+    .sideBody{ flex:1; padding:14px; overflow:auto; min-height:0; }
+
+    .footer{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        padding:12px 18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    }
+
+    .metricCard{
+        border:1px solid rgba(15,23,42,.10);
+        border-radius:14px;
+        padding:14px;
+        background: rgba(255,255,255,.92);
+    }
+    .metricCard .label{ font-size:11px; color: var(--muted2); margin-bottom:6px; font-family: var(--mono); }
+    .metricCard .value{ font-size:28px; font-weight:900; line-height:1; }
+    .metricCard .unit{ font-size:14px; font-weight:600; color: var(--muted); }
+    .metricCard.ok{ border-color: rgba(5,150,105,.3); background: rgba(5,150,105,.05); }
+    .metricCard.warn{ border-color: rgba(180,83,9,.3); background: rgba(180,83,9,.05); }
+    .metricCard.bad{ border-color: rgba(190,18,60,.3); background: rgba(190,18,60,.05); }
+
+    .patientCard{
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:14px;
+      padding:16px;
+      background: rgba(255,255,255,.92);
+    }
+    .patientCard .header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:0;
+      border:none;
+      margin-bottom:14px;
+    }
+    .patientCard .avatar{
+      width:48px;height:48px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(220,38,38,.15), rgba(37,99,235,.15));
+      display:grid;
+      place-items:center;
+      font-size:24px;
+    }
+    .patientCard .info h3{ margin:0; font-size:16px; font-weight:800; }
+    .patientCard .info p{ margin:4px 0 0 0; font-size:13px; color: var(--muted); }
+
+    .hrTrace{
+      position:relative;
+      height:100px;
+      border-radius:12px;
+      overflow:hidden;
+      background: rgba(15,23,42,.02);
+    }
+    .hrTrace .zones{ position:absolute; inset:0; display:flex; flex-direction:column; }
+    .hrTrace .zone{ flex:1; }
+    .hrTrace .zone.ok{ background: rgba(5,150,105,.08); }
+    .hrTrace .zone.warn{ background: rgba(180,83,9,.08); }
+    .hrTrace .zone.danger{ background: rgba(190,18,60,.08); }
+    .hrTrace svg{ position:relative; width:100%; height:100%; }
+
+    .progressBar{ height:6px; background: rgba(15,23,42,.10); border-radius:99px; overflow:hidden; }
+    .progressBar .fill{ height:100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius:99px; }
+
+    .costBar{ display:grid; grid-template-columns: 120px 1fr 50px; gap:10px; align-items:center; }
+    .costBar .label{ font-size:12px; color: var(--text); }
+    .costBar .track{ height:8px; background: rgba(15,23,42,.10); border-radius:99px; overflow:hidden; }
+    .costBar .fill{ height:100%; border-radius:99px; }
+    .costBar .fill.blue{ background: linear-gradient(90deg, var(--accent), rgba(37,99,235,.6)); }
+    .costBar .fill.purple{ background: linear-gradient(90deg, var(--accent2), rgba(124,58,237,.6)); }
+    .costBar .value{ font-family: var(--mono); font-size:12px; text-align:right; }
+
+    .safetyIndicator{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      border-radius:12px;
+      background: rgba(5,150,105,.08);
+      border: 1px solid rgba(5,150,105,.25);
+    }
+    .safetyIndicator .light{
+      width:12px;height:12px;
+      border-radius:50%;
+      background: var(--ok);
+      box-shadow: 0 0 12px rgba(5,150,105,.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.6; } }
+    .safetyIndicator .label{ font-weight:700; font-size:13px; }
+
+    .guidanceCard{
+      border:1px solid rgba(37,99,235,.25);
+      background: rgba(37,99,235,.05);
+      border-radius:14px;
+      padding:16px;
+    }
+    .guidanceCard .icon{ font-size:24px; margin-bottom:8px; }
+    .guidanceCard .text{ font-size:18px; font-weight:800; margin-bottom:6px; }
+    .guidanceCard .detail{ font-size:13px; color: var(--muted); }
+
+    .summaryGrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+    .summaryCard{
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:14px;
+      padding:14px;
+      background: rgba(255,255,255,.92);
+      text-align:center;
+    }
+    .summaryCard .value{ font-size:28px; font-weight:900; margin-bottom:4px; }
+    .summaryCard .label{ font-size:11px; color: var(--muted); }
+
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .mt12{ margin-top:12px; }
+    .mb12{ margin-bottom:12px; }
+
+    .linkBtn{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:10px 16px;
+        border-radius:10px;
+        background: rgba(37,99,235,.08);
+        color: var(--accent);
+        font-weight:600;
+        font-size:13px;
+        text-decoration:none;
+        transition: all 0.2s ease;
+    }
+    .linkBtn:hover{ background: rgba(37,99,235,.15); }
+
+    /* CMG Graph styles */
+    .cmg-container { width: 100%; height: 100%; min-height: 260px; position: relative; }
+    .cmg-graph { width: 100%; height: 100%; }
+    .cmg-tooltip {
+      position: absolute;
+      pointer-events: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #111f20;
+      color: #f8f7f2;
+      font-size: 11px;
+      box-shadow: 0 8px 16px rgba(0,0,0,.15);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      max-width: 220px;
+      z-index: 100;
+    }
+    .cmg-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; font-size: 10px; }
+    .cmg-legend-item { display: flex; align-items: center; gap: 4px; }
+    .cmg-swatch { width: 10px; height: 10px; border-radius: 50%; }
+
+    @media (max-width: 1060px){
+      body{ overflow:auto; }
+      .app{ height:auto; min-height:100%; overflow:auto; }
+      .stage{ grid-template-columns: 1fr; }
+      .controls { gap: 6px; }
+      .controls button { padding: 10px 12px; font-size: 12px; }
+    }
+    /* --- CMG embedded viewer (iframe) --- */
+    .cmgToolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin: 6px 0 10px 0;
+    }
+
+    button.cmgOpenBtn{
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      color: #0b1220;
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 10px 22px rgba(2,6,23,.08);
+      transition: all 0.2s ease;
+    }
+
+    button.cmgOpenBtn:hover{
+      border-color: rgba(37,99,235,.25);
+      background: rgba(255,255,255,1);
+    }
+
+    /* The actual embedded area */
+    .cmgEmbed{
+      height: clamp(520px, 68vh, 820px);  /* this is what makes it “big enough” */
+      min-height: 520px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      overflow: hidden; /* keeps rounded corners clean */
+    }
+
+    .cmgEmbed iframe{
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Top Bar with Navigation (matching Motor Intelligence demo) -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="logoMark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="#dc2626"/>
+            <path d="M12 5.67v7" stroke="#2563eb" stroke-width="1.5"/>
+            <circle cx="12" cy="15" r="2" fill="#2563eb"/>
+          </svg>
+        </div>
+        <div>
+          <h1>RAST-CR</h1>
+          <p class="sub">Cardiac Rehabilitation • Product Demo</p>
+        </div>
+      </div>
+      <div class="controls">
+        <span class="pill" id="scenePill">Scene 1/7</span>
+        <span class="pill" id="timeBox">0:00</span>
+        <button id="prevBtn">◀ Prev</button>
+        <button id="playBtn" class="primary">Play</button>
+        <button id="nextBtn">Next ▶</button>
+      </div>
+    </div>
+
+    <!-- Main Stage -->
+    <div class="stage">
+      <div class="main">
+        <div class="header">
+          <div class="sceneTitle">
+            <span class="kicker" id="kicker">Scene 1</span>
+            <h2 id="sceneTitle">Patient Intake</h2>
+            <p id="sceneSubtitle">Session 0 begins with patient profile and baseline assessment.</p>
+          </div>
+          <div class="badgeRow" id="badgeRow"></div>
+        </div>
+        <div class="canvasWrap">
+          <div class="vizGrid">
+            <div class="card">
+              <div class="cardHead">
+                <span class="title" id="leftCardTitle">Patient Profile</span>
+                <span class="hint" id="leftCardHint">intake data</span>
+              </div>
+              <div class="cardBody" id="leftCardBody"></div>
+            </div>
+            <div class="card">
+              <div class="cardHead">
+                <span class="title" id="rightCardTitle">Baseline Metrics</span>
+                <span class="hint" id="rightCardHint">cardiac parameters</span>
+              </div>
+              <div class="cardBody" id="rightCardBody"></div>
+            </div>
+          </div>
+          <div class="bottomStrip">
+            <span class="title" id="bottomTitle">Session Status</span>
+            <span class="hint" id="bottomHint">current phase</span>
+            <div class="body" id="bottomBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="sideHead">Script & Notes</div>
+        <div class="sideBody" id="scriptBox"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div style="font-size:12px; color:var(--muted);">
+        Infrastructure for Precision Rehabilitation
+      </div>
+      <a href="#" class="linkBtn" onclick="window.close(); return false;">
+        ← Back to concepts
+      </a>
+    </div>
+  </div>
+
+<script>
+    const el = id => document.getElementById(id);
+    const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+    const fmtTime = s => { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
+
+    // ========== Component Generators ==========
+    function makePatientCard(){
+      return `
+        <div class="patientCard">
+          <div class="header">
+            <div class="avatar">👤</div>
+            <div class="info">
+              <h3>Patient #CR-2024-0847</h3>
+              <p>Male, 58 years • Post-MI (12 weeks)</p>
+            </div>
+          </div>
+          <div class="grid2 mt12">
+            <div class="metricCard">
+              <div class="label">Ejection Fraction</div>
+              <div class="value">42<span class="unit">%</span></div>
+            </div>
+            <div class="metricCard">
+              <div class="label">Risk Category</div>
+              <div class="value" style="font-size:20px;">Moderate</div>
+            </div>
+          </div>
+          <div class="mt12" style="font-size:12px; color:var(--muted);">
+            <div><b>Medications:</b> Beta-blocker, ACE inhibitor, Statin</div>
+            <div class="mt12"><b>Comorbidities:</b> Hypertension, Type 2 DM (controlled)</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeBaselineMetrics(){
+      return `
+        <div style="display:grid; gap:10px;">
+          <div class="metricCard ok"><div class="label">Resting HR</div><div class="value">68<span class="unit">bpm</span></div></div>
+          <div class="metricCard"><div class="label">Target HR Range</div><div class="value" style="font-size:18px;">95-115<span class="unit">bpm</span></div></div>
+          <div class="metricCard warn"><div class="label">HR Ceiling (85% HRmax)</div><div class="value">138<span class="unit">bpm</span></div></div>
+          <div class="metricCard"><div class="label">Baseline RPE</div><div class="value">11<span class="unit">/20</span></div></div>
+        </div>
+      `;
+    }
+
+    function makeObservationPanel(){
+      return `
+        <div style="display:grid; gap:14px;">
+          <div class="hrTrace">
+            <div class="zones"><div class="zone danger"></div><div class="zone warn"></div><div class="zone ok"></div></div>
+            <svg viewBox="0 0 400 100" preserveAspectRatio="none">
+              <path d="M 0,80 Q 50,75 100,70 T 150,65 T 200,60 T 250,55 T 300,58 T 350,52 T 400,50" fill="none" stroke="#dc2626" stroke-width="2"/>
+              <text x="10" y="15" font-size="10" fill="var(--muted)">HR (bpm)</text>
+              <text x="380" y="95" font-size="10" fill="var(--muted)">Time</text>
+            </svg>
+          </div>
+          <div class="grid3">
+            <div class="metricCard ok"><div class="label">Current HR</div><div class="value">102<span class="unit">bpm</span></div></div>
+            <div class="metricCard ok"><div class="label">RPE</div><div class="value">13<span class="unit">/20</span></div></div>
+            <div class="metricCard"><div class="label">Speed</div><div class="value">3.2<span class="unit">mph</span></div></div>
+          </div>
+          <div style="padding:10px; background:rgba(37,99,235,.05); border-radius:10px; font-size:13px;">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--muted2); margin-bottom:6px;">STATUS</div>
+            <div style="display:flex; align-items:center; gap:8px;"><span style="color:var(--ok);">●</span><span>Extracting motor signature... <b>42% complete</b></span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeSensorPanel(){
+      return `
+        <div style="display:grid; gap:10px;">
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:12px; padding:12px; background:rgba(255,255,255,.9);">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">Active Sensors</div>
+            <div class="grid2 mt12">
+              <div style="display:flex; align-items:center; gap:8px; font-size:12px;"><span style="color:var(--ok);">●</span> HR Monitor</div>
+              <div style="display:flex; align-items:center; gap:8px; font-size:12px;"><span style="color:var(--ok);">●</span> Treadmill</div>
+              <div style="display:flex; align-items:center; gap:8px; font-size:12px;"><span style="color:var(--ok);">●</span> RPE Input</div>
+              <div style="display:flex; align-items:center; gap:8px; font-size:12px;"><span style="color:var(--muted);">○</span> IMU (optional)</div>
+            </div>
+          </div>
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:12px; padding:12px; background:rgba(255,255,255,.9);">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">Data Quality</div>
+            <div class="mt12"><div class="progressBar"><div class="fill" style="width:92%;"></div></div><div style="font-size:11px; color:var(--muted); margin-top:4px;">Signal quality: 92%</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeSignaturePanel(){
+      return `
+        <div style="display:grid; gap:12px;">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">Extracted Cost Function Weights</div>
+          <div class="costBar"><span class="label">Stability priority</span><div class="track"><div class="fill blue" style="width:82%;"></div></div><span class="value">0.82</span></div>
+          <div class="costBar"><span class="label">Effort tolerance</span><div class="track"><div class="fill purple" style="width:58%;"></div></div><span class="value">0.58</span></div>
+          <div class="costBar"><span class="label">Speed preference</span><div class="track"><div class="fill blue" style="width:45%;"></div></div><span class="value">0.45</span></div>
+          <div class="costBar"><span class="label">Variability tolerance</span><div class="track"><div class="fill purple" style="width:38%;"></div></div><span class="value">0.38</span></div>
+          <div style="margin-top:8px; padding:10px; background:rgba(37,99,235,.05); border-radius:10px; border-left:3px solid var(--accent);">
+            <div style="font-size:13px; font-weight:600;">Key Finding</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">High stability preference, moderate effort tolerance. Patient prefers gradual progression over aggressive targets.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeComparisonPanel(){
+      return `
+        <div style="display:grid; gap:12px;">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">This Patient vs Protocol Average</div>
+          <div style="display:grid; gap:8px;">
+            ${[['Stability priority', 82, 50, 'Higher'],['Effort tolerance', 58, 65, 'Lower'],['Speed preference', 45, 60, 'Lower'],['Variability tolerance', 38, 55, 'Lower']].map(([label, patient, avg, note]) => `
+              <div style="border:1px solid rgba(15,23,42,.08); border-radius:10px; padding:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span>${label}</span><span style="color:var(--accent); font-weight:600;">${note}</span></div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <div style="flex:1; height:4px; background:rgba(15,23,42,.1); border-radius:2px; position:relative;">
+                    <div style="position:absolute; height:4px; background:var(--accent); border-radius:2px; width:${patient}%;"></div>
+                    <div style="position:absolute; height:8px; width:2px; background:var(--muted); top:-2px; left:${avg}%;"></div>
+                  </div>
+                  <span style="font-family:var(--mono); font-size:10px; width:60px;">${patient} / ${avg}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // ========== CMG Interactive Graph (Inline — Scene 4) ==========
+
+  function makeCMGPanel(){
+    return `
+      <div class="card">
+        <div class="cmgToolbar">
+          <button
+            type="button"
+            class="cmgOpenBtn"
+            onclick="window.open('rast-cmg-viewer.html', '_blank', 'noopener,noreferrer')"
+          >
+            Open CMG Viewer
+          </button>
+          <span class="micro">Interactive CMG graph (embedded)</span>
+        </div>
+
+        <div class="cmgEmbed">
+          <iframe
+            src="rast-cmg-viewer.html"
+            title="CMG Viewer"
+            loading="lazy"
+          ></iframe>
+        </div>        
+      </div>
+    `;
+  }
+
+    // ---- Inline CMG renderer (scoped to Scene 4 DOM ids) ----
+    const CMG_INLINE = {
+      current: null,
+      lastCmg: null,
+      selectedId: null,
+      enabledGroups: null,
+      enabledEdgeTypes: null,
+      searchQuery: "",
+      teardown: null
+    };
+
+    const cmgInlineCategories = [
+      { id: "identity", label: "Identity", color: "#2563eb" },
+      { id: "provenance", label: "Provenance", color: "#7c3aed" },
+      { id: "structural", label: "Structural", color: "#0b1220" },
+      { id: "metabolic", label: "Metabolic", color: "#b45309" },
+      { id: "intent", label: "Intent", color: "#0ea5e9" },
+      { id: "action", label: "Action Bank", color: "#059669" },
+      { id: "constraint", label: "Constraints", color: "#dc2626" },
+    ];
+
+    const cmgInlineEdgeTypes = [
+      { id: "HAS", stroke: "rgba(15,23,42,.35)", dash: "" },
+      { id: "USES", stroke: "rgba(37,99,235,.65)", dash: "6,4" },
+      { id: "CONSTRAINED_BY", stroke: "rgba(220,38,38,.65)", dash: "2,4" },
+      { id: "PARAMETERIZES", stroke: "rgba(124,58,237,.65)", dash: "" },
+      { id: "MODULATES", stroke: "rgba(180,83,9,.75)", dash: "10,4" },
+      { id: "DEPENDS_ON", stroke: "rgba(15,23,42,.22)", dash: "2,2" },
+      { id: "SUPPORTS_INFERENCE", stroke: "rgba(5,150,105,.75)", dash: "" },
+    ];
+
+    const cmgInlineColor = (group) => cmgInlineCategories.find((c)=>c.id===group)?.color || "#64748b";
+    const cmgInlineEdgeStyle = (type) => cmgInlineEdgeTypes.find((t)=>t.id===type) || { stroke: "rgba(15,23,42,.25)", dash: "" };
+
+    const cmgInlineSample =
+      {
+        cmg_id: "uuid-patient-8842",
+        version: "1.4",
+        timestamp: "2025-10-27T10:00:00Z",
+        provenance: { session_id: "sess-05", sensor_suite: ["IMU_x6","HR_Polar","ForcePlate"], ioc_confidence_score: 0.85 },
+        layer_1_structural: {
+          model_type: "opensim_compatible",
+          model_ref: "uri/to/patient_scaled_model.osim",
+          constraints: { hard_rom_limits: { shoulder_flexion_left: { max: 90, unit: "deg" }, knee_extension_right: { max: 0, unit: "deg" } } }
+        },
+        layer_3_metabolic_uthpc: {
+          baseline_envelope: { vo2_max_estimate: 28.5, hr_rest: 65, hr_max_safe: 140, recovery_slope_threshold: 12 },
+          dynamic_state: { current_hr_zone: "stable_zone", fatigue_index: 0.4, perceived_exertion_scale: "Borg_CR10" },
+          motor_modulation: { description: "Function f(M(t)) mapping fatigue to motor limits", fatigue_impact_on_stability: "high" }
+        },
+        layer_4_intent_optimization: {
+          description: "Inferred Cost Function Weights",
+          weights: [
+            { term: "w_effort", value: 0.8, variance: 0.05, classification: "trait", transferability: "high", description: "Stable preference for energy conservation" },
+            { term: "w_smoothness", value: 0.72, variance: 0.03, classification: "trait", transferability: "high", description: "Jerk minimization preference" },
+            { term: "w_stability", value: 0.95, variance: 0.2, classification: "state", transferability: "low", context_dependency: ["surface_friction","fatigue"], description: "High fear of falling" },
+            { term: "w_speed", value: 0.3, variance: 0.15, classification: "state", transferability: "low", description: "Task-dependent urgency" }
+          ]
+        },
+        layer_5_action_bank: { primitives: [ { id: "sit_to_stand", type: "ProMP", parameters: "uri/to/weights.npy", feasibility_check: "metabolic_feasible AND motor_feasible" } ] }
+      };
+
+    const cmgInlineSetStatus = (msg) => {
+      const el = document.getElementById("cmgInlineStatus");
+      if (el) el.textContent = msg || "";
+    };
+
+    const cmgInlineFormatPayloadHtml = (obj) => {
+      if (obj == null) return "<span style='color:rgba(75,85,101,.9)'>No payload</span>";
+      const pretty = JSON.stringify(obj, null, 2);
+      return `<pre style="margin:0; white-space:pre-wrap; word-break:break-word; font-family:var(--mono); font-size:11px; line-height:1.45; color:rgba(11,18,32,.92);">${pretty.replace(/</g, "&lt;")}</pre>`;
+    };
+
+    const cmgInlineBuildSemanticGraph = (cmg) => {
+      const nodes = [];
+      const links = [];
+      const nodeIndex = new Map();
+      const addNode = (id, label, group, payload) => {
+        if (!nodeIndex.has(id)) { nodeIndex.set(id, nodes.length); nodes.push({ id, label, group, payload }); }
+      };
+      const addLink = (source, target, type) => links.push({ source, target, type });
+
+      addNode("cmg", "CMG", "identity", { cmg_id: cmg.cmg_id, version: cmg.version, timestamp: cmg.timestamp });
+      addNode("person", "Person", "identity", { person_id: cmg.cmg_id });
+      addLink("person", "cmg", "HAS");
+
+      const prov = cmg.provenance || {};
+      addNode("session", "Session", "provenance", { session_id: prov.session_id, ioc_confidence_score: prov.ioc_confidence_score, sensor_suite: prov.sensor_suite });
+      addLink("cmg", "session", "HAS");
+      if (Array.isArray(prov.sensor_suite)) {
+        prov.sensor_suite.forEach((s, i) => { const id = `sensor-${i}`; addNode(id, s, "provenance", { sensor: s }); addLink("session", id, "USES"); });
+      }
+
+      const struct = cmg.layer_1_structural || {};
+      addNode("struct", "Structural", "structural", { model_type: struct.model_type, model_ref: struct.model_ref });
+      addLink("cmg", "struct", "HAS");
+      if (struct.constraints?.hard_rom_limits) {
+        addNode("rom", "ROM Limits", "constraint", { type: "hard_rom_limits" });
+        addLink("struct", "rom", "CONSTRAINED_BY");
+        Object.entries(struct.constraints.hard_rom_limits).forEach(([k,v])=>{
+          const id = `rom-${k}`;
+          addNode(id, k.replaceAll("_"," "), "constraint", v);
+          addLink("rom", id, "HAS");
+        });
+      }
+
+      const metab = cmg.layer_3_metabolic_uthpc || {};
+      addNode("metab", "Metabolic", "metabolic", { description: "Metabolic envelope + state" });
+      addLink("cmg", "metab", "HAS");
+      if (metab.baseline_envelope) {
+        addNode("metab-base", "Baseline Envelope", "metabolic", metab.baseline_envelope);
+        addLink("metab", "metab-base", "HAS");
+      }
+      if (metab.dynamic_state) {
+        addNode("metab-state", "Dynamic State", "metabolic", metab.dynamic_state);
+        addLink("metab", "metab-state", "HAS");
+      }
+      if (metab.motor_modulation) {
+        addNode("metab-mod", "Motor Modulation", "metabolic", metab.motor_modulation);
+        addLink("metab", "metab-mod", "MODULATES");
+      }
+
+      const intent = cmg.layer_4_intent_optimization || {};
+      addNode("intent", "Intent", "intent", { description: intent.description });
+      addLink("cmg", "intent", "HAS");
+      if (Array.isArray(intent.weights)) {
+        addNode("weights", "Cost Weights", "intent", { count: intent.weights.length });
+        addLink("intent", "weights", "SUPPORTS_INFERENCE");
+        intent.weights.forEach((w)=>{
+          const id = `w-${w.term}`;
+          addNode(id, w.term, "intent", w);
+          addLink("weights", id, "HAS");
+        });
+      }
+
+      const action = cmg.layer_5_action_bank || {};
+      addNode("ab", "Action Bank", "action", { description: "Motor primitives" });
+      addLink("cmg", "ab", "HAS");
+      if (Array.isArray(action.primitives)) {
+        action.primitives.forEach((p)=>{
+          const id = `prim-${p.id}`;
+          addNode(id, p.id.replaceAll("_"," "), "action", p);
+          addLink("ab", id, "PARAMETERIZES");
+        });
+      }
+
+      return { nodes, links };
+    };
+
+    const cmgInlineFilterGraph = (graph) => {
+      // group filters are not shown in this embedded variant; keep all.
+      const enabledGroups = CMG_INLINE.enabledGroups || new Set(cmgInlineCategories.map(c=>c.id));
+      const enabledEdgeTypes = CMG_INLINE.enabledEdgeTypes || new Set(cmgInlineEdgeTypes.map(t=>t.id));
+      const q = (CMG_INLINE.searchQuery || "").trim().toLowerCase();
+
+      let links = graph.links.filter((l)=> enabledEdgeTypes.has(l.type));
+      let nodes = graph.nodes.filter((n)=> enabledGroups.has(n.group));
+      const allowed = new Set(nodes.map(n=>n.id));
+      links = links.filter(l=> allowed.has(l.source) && allowed.has(l.target));
+
+      if (!q) return { nodes, links };
+      const match = new Set(nodes.filter((n)=>{
+        const labelHit = (n.label||"").toLowerCase().includes(q);
+        const payloadHit = JSON.stringify(n.payload||{}).toLowerCase().includes(q);
+        return labelHit || payloadHit;
+      }).map(n=>n.id));
+
+      const keep = new Set(match);
+      links.forEach((l)=>{ if (match.has(l.source)) keep.add(l.target); if (match.has(l.target)) keep.add(l.source); });
+      nodes = nodes.filter(n=> keep.has(n.id));
+      const allowed2 = new Set(nodes.map(n=>n.id));
+      links = links.filter(l=> allowed2.has(l.source) && allowed2.has(l.target));
+      return { nodes, links };
+    };
+
+    const cmgInlineRenderMeta = (cmg) => {
+      const el = document.getElementById("cmgInlineMeta");
+      if (!el) return;
+      el.innerHTML = `
+        <div><b>ID</b>: ${cmg.cmg_id}</div>
+        <div><b>Version</b>: ${cmg.version}</div>
+        <div><b>Timestamp</b>: ${cmg.timestamp}</div>
+        <div><b>Session</b>: ${cmg.provenance?.session_id ?? ""}</div>
+        <div><b>IOC confidence</b>: ${cmg.provenance?.ioc_confidence_score ?? ""}</div>
+      `;
+    };
+
+    const cmgInlineRenderSelection = (node) => {
+      const el = document.getElementById("cmgInlineSelection");
+      if (!el) return;
+      if (!node) { el.innerHTML = "Click a node…"; return; }
+      el.innerHTML = `<div style="font-weight:800; color:var(--text); margin-bottom:6px;">${node.label}</div>${cmgInlineFormatPayloadHtml(node.payload)}`;
+    };
+
+    const cmgInlineClearSvg = () => d3.select("#cmgInlineGraph").selectAll("*").remove();
+
+    function cmgInlineRender(cmg){
+      CMG_INLINE.lastCmg = cmg;
+      CMG_INLINE.selectedId = null;
+      cmgInlineRenderSelection(null);
+      cmgInlineRenderMeta(cmg);
+
+      cmgInlineClearSvg();
+      const full = cmgInlineBuildSemanticGraph(cmg);
+      CMG_INLINE.current = cmgInlineFilterGraph(full);
+      const { nodes, links } = CMG_INLINE.current;
+      cmgInlineSetStatus(`${nodes.length} nodes • ${links.length} edges`);
+
+      const svg = d3.select("#cmgInlineGraph");
+      const tooltip = d3.select("#cmgInlineTooltip");
+
+      const root = svg.append("g").attr("class","cmgRoot");
+      const zoom = d3.zoom().scaleExtent([0.45, 2.2]).on("zoom", (event)=> root.attr("transform", event.transform));
+      svg.call(zoom);
+
+      const sim = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id((d)=>d.id).distance(110).strength(0.85))
+        .force("charge", d3.forceManyBody().strength(-520))
+        .force("center", d3.forceCenter(900/2, 600/2))
+        .force("collision", d3.forceCollide().radius(44));
+
+      const link = root.append("g").attr("stroke-width", 1.6)
+        .selectAll("line").data(links).join("line")
+        .attr("stroke", (d)=> cmgInlineEdgeStyle(d.type).stroke)
+        .attr("stroke-dasharray", (d)=> cmgInlineEdgeStyle(d.type).dash)
+        .attr("opacity", 0.85);
+
+      const node = root.append("g").selectAll("g").data(nodes).join("g")
+        .style("cursor","pointer")
+        .call(d3.drag()
+          .on("start", (event, d)=>{ if(!event.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+          .on("drag", (event, d)=>{ d.fx=event.x; d.fy=event.y; })
+          .on("end", (event, d)=>{ if(!event.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
+        );
+
+      node.append("circle")
+        .attr("r", (d)=> d.group==="identity" ? 22 : 14)
+        .attr("fill", (d)=> cmgInlineColor(d.group))
+        .attr("stroke", "rgba(255,255,255,.95)")
+        .attr("stroke-width", 2);
+
+      node.append("text")
+        .text((d)=> d.label)
+        .attr("x", 18)
+        .attr("y", 4)
+        .attr("font-size", "12px")
+        .attr("font-weight", (d)=> d.group==="identity" ? 800 : 600)
+        .attr("fill", "#0b1220");
+
+      const neighbors = () => {
+        const s = new Set();
+        if (!CMG_INLINE.selectedId) return s;
+        CMG_INLINE.current.links.forEach((l)=>{
+          const a = typeof l.source === "object" ? l.source.id : l.source;
+          const b = typeof l.target === "object" ? l.target.id : l.target;
+          if (a === CMG_INLINE.selectedId) s.add(b);
+          if (b === CMG_INLINE.selectedId) s.add(a);
+        });
+        return s;
+      };
+
+      const applyHighlight = () => {
+        const n = neighbors();
+        node.selectAll("circle").attr("opacity", (d)=>{
+          if (!CMG_INLINE.selectedId) return 1;
+          return d.id === CMG_INLINE.selectedId || n.has(d.id) ? 1 : 0.22;
+        });
+        link.attr("opacity", (d)=>{
+          if (!CMG_INLINE.selectedId) return 0.85;
+          const a = typeof d.source === "object" ? d.source.id : d.source;
+          const b = typeof d.target === "object" ? d.target.id : d.target;
+          return a === CMG_INLINE.selectedId || b === CMG_INLINE.selectedId ? 0.95 : 0.12;
+        });
+      };
+
+      node
+        .on("mouseenter", (event, d)=>{
+          tooltip
+            .style("opacity", 1)
+            .style("left", `${event.offsetX + 14}px`)
+            .style("top", `${event.offsetY + 14}px`)
+            .html(`<div style="font-weight:800; margin-bottom:6px;">${d.label}</div>${cmgInlineFormatPayloadHtml(d.payload)}`);
+        })
+        .on("mouseleave", ()=> tooltip.style("opacity", 0))
+        .on("click", (event, d)=>{
+          CMG_INLINE.selectedId = d.id === CMG_INLINE.selectedId ? null : d.id;
+          cmgInlineRenderSelection(CMG_INLINE.selectedId ? d : null);
+          applyHighlight();
+        });
+
+      sim.on("tick", ()=>{
+        link
+          .attr("x1", (d)=> d.source.x)
+          .attr("y1", (d)=> d.source.y)
+          .attr("x2", (d)=> d.target.x)
+          .attr("y2", (d)=> d.target.y);
+        node.attr("transform", (d)=> `translate(${d.x},${d.y})`);
+      });
+
+      applyHighlight();
+
+      CMG_INLINE.teardown = () => {
+        try { sim.stop(); } catch(e){}
+        try { svg.on(".zoom", null); } catch(e){}
+      };
+    }
+
+    async function cmgInlineLoadFromFile(file){
+      const text = await file.text();
+      return JSON.parse(text);
+    }
+
+    async function initCmgScene4(){
+    const root = document.getElementById('cmgViewerMount');
+    if (!root || !window.CmgViewer || typeof window.CmgViewer.mount !== 'function') return;
+
+    window.CmgViewer.mount({
+      root,
+      openStandaloneHref: 'rast-cmg-viewer.html',
+      initialLod: 2,
+      showLegend: true,
+      showLod: true
+    }).catch(err => console.error('CMG viewer mount failed:', err));
+  }
+
+    function makeZonesPanel(){
+      return `
+        <div style="display:grid; gap:10px;">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">Personalized Safety Zones</div>
+          ${[
+            ['Comfort Zone', '90-105 bpm', 'ok', 'Sustainable, can maintain 15+ min'],
+            ['Challenge Zone', '105-120 bpm', 'warn', 'Therapeutic stress, monitor closely'],
+            ['Recovery Zone', '<90 bpm', 'blue', 'Active recovery, reduce intensity'],
+            ['Limit Zone', '>130 bpm', 'bad', 'Automatic intervention triggered']
+          ].map(([name, range, color, desc]) => `
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:10px; padding:10px; display:flex; gap:12px; align-items:center;">
+              <div style="width:8px; height:8px; border-radius:50%; background:var(--${color === 'blue' ? 'accent' : color}); flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-weight:700; font-size:13px;">${name}</div><div style="font-size:11px; color:var(--muted);">${desc}</div></div>
+              <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">${range}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function makeLiveSessionPanel(){
+      return `
+        <div style="display:grid; gap:14px;">
+          <div class="safetyIndicator"><div class="light"></div><span class="label">Safety Governor: ACTIVE — Within Envelope</span></div>
+          <div class="hrTrace" style="height:120px;">
+            <div class="zones"><div class="zone danger"></div><div class="zone warn"></div><div class="zone ok"></div></div>
+            <svg viewBox="0 0 400 120" preserveAspectRatio="none">
+              <path d="M 0,100 Q 30,95 60,90 T 100,82 T 140,75 T 180,70 T 220,65 T 260,62 T 300,58 T 340,60 T 380,55 L 400,55" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+              <circle cx="400" cy="55" r="5" fill="#dc2626"/>
+              <line x1="0" y1="35" x2="400" y2="35" stroke="var(--bad)" stroke-width="1" stroke-dasharray="4,4"/>
+              <text x="10" y="32" font-size="9" fill="var(--bad)">Ceiling: 138</text>
+            </svg>
+          </div>
+          <div class="grid3">
+            <div class="metricCard ok"><div class="label">HR</div><div class="value">108<span class="unit">bpm</span></div></div>
+            <div class="metricCard ok"><div class="label">RPE</div><div class="value">13<span class="unit">/20</span></div></div>
+            <div class="metricCard ok"><div class="label">Time in Zone</div><div class="value">8:42</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeGuidancePanel(){
+      return `
+        <div style="display:grid; gap:12px;">
+          <div class="guidanceCard">
+            <div class="icon">📈</div>
+            <div class="text">Increase incline 0.5%</div>
+            <div class="detail">Patient stable in comfort zone for 3+ min. Ready for challenge progression.</div>
+          </div>
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:12px; padding:12px; background:rgba(255,255,255,.9);">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--muted2); margin-bottom:8px;">Guidance Rationale</div>
+            <div style="font-size:12px; color:var(--text); line-height:1.5;">
+              <b>Why 0.5% and not 1.0%?</b><br/>Patient's stability weight (0.82) is above protocol threshold. Using minimal-change progression.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeSummaryPanel(){
+      return `
+        <div style="display:grid; gap:14px;">
+          <div class="summaryGrid">
+            <div class="summaryCard"><div class="value">32<span class="unit" style="font-size:14px;">min</span></div><div class="label">Session Duration</div></div>
+            <div class="summaryCard"><div class="value">118<span class="unit" style="font-size:14px;">bpm</span></div><div class="label">Peak HR</div></div>
+            <div class="summaryCard"><div class="value" style="color:var(--ok);">0</div><div class="label">Safety Events</div></div>
+          </div>
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:12px; padding:14px; background:rgba(255,255,255,.9);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-weight:700; font-size:14px;">TTTC Progress</span>
+              <span style="font-family:var(--mono); font-size:12px; color:var(--accent);">68% → 6 MET goal</span>
+            </div>
+            <div class="progressBar" style="height:8px;"><div class="fill" style="width:68%;"></div></div>
+            <div style="font-size:11px; color:var(--muted); margin-top:6px;">Estimated 4 more sessions (vs 6 protocol avg)</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeDocPanel(){
+      return `
+        <div style="display:grid; gap:10px;">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted2);">Auto-Generated Documentation</div>
+          ${[['📋', 'Session Notes', 'FHIR-compatible, one-click EMR'],['📊', 'Progress Report', 'PDF export ready'],['💳', 'Billing Codes', '93798, 93799 auto-assigned']].map(([icon, title, desc]) => `
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:10px; padding:12px; display:flex; gap:12px; align-items:center; background:rgba(255,255,255,.9);">
+              <div style="font-size:20px;">${icon}</div>
+              <div style="flex:1;"><div style="font-weight:700; font-size:13px;">${title}</div><div style="font-size:11px; color:var(--muted);">${desc}</div></div>
+              <button style="font-size:11px; padding:6px 10px;">Export</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function makeClosePanel(){
+      return `
+        <div style="text-align:center; padding:20px;">
+          <div style="font-size:48px; margin-bottom:16px;">🎯</div>
+          <div style="font-size:24px; font-weight:900; margin-bottom:12px;">Personalized. Safe. Documented.</div>
+          <div style="font-size:16px; color:var(--muted); line-height:1.5; max-width:400px; margin:0 auto;">
+            RAST-CR transforms cardiac rehabilitation from generic protocols to patient-specific guidance—with built-in safety and automatic documentation.
+          </div>
+        </div>
+      `;
+    }
+
+    function makeValuePanel(){
+      return `
+        <div style="display:grid; gap:10px;">
+          ${[['🎯', 'Personalized', 'Guidance adapts to patient motor signature'],['🛡️', 'Safe', '1kHz safety governor, never exceeds envelope'],['📋', 'Documented', 'Auto-generated clinical notes, one-click EMR'],['📈', 'Measurable', 'TTTC tracking, objective progress metrics']].map(([icon, title, desc]) => `
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:12px; padding:14px; display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.92);">
+              <div style="font-size:24px;">${icon}</div>
+              <div><div style="font-weight:800; font-size:14px;">${title}</div><div style="font-size:12px; color:var(--muted); margin-top:4px;">${desc}</div></div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ========== Scene Definitions ==========
+    const scenes = [
+      { kicker:"Scene 1", title:"Patient Intake", subtitle:"Session 0 begins with patient profile and baseline cardiac parameters.",
+        badges:[{dot:"red", text:"Cardiac"},{dot:"green", text:"Session 0"}],
+        leftTitle:"Patient Profile", rightTitle:"Baseline Metrics", leftHint:"intake data", rightHint:"cardiac parameters",
+        left: makePatientCard, right: makeBaselineMetrics,
+        bottomTitle:"Session Status", bottomHint:"current phase",
+        bottom: ()=>`<div style="display:flex; align-items:center; gap:12px;"><span style="color:var(--ok);">●</span><span style="font-weight:600;">Intake complete</span><span style="color:var(--muted);">→ Beginning baseline observation</span></div>`,
+        script:{ vo:`Session 0 starts with patient intake. We capture cardiac history, current medications, risk factors, and baseline metrics like resting heart rate and target zones.`, ons:`Patient profile + cardiac baseline. Standard intake, but structured for what comes next.` }
+      },
+      { kicker:"Scene 2", title:"Observation Phase", subtitle:"Patient performs baseline exercise while RAST extracts motor signature.",
+        badges:[{dot:"red", text:"Live HR"},{dot:"purple", text:"Extracting"}],
+        leftTitle:"Live Monitoring", rightTitle:"Sensor Status", leftHint:"HR + RPE + gait", rightHint:"data quality",
+        left: makeObservationPanel, right: makeSensorPanel,
+        bottomTitle:"Extraction", bottomHint:"IOC running",
+        bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><div style="flex:1;"><div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Motor signature extraction</div><div class="progressBar"><div class="fill" style="width:42%;"></div></div></div><span style="font-family:var(--mono); font-size:12px;">~3 min remaining</span></div>`,
+        script:{ vo:`During baseline exercise, we're not just monitoring vitals. We're extracting the patient's motor signature—their preferences for stability, effort, pacing. This uses the same IOC pipeline from the concepts demo.`, ons:`Live monitoring + background extraction. Zero extra equipment—uses existing HR monitor and treadmill.` }
+      },
+      { kicker:"Scene 3", title:"Motor Signature Extracted", subtitle:"Patient-specific cost function weights reveal how they prefer to move.",
+        badges:[{dot:"green", text:"Signature"},{dot:"purple", text:"IOC complete"}],
+        leftTitle:"Cost Function Weights", rightTitle:"vs Protocol Average", leftHint:"patient preferences", rightHint:"personalization visible",
+        left: makeSignaturePanel, right: makeComparisonPanel,
+        bottomTitle:"Clinical Implication", bottomHint:"what this means",
+        bottom: ()=>`<div style="border-left:3px solid var(--accent); padding-left:12px;"><div style="font-size:14px; line-height:1.5;">This patient's signature shows <b>high stability preference</b> and <b>lower variability tolerance</b> than average. Standard protocols would progress too aggressively. RAST adjusts automatically.</div></div>`,
+        script:{ vo:`Here's what makes RAST different. We've extracted this patient's motor signature—their actual preferences, not assumptions. High stability priority, moderate effort tolerance. This patient needs gradual progression, not aggressive targets.`, ons:`Cost function weights + comparison to protocol average. The "why" behind personalization.` }
+      },
+      { kicker:"Scene 4", title:"CMG Generated", subtitle:"Patient's Contextual Motor Graph: the computational representation of their motor identity.",
+        badges:[{dot:"", text:"CMG"},{dot:"green", text:"Interactive"}],
+        leftTitle:"Motor Graph", rightTitle:"Safety Zones", leftHint:"drag nodes • hover for details", rightHint:"personalized thresholds",
+        left: makeCMGPanel, right: makeZonesPanel,
+        bottomTitle:"What CMG enables", bottomHint:"guidance foundation",
+        bottom: ()=>`<div style="font-size:13px; line-height:1.5;">CMG isn't just zones—it's the <b>complete motor identity</b>: constraints, preferences, cost weights, and transition logic. The graph shows how patient-specific parameters drive personalized guidance.</div>`,
+        script:{ vo:`From the signature, we generate a Contextual Motor Graph. This is the computational representation of the patient's motor identity—what they can do, how they prefer to do it, and what will transfer across contexts.`, ons:`Interactive CMG visualization. Drag nodes to explore relationships. Hover for details. Inline viewer is integrated directly into the demo.` },
+        onRender: ()=> {}
+      },
+      { kicker:"Scene 5", title:"Live Session", subtitle:"Real-time guidance with safety governor and therapist dashboard.",
+        badges:[{dot:"green", text:"Safe"},{dot:"red", text:"Live"}],
+        leftTitle:"Patient View", rightTitle:"Therapist Dashboard", leftHint:"safety + vitals", rightHint:"guidance + rationale",
+        left: makeLiveSessionPanel, right: makeGuidancePanel,
+        bottomTitle:"Safety Governor", bottomHint:"1kHz deterministic",
+        bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><div style="display:flex; align-items:center; gap:8px;"><span style="color:var(--ok);">●</span><span style="font-weight:600;">Loop active</span></div><span style="color:var(--muted);">|</span><span style="font-family:var(--mono); font-size:12px;">Last check: 0.8ms ago</span><span style="color:var(--muted);">|</span><span style="font-size:12px;">All constraints satisfied</span></div>`,
+        script:{ vo:`During the session, the safety governor runs at 1kHz—checking every millisecond that we're within the patient's envelope. The therapist sees real-time guidance with rationale. Not "increase intensity" but "increase 0.5%, here's why."`, ons:`Safety indicator + live trace + guidance card. Show the product in action.` }
+      },
+      { kicker:"Scene 6", title:"Session Summary", subtitle:"Auto-generated documentation and progress tracking.",
+        badges:[{dot:"green", text:"Complete"},{dot:"", text:"Documented"}],
+        leftTitle:"Session Metrics", rightTitle:"Documentation", leftHint:"outcomes + TTTC", rightHint:"auto-generated",
+        left: makeSummaryPanel, right: makeDocPanel,
+        bottomTitle:"Next Session", bottomHint:"progression plan",
+        bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><span style="font-weight:600;">Recommended:</span><span>Increase target HR zone by 5 bpm</span><span style="color:var(--muted);">|</span><span style="font-family:var(--mono); font-size:12px;">Based on today's stability + TTTC trajectory</span></div>`,
+        script:{ vo:`Session complete. Documentation is auto-generated—FHIR-compatible, ready for EMR. TTTC shows we're 68% to goal, on track to finish in 4 sessions instead of the protocol average of 6. That's measurable personalization.`, ons:`Summary metrics + documentation export. The "what happened" and "what's next."` }
+      },
+      { kicker:"Scene 7", title:"RAST-CR", subtitle:"Infrastructure for Precision Rehabilitation",
+        badges:[{dot:"red", text:"Cardiac"},{dot:"green", text:"Ready"}],
+        leftTitle:"Value Proposition", rightTitle:"Next Steps", leftHint:"why it matters", rightHint:"what's next",
+        left: makeClosePanel, right: makeValuePanel,
+        bottomTitle:"Contact", bottomHint:"partnership",
+        bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><span style="font-weight:600;">Nitsan Sharon</span><span style="color:var(--muted);">|</span><span>nitsan.sharon@yumaniq.com</span><span style="color:var(--muted);">|</span><span style="color:var(--accent);">yumaniq.com</span></div>`,
+        script:{ vo:`RAST-CR: Personalized cardiac rehabilitation with built-in safety and automatic documentation. We're piloting at Ziv Medical Center and partnering with Technion for research validation.`, ons:`Value props + contact. End with a clear call to action.` }
+      }
+    ];
+
+    // ========== Timing & State ==========
+    const approxSceneSeconds = [12, 15, 15, 18, 18, 15, 12];
+    const totalSeconds = approxSceneSeconds.reduce((a,b)=>a+b, 0);
+    const sceneStartSeconds = approxSceneSeconds.reduce((arr, dur)=>{ arr.push(arr.length ? arr[arr.length-1] + approxSceneSeconds[arr.length-1] : 0); return arr; }, []);
+
+    let sceneIndex = 0;
+    let playing = false;
+    let playTimer = null;
+
+    function renderScene(idx){
+      idx = clamp(idx, 0, scenes.length-1);
+      sceneIndex = idx;
+      const s = scenes[idx];
+
+      el("scenePill").textContent = `Scene ${idx+1}/${scenes.length}`;
+      el("kicker").textContent = s.kicker;
+      el("sceneTitle").textContent = s.title;
+      el("sceneSubtitle").textContent = s.subtitle;
+
+      el("badgeRow").innerHTML = s.badges.map(b => `<div class="badge">${b.dot ? `<span class="dot ${b.dot}"></span>` : ''}<span>${b.text}</span></div>`).join('');
+
+      el("leftCardTitle").textContent = s.leftTitle;
+      el("leftCardHint").textContent = s.leftHint;
+      el("leftCardBody").innerHTML = s.left();
+
+      el("rightCardTitle").textContent = s.rightTitle;
+      el("rightCardHint").textContent = s.rightHint;
+      el("rightCardBody").innerHTML = s.right();
+
+      el("bottomTitle").textContent = s.bottomTitle;
+      el("bottomHint").textContent = s.bottomHint;
+      el("bottomBody").innerHTML = s.bottom();
+
+      el("scriptBox").innerHTML = `
+        <div style="font-family:var(--mono); font-size:11px; color:var(--muted2); margin-bottom:8px;">VO (voiceover)</div>
+        <p style="font-size:13px; line-height:1.6; margin:0 0 16px 0;">${s.script.vo}</p>
+        <div style="font-family:var(--mono); font-size:11px; color:var(--muted2); margin-bottom:8px;">ON SCREEN</div>
+        <p style="font-size:13px; line-height:1.6; margin:0; color:var(--muted);">${s.script.ons}</p>
+      `;
+
+      if (s.onRender) setTimeout(s.onRender, 50);
+    }
+
+    function nextScene(){ if(sceneIndex < scenes.length-1){ renderScene(sceneIndex+1); }else{ stop(); renderScene(scenes.length-1); } }
+    function prevScene(){ renderScene(sceneIndex-1); }
+
+    function play(){
+      playing = true;
+      el("playBtn").textContent = "Pause";
+      let t0 = performance.now();
+      let localElapsed = 0;
+      const currentDuration = approxSceneSeconds[sceneIndex] || 12;
+      
+      const tick = (now)=>{
+        if(!playing) return;
+        const dt = (now - t0)/1000;
+        t0 = now;
+        localElapsed += dt;
+        
+        // Update time display
+        const global = (sceneStartSeconds[sceneIndex] || 0) + localElapsed;
+        el("timeBox").textContent = fmtTime(Math.min(global, totalSeconds));
+        
+        // Auto-advance to next scene when current scene duration is complete
+        if(localElapsed >= currentDuration){
+          if(sceneIndex < scenes.length - 1){
+            sceneIndex++;
+            renderScene(sceneIndex);
+            localElapsed = 0;
+            // Restart with new scene's duration handled by recursive call
+            play();
+            return;
+          } else {
+            // End of demo
+            stop();
+            return;
+          }
+        }
+        
+        playTimer = requestAnimationFrame(tick);
+      };
+      playTimer = requestAnimationFrame(tick);
+    }
+
+    function stop(){
+      playing = false;
+      el("playBtn").textContent = "Play";
+      if(playTimer) cancelAnimationFrame(playTimer);
+      playTimer = null;
+      el("timeBox").textContent = fmtTime(sceneStartSeconds[sceneIndex] || 0);
+    }
+
+    // Event listeners
+    el("prevBtn").addEventListener("click", ()=>{ stop(); prevScene(); });
+    el("nextBtn").addEventListener("click", ()=>{ stop(); nextScene(); });
+    el("playBtn").addEventListener("click", ()=>{ if(playing) stop(); else play(); });
+
+    // Init
+    renderScene(0);
+  </script>
+</body>
+</html>

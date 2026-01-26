@@ -1,0 +1,94 @@
+{
+  "cmg_id": "patient_stroke_004",
+  "version": "1.0-footdrop",
+  "timestamp": "2025-11-12T08:30:00Z",
+  "provenance": {
+    "session_id": "sess-stroke-004-001",
+    "sensor_suite": ["IMU_Ankle_R", "IMU_Hip_R", "ForcePlate"],
+    "ioc_confidence_score": 0.88,
+    "method": "RAST_IOC_Extraction_v2"
+  },
+  "layer_1_structural": {
+    "model_type": "opensim_compatible",
+    "model_ref": "uri/to/patient_stroke_004_scaled_model.osim",
+    "constraints": {
+      "hard_rom_limits": {
+        "ankle_dorsiflexion_right": { "max": -15.0, "unit": "deg" },
+        "knee_extension_right": { "max": 0.0, "unit": "deg" }
+      }
+    }
+  },
+  "layer_3_metabolic_uthpc": {
+    "baseline_envelope": {
+      "vo2_max_estimate": 22.0
+    },
+    "dynamic_state": {
+      "fatigue_index": 0.3
+    },
+    "motor_modulation": {
+      "description": "Foot-drop compensation increases energetic cost and alters feasible gait envelope",
+      "efficiency_penalty": "high",
+      "note": "Compensation (hip hiking) costs ~40% more energy"
+    }
+  },
+  "layer_4_intent_optimization": {
+    "description": "Inferred Cost Function Weights (foot drop strategy)",
+    "weights": [
+      {
+        "term": "w_stability",
+        "value": 0.95,
+        "variance": 0.15,
+        "classification": "state",
+        "transferability": "low",
+        "context_dependency": ["fear_of_falling"],
+        "description": "Prioritizes not tripping above all else"
+      },
+      {
+        "term": "w_effort",
+        "value": 0.2,
+        "variance": 0.08,
+        "classification": "trait",
+        "transferability": "high",
+        "description": "Willing to spend effort (hip hike) to ensure safety"
+      },
+      {
+        "term": "w_symmetry",
+        "value": 0.1,
+        "variance": 0.12,
+        "classification": "state",
+        "transferability": "low",
+        "description": "Symmetry sacrificed for clearance"
+      },
+      {
+        "term": "w_toe_clearance",
+        "value": 0.9,
+        "variance": 0.1,
+        "classification": "state",
+        "transferability": "low",
+        "description": "Toe clearance prioritized due to hardware limitation"
+      }
+    ]
+  },
+  "layer_5_action_bank": {
+    "primitives": [
+      {
+        "id": "gait_cycle_compensated_right",
+        "type": "TrajectoryLibrary",
+        "parameters": "uri/to/primitives/gait_cycle_compensated_right.json",
+        "feasibility_check": "metabolic_feasible AND motor_feasible"
+      }
+    ]
+  },
+  "extensions": {
+    "layer_2_kinematic_invariants": {
+      "gait_symmetry_index": 0.4,
+      "velocity_profile": "asymmetric_bell",
+      "circumduction_arc": { "present": true, "magnitude": 0.12, "unit": "meters" }
+    },
+    "transfer_map": {
+      "traits": ["w_effort_tolerance", "w_smoothness_preference"],
+      "states": ["w_stability", "w_symmetry"],
+      "recalibration_required": ["ankle_stiffness", "ground_reaction_force"]
+    }
+  }
+}

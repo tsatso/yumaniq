@@ -111,7 +111,11 @@
       "items": [
         {
           "title": "Cardiac Rehabilitation",
-          "body": "Objective baseline, dose aware progression, and payer ready reporting. State aware guidance with hard safety limits, designed for clinic workflows."
+          "body": "Objective baseline, dose aware progression, and payer ready reporting. State aware guidance with hard safety limits, designed for clinic workflows.",
+          "demo": {
+             "label": "RAST Cardiac Rehab Demo",
+             "href": "/demos/rast-cr/rast-c2-motor-intelligence.html"
+          }
         },
         {
           "title": "Neuro and MSK Rehabilitation",

@@ -1,0 +1,1804 @@
+<!doctype html>
+<html lang="en"
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Motor Intelligence Demo — Session 0 → CMG</title>
+  <style>
+    :root{
+        /* Light theme */
+        --bg:#fbfcff;
+        --bg2:#f3f6ff;
+        --panel:#ffffff;
+        --panel2:#ffffff;
+        --line: rgba(15,23,42,.10);
+
+        --text:#0b1220;
+        --muted:#4b5565;
+        --muted2:#6b7280;
+
+        /* Gentle accents (Basquiat-ish but soft) */
+        --accent:#2563eb;     /* blue */
+        --accent2:#7c3aed;    /* purple */
+        --ok:#059669;         /* green */
+        --warn:#b45309;       /* amber */
+        --bad:#be123c;        /* rose */
+
+        --shadow: 0 18px 38px rgba(2,6,23,.10);
+        --radius: 18px;
+
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    body{
+        margin:0;
+        font-family: var(--sans);
+        color: var(--text);
+
+        background:
+            /* soft tint */
+            radial-gradient(900px 520px at 70% 0%, rgba(37,99,235,.08), transparent 60%),
+            radial-gradient(850px 560px at 10% 15%, rgba(124,58,237,.08), transparent 60%),
+            linear-gradient(180deg, #fbfcff, #f3f6ff),
+
+            /* your hero texture (very subtle) */
+            url("./art/hero-motor-intelligence-minimal-logo.png");
+
+        background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+        background-size: auto, auto, auto, 720px auto;
+        background-position: 70% 0%, 10% 15%, 0 0, 20px 20px;
+
+        overflow:hidden;
+    }
+    
+    html, body { height: 100%; }
+
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:14px;
+      padding:18px;
+      box-sizing:border-box;
+    }
+
+    .topbar{
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:280px;
+    }
+    .logo{
+      width:40px;height:40px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(125,211,252,.9), rgba(167,139,250,.85));
+      display:grid;place-items:center;
+      box-shadow: 0 10px 25px rgba(125,211,252,.15);
+      color:#0b0f14;
+      font-weight:800;
+      letter-spacing:.4px;
+      user-select:none;
+    }
+    .logoMark{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        border:1px solid rgba(15,23,42,.12);
+        background-color: rgba(255,255,255,.88);
+
+        background-image: url("./art/hero-motor-intelligence-minimal-logo.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;   /* key: no cropping */
+
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+    }    
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      font-weight:850;
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .brand .sub{
+      margin:0;
+      font-size:13.5px;
+      color:var(--muted);
+      line-height:1.2;
+    }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    button, .pill{
+        border:1px solid rgba(15,23,42,.12);
+        background: rgba(255,255,255,.92);
+        color: #0b1220;
+        padding:12px 14px;
+        border-radius: 14px;
+        cursor:pointer;
+        font-weight:700;
+        font-size:13px;
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+    }
+
+    button:hover{
+        border-color: rgba(37,99,235,.25);
+        background: rgba(255,255,255,1);
+    }
+
+    button.primary{
+        background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(124,58,237,.90));
+        color:#ffffff;
+        border-color: transparent;
+    }
+    button:active{ transform: translateY(0); }
+    button.primary:hover{
+      border-color: transparent;
+      filter: brightness(1.03);
+    }
+    .pill{
+      cursor:default;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size:12px;
+      padding:9px 11px;
+    }
+
+    .stage{
+      display:grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap:14px;
+      min-height:0;
+    }
+
+    .main{
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        display:grid;
+        grid-template-rows: auto 1fr;
+        min-height:0;
+    }
+    .header{
+      padding:16px 18px 10px 18px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .sceneTitle{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-width:78%;
+    }
+    .sceneTitle .kicker{
+      font-size:12px;
+      color: var(--muted2);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+    .sceneTitle h2{
+      margin:0;
+      font-size:34px;
+      font-weight:900;
+      letter-spacing:.2px;
+      line-height:1.18;
+    }
+    .sceneTitle p{
+      margin:0;
+      color: var(--muted);
+      font-size:17px;
+      line-height:1.5;
+    }
+
+    .badgeRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .badge{
+        font-size:11px;
+        color: rgba(11,18,32,.78);
+        border:1px solid rgba(15,23,42,.12);
+        background: rgba(255,255,255,.88);
+        padding:7px 10px;
+        border-radius: 999px;
+        display:flex;
+        gap:8px;
+        align-items:center;
+        white-space:nowrap;
+        box-shadow: 0 10px 22px rgba(2,6,23,.06);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(125,211,252,.35);
+    }
+    .dot.purple{ background: var(--accent2); box-shadow: 0 0 18px rgba(167,139,250,.30); }
+    .dot.green{ background: var(--ok); box-shadow: 0 0 18px rgba(52,211,153,.24); }
+    .dot.yellow{ background: var(--warn); box-shadow: 0 0 18px rgba(251,191,36,.22); }
+
+    .canvasWrap{
+      position:relative;
+      padding:14px;
+      min-height:0;
+      display:grid;
+      grid-template-rows: 1fr auto;
+      gap:12px;
+      overflow:auto;
+    
+    }
+
+    .vizGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      grid-template-rows: 1fr;
+      gap:14px;
+      min-height:0;
+    }
+
+    .card{
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.92);
+        border-radius: 18px;
+        overflow:hidden;
+        box-shadow: 0 14px 30px rgba(2,6,23,.08);
+        min-height:0;
+    }
+
+    .cardHeader{
+      padding:12px 12px 10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHeader .title{
+        font-size:12px;
+        color: rgba(11,18,32,.82);
+        font-weight:750;
+        letter-spacing:.2px;
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+    .cardHeader .hint{
+      font-size:11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .cardBody{
+      padding:12px;
+      height: calc(100% - 46px);
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+
+    .side{
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);    
+    }
+    .sideTop{
+      padding:14px 14px 10px 14px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sideTop .sideTitle{
+        font-size:12px;
+        font-weight:800;
+        letter-spacing:.12em;
+        text-transform:uppercase;
+        color: rgba(11,18,32,.70);
+    }
+    .script{
+      padding:12px 14px;
+      overflow:auto;
+      min-height:0;
+      color: var(--text);
+      font-size:16px;
+      line-height:1.65;
+    }
+    .script .label{
+      font-family: var(--mono);
+      font-size:12px;
+      color: var(--muted2);
+      margin-bottom:8px;
+    }
+    .script .vo{
+        border-left:3px solid rgba(37,99,235,.35);
+        padding-left:10px;
+        margin:0 0 12px 0;
+        color: rgba(11,18,32,.82);
+    }
+    .script .ons{
+      border-left:3px solid rgba(167,139,250,.55);
+      padding-left:10px;
+      margin:0 0 14px 0;
+      color: var(--muted);
+    }
+
+    .timeline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px 14px 14px;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    input[type="range"]{
+      width:100%;
+      accent-color: #9ddcff;
+    }
+    .time{
+      font-family: var(--mono);
+      font-size:11px;
+      color: var(--muted);
+      min-width:92px;
+      text-align:right;
+    }
+
+    .footer{
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+    }
+    .footer small{
+      color: var(--muted);
+      line-height:1.35;
+    }
+    .toggleFooter{
+      font-family: var(--mono);
+      font-size:11px;
+    }
+    .footerDetail{
+      display:none;
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .footer.show .footerDetail{ display:block; }
+
+    .svgFill{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    .legendRow{
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        align-items:center;
+        margin-top:6px;
+    }
+
+    .lg{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        font-size:12px;
+        color: rgba(11,18,32,.72);     /* stronger on white */
+        font-family: var(--mono);
+    }
+
+    .sw{
+        width:10px;
+        height:10px;
+        border-radius:999px;
+        background: var(--accent);
+
+        border: 1px solid rgba(15,23,42,.18);  /* makes it readable on white */
+        box-shadow: 0 8px 18px rgba(37,99,235,.16); /* softer, not neon */
+    }
+    .sw.p{ background: var(--accent2); box-shadow: 0 0 16px rgba(167,139,250,.20); }
+    .sw.g{ background: var(--ok); box-shadow: 0 0 16px rgba(52,211,153,.16); }
+    .sw.y{ background: var(--warn); box-shadow: 0 0 16px rgba(251,191,36,.14); }
+    .sw.p{ background: var(--accent2);box-shadow: 0 8px 18px rgba(124,58,237,.14);
+}
+    .timeline{
+        background: rgba(255,255,255,.85);
+    }
+
+    input[type="range"]{
+        -webkit-appearance:none;
+        appearance:none;
+        width:100%;
+        height:6px;
+        border-radius:999px;
+        background: rgba(15,23,42,.12);
+        outline:none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb{
+        -webkit-appearance:none;
+        appearance:none;
+        width:16px;
+        height:16px;
+        border-radius:50%;
+        background: rgba(37,99,235,.95);
+        border: 3px solid rgba(255,255,255,.95);
+        box-shadow: 0 8px 18px rgba(2,6,23,.18);
+    }
+    
+    .canvasWrap{
+        overflow:auto;     /* critical: keeps footer on-screen */
+    }
+
+    @media (max-width: 1060px){
+      body{ overflow:auto; }
+      .app{ height:auto; min-height:100%; overflow:auto; }
+      .stage{ grid-template-columns: 1fr; }
+    }
+
+    #doodleLayer{
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+
+        background-image: url("./art/approach-decouple-full.png");
+        background-repeat: no-repeat;
+        background-size: 1100px auto;
+        background-position: 55% 38%;
+
+        opacity:0.085;         /* stays “in spirit” but not dominant */
+        filter: saturate(.95);
+    }
+
+    /* --- CMG embedded viewer (iframe) --- */
+    .cmgToolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin: 6px 0 10px 0;
+    }
+
+    button.cmgOpenBtn{
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      color: #0b1220;
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 10px 22px rgba(2,6,23,.08);
+      transition: all 0.2s ease;
+    }
+
+    button.cmgOpenBtn:hover{
+      border-color: rgba(37,99,235,.25);
+      background: rgba(255,255,255,1);
+    }
+
+    /* The actual embedded area */
+    .cmgEmbed{
+      height: clamp(520px, 68vh, 820px);
+      min-height: 520px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      overflow: hidden; /* keeps rounded corners clean */
+    }
+
+    .cmgEmbed iframe{
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logoMark" aria-label="Yumaniq mark"></div>
+        <div>
+          <h1>Motor Intelligence Demo</h1>
+          <p class="sub">Session 0 → CMG → Prediction-under-change → Minimal-change guidance</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <span class="pill" id="scenePill">Scene 1/7</span>
+        <button id="prevBtn">◀ Prev</button>
+        <button class="primary" id="playBtn">Play</button>
+        <button id="nextBtn">Next ▶</button>
+        <button id="autoplayBtn">Autoplay: Off</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="main">
+        <div id="doodleLayer" aria-hidden="true"></div>
+        <div class="header">
+          <div class="sceneTitle">
+            <div class="kicker" id="kicker">Scene</div>
+            <h2 id="sceneTitle">Same person. Same task.</h2>
+            <p id="sceneSubtitle">A simple task, two conditions. The motion changes; the intent/strategy can persist.</p>
+          </div>
+          <div class="badgeRow" id="badgeRow"></div>
+        </div>
+
+        <div class="canvasWrap">
+          <div class="vizGrid">
+            <div class="card">
+              <div class="cardHeader">
+                <div class="title"><span class="dot"></span><span id="leftCardTitle">Condition A</span></div>
+                <div class="hint" id="leftCardHint">3D camera • pressure • accel</div>
+              </div>
+              <div class="cardBody" id="leftCardBody"></div>
+            </div>
+
+            <div class="card">
+              <div class="cardHeader">
+                <div class="title"><span class="dot purple"></span><span id="rightCardTitle">Condition B</span></div>
+                <div class="hint" id="rightCardHint">context shift</div>
+              </div>
+              <div class="cardBody" id="rightCardBody"></div>
+            </div>
+          </div>
+
+          <div class="card" style="height:160px;">
+            <div class="cardHeader">
+              <div class="title"><span class="dot green"></span><span id="bottomTitle">Overlays & Claims</span></div>
+              <div class="hint" id="bottomHint">what the viewer should take away</div>
+            </div>
+            <div class="cardBody" id="bottomBody" style="gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="sideTop">
+          <div class="sideTitle">Voiceover + On-screen</div>
+          <div class="pill" id="lengthPill">~90s</div>
+        </div>
+
+        <div class="script" id="scriptBox"></div>
+
+        <div class="timeline">
+          <input id="sceneSlider" type="range" min="0" max="6" step="1" value="0" />
+          <div class="time" id="timeBox">00:00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" id="footer">
+      <div style="min-width:0;">
+        <small><strong>Project Footer</strong> — Assumptions, Next step, Owner, Date</small>
+        <div class="footerDetail" id="footerDetail"></div>
+      </div>
+      <button class="toggleFooter" id="toggleFooterBtn">Show details</button>
+    </div>
+  </div>
+
+<script>
+    // Utility
+    const el = (id) => document.getElementById(id);
+    const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+    const fmtTime = (s)=>{
+      const m = Math.floor(s/60);
+      const r = Math.floor(s%60);
+      return String(m).padStart(2,'0')+":"+String(r).padStart(2,'0');
+    };
+    let autoplayEnabled = false;
+    let autoplayTimer = null;
+    const AUTOPLAY_MS = 4500; // adjust if you want slower/faster
+    
+    function renderDoodleLayer(){
+    const target = document.getElementById("doodleLayer");
+    if(!target) return;
+
+    // Light Basquiat-ish scribbles: crowns, arrows, loops, tiny words. Low opacity by CSS.
+    target.innerHTML = `
+        <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
+        <rect x="0" y="0" width="1200" height="700" fill="transparent"></rect>
+
+        <!-- soft strokes -->
+        <path d="M40 120 C140 40, 240 210, 360 120 C470 40, 560 240, 680 140"
+                stroke="rgba(37,99,235,.55)" stroke-width="6" fill="none" stroke-linecap="round" />
+        <path d="M980 90 C900 160, 1080 220, 980 290 C880 360, 1030 410, 960 510"
+                stroke="rgba(124,58,237,.55)" stroke-width="6" fill="none" stroke-linecap="round" />
+
+        <!-- crown -->
+        <path d="M210 520 L235 480 L260 520 L285 480 L310 520"
+                stroke="rgba(0,0,0,.55)" stroke-width="5" fill="none" stroke-linejoin="round"/>
+        <line x1="210" y1="520" x2="310" y2="520" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+
+        <!-- arrows + x marks -->
+        <path d="M820 560 L920 560" stroke="rgba(0,0,0,.45)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M920 560 L905 548" stroke="rgba(0,0,0,.45)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M920 560 L905 572" stroke="rgba(0,0,0,.45)" stroke-width="4" stroke-linecap="round"/>
+
+        <path d="M520 610 L545 635 M545 610 L520 635"
+                stroke="rgba(190,18,60,.45)" stroke-width="5" stroke-linecap="round"/>
+
+        <!-- tiny text (very faint; decorative only) -->
+        <text x="70" y="670" fill="rgba(0,0,0,.40)" font-size="26" font-family="ui-monospace, Menlo">MOVE / INTENT</text>
+        <text x="860" y="660" fill="rgba(0,0,0,.35)" font-size="22" font-family="ui-monospace, Menlo">SESSION 0 → CMG</text>
+        </svg>
+    `;
+    }
+    function stopAutoplay(){
+        if(autoplayTimer){
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        }
+    }
+
+    function startAutoplay(){
+        stopAutoplay();
+        autoplayTimer = setInterval(()=>{
+            // advance; if at end, stop (or wrap if you prefer)
+            if(sceneIndex >= scenes.length - 1){
+            autoplayEnabled = false;
+            updateAutoplayUI(false);
+            stopAutoplay();
+            return;
+            }
+            goToScene(sceneIndex + 1);
+        }, AUTOPLAY_MS);
+    }
+
+    function updateAutoplayUI(on){
+        const el = document.getElementById("autoplayBtn"); // assumes your toggle button has this id
+        if(!el) return;
+        el.textContent = on ? "Autoplay: On" : "Autoplay: Off";
+        el.classList.toggle("primary", on);
+    }
+    
+    function goToScene(i){
+        sceneIndex = clamp(i, 0, scenes.length - 1);
+        renderScene(sceneIndex);
+
+        // keep slider in sync if exists
+        const slider = document.getElementById("sceneSlider");
+        if(slider) slider.value = String(sceneIndex);
+
+        // keep label in sync if exists
+        const label = document.getElementById("sceneLabel");
+        if(label) label.textContent = `Scene ${sceneIndex+1}/${scenes.length}`;
+    }
+
+    function mascotAndTreadmillSVG(){
+    return `
+        <svg viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%;">
+        <rect x="0" y="0" width="520" height="260" fill="transparent"></rect>
+
+        <!-- treadmill (light sketch) -->
+        <path d="M70 200 C120 230, 210 235, 300 220 C380 208, 420 195, 450 180"
+                stroke="rgba(0,0,0,.55)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M85 175 L115 210" stroke="rgba(0,0,0,.35)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M160 170 L140 212" stroke="rgba(0,0,0,.35)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M360 165 L390 205" stroke="rgba(0,0,0,.35)" stroke-width="4" stroke-linecap="round"/>
+        <ellipse cx="125" cy="220" rx="16" ry="10" fill="rgba(37,99,235,.18)" stroke="rgba(0,0,0,.25)" stroke-width="3"/>
+        <ellipse cx="395" cy="205" rx="16" ry="10" fill="rgba(124,58,237,.16)" stroke="rgba(0,0,0,.25)" stroke-width="3"/>
+
+        <!-- funny person (simple doodle) -->
+        <circle cx="215" cy="92" r="26" fill="rgba(255,255,255,.9)" stroke="rgba(0,0,0,.55)" stroke-width="4"/>
+        <path d="M204 92 C210 85, 218 85, 224 92" stroke="rgba(0,0,0,.55)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="205" cy="86" r="3.5" fill="rgba(0,0,0,.55)"/>
+        <circle cx="225" cy="86" r="3.5" fill="rgba(0,0,0,.55)"/>
+
+        <!-- crown -->
+        <path d="M190 62 L202 46 L214 62 L226 46 L238 62"
+                stroke="rgba(190,18,60,.55)" stroke-width="5" fill="none" stroke-linejoin="round"/>
+        <line x1="190" y1="62" x2="238" y2="62" stroke="rgba(190,18,60,.55)" stroke-width="5"/>
+
+        <!-- body -->
+        <path d="M215 118 L215 168" stroke="rgba(0,0,0,.55)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M190 138 L240 138" stroke="rgba(0,0,0,.55)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M215 168 L195 205" stroke="rgba(0,0,0,.55)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M215 168 L245 198" stroke="rgba(0,0,0,.55)" stroke-width="5" stroke-linecap="round"/>
+
+        <!-- caption -->
+        <text x="70" y="40" fill="rgba(0,0,0,.55)" font-size="20" font-family="ui-monospace, Menlo">
+            one minute demo — click in
+        </text>
+        <text x="70" y="62" fill="rgba(0,0,0,.40)" font-size="16" font-family="ui-monospace, Menlo">
+            simple sensors • deep model
+        </text>
+        </svg>
+    `;
+    }    
+    function svg(tag, attrs={}, children=""){
+      const a = Object.entries(attrs).map(([k,v])=>`${k}="${String(v).replaceAll('"','&quot;')}"`).join(" ");
+      return `<${tag} ${a}>${children}</${tag}>`;
+    }
+
+    // Synthetic demo data
+    function makeTrajectory(seed=0, variant="A"){
+      const pts = [];
+      const n = 90;
+      for(let i=0;i<n;i++){
+        const t = i/(n-1);
+        let x = 0.12 + 0.78*t;
+        let y = 0.72 - 0.45*Math.sin(Math.PI*t)*Math.exp(-0.15*t);
+        if(variant==="B"){
+          y += 0.08*Math.exp(-Math.pow((t-0.55)/0.12,2));
+          x -= 0.03*Math.exp(-Math.pow((t-0.55)/0.10,2));
+        }
+        const sig = 0.015*Math.sin(10*Math.PI*t + seed*0.7) + 0.008*Math.sin(22*Math.PI*t + seed*1.1);
+        y += sig;
+        pts.push([x,y]);
+      }
+      return pts;
+    }
+
+    function makeSignal(seed=0, variant="A", type="accel"){
+      const n = 120;
+      const arr = [];
+      for(let i=0;i<n;i++){
+        const t = i/(n-1);
+        const phase = variant==="B" ? 0.6 : 0.0;
+        const amp = variant==="B" ? 1.15 : 1.0;
+        let v = 0;
+        if(type==="accel"){
+          v = amp*(0.55*Math.sin(2*Math.PI*(t+phase)) + 0.22*Math.sin(6*Math.PI*(t+phase)+seed));
+          v += 0.10*Math.sin(18*Math.PI*t + seed*0.4);
+        }else if(type==="pressure"){
+          const p1 = Math.exp(-Math.pow((t-(0.28+phase*0.08))/0.07,2));
+          const p2 = Math.exp(-Math.pow((t-(0.62+phase*0.05))/0.08,2));
+          v = amp*(0.8*p1 + 1.0*p2) - 0.15;
+          v += 0.05*Math.sin(10*Math.PI*t + seed*0.2);
+        }else if(type==="jerk"){
+          v = amp*(0.45*Math.sin(4*Math.PI*(t+phase)+0.8) + 0.25*Math.sin(12*Math.PI*(t+phase)+seed));
+        }
+        arr.push(v);
+      }
+      return arr;
+    }
+
+    function polylineFrom(points, w, h, pad=18){
+      const map = ([x,y])=>{
+        const X = pad + x*(w-2*pad);
+        const Y = pad + y*(h-2*pad);
+        return `${X.toFixed(1)},${Y.toFixed(1)}`;
+      };
+      return points.map(map).join(" ");
+    }
+
+    function sparkPathFrom(arr, w, h, pad=14){
+      const n = arr.length;
+      const min = Math.min(...arr);
+      const max = Math.max(...arr);
+      const span = (max-min) || 1;
+      const pts = arr.map((v,i)=>{
+        const t = i/(n-1);
+        const x = pad + t*(w-2*pad);
+        const y = pad + (1 - (v-min)/span)*(h-2*pad);
+        return [x,y];
+      });
+      return pts.map((p,i)=> (i===0?`M ${p[0].toFixed(1)} ${p[1].toFixed(1)}`:`L ${p[0].toFixed(1)} ${p[1].toFixed(1)}`)).join(" ");
+    }
+
+    function makeOverlayPanel(labelA, labelB, opts={}){
+    const w = opts.w ?? 520;
+    const h = opts.h ?? 280;
+
+    // Theme tokens for bright UI
+    const GRID = "rgba(15,23,42,.08)";
+    const INK  = "rgba(11,18,32,.82)";
+    const MUT  = "rgba(75,85,101,.78)";
+    const CARD_BORDER = "rgba(15,23,42,.10)";
+    const SPARK_BG = "rgba(255,255,255,1)";
+
+    const trajA = makeTrajectory(1, "A");
+    const trajB = makeTrajectory(1, "B");
+    const accelA = makeSignal(1, "A", "accel");
+    const accelB = makeSignal(1, "B", "accel");
+
+    const grid = svg("g", {opacity:"1"}, [
+        ...Array.from({length:6}).map((_,i)=>
+        svg("line",{x1:0,y1:(h/6)*i,x2:w,y2:(h/6)*i,stroke:GRID,"stroke-width":"1"},"")
+        ),
+        ...Array.from({length:8}).map((_,i)=>
+        svg("line",{x1:(w/8)*i,y1:0,x2:(w/8)*i,y2:h,stroke:GRID,"stroke-width":"1"},"")
+        )
+    ].join(""));
+
+    const aLine = svg("polyline", {
+        points: polylineFrom(trajA,w,h,20),
+        fill:"none",
+        stroke:"rgba(125,211,252,.95)",
+        "stroke-width":"3",
+        "stroke-linecap":"round",
+        "stroke-linejoin":"round"
+    }, "");
+
+    const bLine = svg("polyline", {
+        points: polylineFrom(trajB,w,h,20),
+        fill:"none",
+        stroke:"rgba(167,139,250,.92)",
+        "stroke-width":"3",
+        "stroke-linecap":"round",
+        "stroke-linejoin":"round"
+    }, "");
+
+    const endpoint = (pts)=>pts[pts.length-1];
+    const [exA,eyA] = endpoint(trajA);
+    const [exB,eyB] = endpoint(trajB);
+
+    const endA = svg("circle", {
+        cx: 20 + exA*(w-40),
+        cy: 20 + eyA*(h-40),
+        r:6,
+        fill:"rgba(125,211,252,.95)"
+    }, "");
+
+    const endB = svg("circle", {
+        cx: 20 + exB*(w-40),
+        cy: 20 + eyB*(h-40),
+        r:6,
+        fill:"rgba(167,139,250,.92)"
+    }, "");
+
+    const sw = w, sh = 90;
+    const sparkA = sparkPathFrom(accelA, sw, sh, 14);
+    const sparkB = sparkPathFrom(accelB, sw, sh, 14);
+
+    const topSvg = svg("svg", {class:"svgFill", viewBox:`0 0 ${w} ${h}`, preserveAspectRatio:"none"}, [
+        grid, aLine, bLine, endA, endB,
+        svg("text",{x:18,y:26,fill:INK,"font-size":"12","font-family":"var(--mono)"}, "Trajectory (3D camera)"),
+        svg("text",{x:18,y:h-14,fill:MUT,"font-size":"11","font-family":"var(--mono)"}, "Overlay: A vs B")
+    ].join(""));
+
+    const sparkSvg = svg("svg", {class:"svgFill", viewBox:`0 0 ${sw} ${sh}`, preserveAspectRatio:"none"}, [
+        svg("rect",{x:0,y:0,width:sw,height:sh,fill:SPARK_BG,stroke:"rgba(15,23,42,.08)","stroke-width":"1"},""),
+        svg("path",{d:sparkA,fill:"none",stroke:"rgba(125,211,252,.95)","stroke-width":"2"},""),
+        svg("path",{d:sparkB,fill:"none",stroke:"rgba(167,139,250,.92)","stroke-width":"2"},""),
+        svg("text",{x:14,y:20,fill:INK,"font-size":"12","font-family":"var(--mono)"}, "Acceleration (wearable)"),
+        svg("text",{x:14,y:sh-12,fill:MUT,"font-size":"11","font-family":"var(--mono)"}, "Same person. Context shift.")
+    ].join(""));
+
+    return `
+        <div style="display:grid; grid-template-rows: 280px 96px auto; gap:10px; height:100%; min-height:0;">
+        <div style="border:1px solid ${CARD_BORDER}; border-radius:14px; overflow:hidden; min-height:0; background: rgba(255,255,255,.92);">
+            ${topSvg}
+        </div>
+        <div style="border:1px solid ${CARD_BORDER}; border-radius:14px; overflow:hidden; background: rgba(255,255,255,.92);">
+            ${sparkSvg}
+        </div>
+        <div class="legendRow">
+            <div class="lg"><span class="sw"></span>${labelA}</div>
+            <div class="lg"><span class="sw p"></span>${labelB}</div>
+        </div>
+        </div>
+    `;
+    }
+    function makeTraditionalPanel(){
+    const items = [
+        ["Cadence", "112 spm", "± 9"],
+        ["Speed", "4.7 km/h", "± 0.4"],
+        ["Symmetry", "0.91", "L/R"],
+        ["ROM", "42°", "hip"],
+        ["Stability", "0.76", "index"],
+        ["Fatigue", "mild", "label"]
+    ];
+
+    // Bright theme tokens (inline so the panel is self-contained)
+    const CARD_BORDER = "rgba(15,23,42,.10)";
+    const SOFT_SHADOW = "0 10px 22px rgba(2,6,23,.06)";
+    const TINT = "rgba(37,99,235,.06)"; // faint blue tint
+
+    return `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        ${items.map(([k,v,s])=>`
+            <div style="
+            border:1px solid ${CARD_BORDER};
+            border-radius:14px;
+            padding:12px;
+            background: rgba(255,255,255,.92);
+            box-shadow: ${SOFT_SHADOW};
+            ">
+            <div style="font-size:11px; color: var(--muted2); letter-spacing:.14em; text-transform:uppercase;">
+                ${k}
+            </div>
+            <div style="font-size:20px; font-weight:950; margin-top:6px; color: rgba(11,18,32,.92);">
+                ${v}
+            </div>
+            <div style="font-size:12px; color: var(--muted); font-family: var(--mono); margin-top:4px;">
+                ${s}
+            </div>
+            </div>
+        `).join("")}
+        </div>
+
+        <div style="
+        margin-top:12px;
+        padding:12px;
+        border:1px solid ${CARD_BORDER};
+        border-radius:14px;
+        background: ${TINT};
+        color: rgba(11,18,32,.80);
+        font-size:13px;
+        line-height:1.45;
+        ">
+        <div style="font-family: var(--mono); font-size:11px; color: var(--muted2); margin-bottom:6px;">
+            Why this is not enough
+        </div>
+        Traditional analytics summarize <b>what happened</b>.<br/>
+        They do not identify the <b>objective</b> and <b>constraints</b> that generated the motion.
+        </div>
+    `;
+    }
+    function makePrinciplesStrip(){
+      const tags = [
+        {name:"Flash & Hogan", text:"Regularities as constraints", dot:"yellow"},
+        {name:"Todorov (OFC)", text:"Policy + minimal intervention", dot:"green"},
+        {name:"Westermann", text:"Forward prediction", dot:""},
+        {name:"Marr", text:"Goal → algorithm → implementation", dot:"purple"}
+      ];
+      return `
+        <div style="display:grid; gap:10px;">
+          <div style="display:grid; grid-template-columns: 1fr; gap:10px;">
+            ${tags.map(t=>`
+              <div style="border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:10px 10px; background: rgba(15,23,42,.20); display:flex; align-items:flex-start; gap:10px;">
+                <span class="dot ${t.dot ? t.dot : ""}" style="margin-top:3px;"></span>
+                <div>
+                  <div style="font-weight:900; font-size:12px; letter-spacing:.2px;">${t.name}</div>
+                  <div style="font-size:12px; color: var(--muted); line-height:1.35;">${t.text}</div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+          <div style="border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:10px; background: rgba(15,23,42,.18);">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Key claim</div>
+            <div style="font-size:13px; line-height:1.45; margin-top:6px;">
+              Not just <b>measurement</b>. We infer <b>objectives + constraints</b> that generate motion, and test via <b>prediction under change</b>.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeIOCPanel(weights, title="Inferred trade-offs (IOC)"){
+    const w = 520, h = 280;
+
+    // Bright theme tokens
+    const INK  = "rgba(11,18,32,.82)";
+    const MUT  = "rgba(75,85,101,.78)";
+    const CARD_BORDER = "rgba(15,23,42,.10)";
+
+    // Bar styling that looks good on white
+    const BASE_FILL = "rgba(15,23,42,.08)";      // light ink background for bars
+    const BASE_STROKE = "rgba(15,23,42,.10)";    // subtle outline for the base
+    const TICK = "rgba(15,23,42,.10)";
+
+    const leftPad = 160;      // a bit more room for long labels
+    const topPad = 34;
+    const barH = 18;
+    const gap = 16;
+    const maxW = w - leftPad - 26;
+
+    // Optional: faint ticks behind bars (helps readability)
+    const ticks = Array.from({length:5}).map((_,i)=>{
+        const x = leftPad + (maxW/4)*i;
+        return svg("line",{x1:x,y1:topPad-6,x2:x,y2:h-28,stroke:TICK,"stroke-width":"1"},"");
+    }).join("");
+
+    const bars = weights.map((d,i)=>{
+        const y = topPad + i*(barH+gap);
+        const aW = clamp(d.a,0,1)*maxW;
+        const bW = clamp(d.b,0,1)*maxW;
+
+        const label = svg("text",{
+        x:16,
+        y:y+13,
+        fill: INK,
+        "font-size":"12",
+        "font-family":"var(--mono)"
+        }, d.name);
+
+        const base = svg("rect",{
+        x:leftPad,
+        y:y,
+        width:maxW,
+        height:barH,
+        rx:9,
+        fill: BASE_FILL,
+        stroke: BASE_STROKE,
+        "stroke-width":"1"
+        },"");
+
+        const aBar = svg("rect",{
+        x:leftPad,
+        y:y,
+        width:aW,
+        height:barH,
+        rx:9,
+        fill:"rgba(125,211,252,.92)"
+        },"");
+
+        const bBar = svg("rect",{
+        x:leftPad,
+        y:y,
+        width:bW,
+        height:barH,
+        rx:9,
+        fill:"rgba(167,139,250,.88)"
+        },"");
+
+        // Optional: value dots at bar ends (small but improves scanning)
+        const aDot = svg("circle",{cx:leftPad + aW, cy:y + barH/2, r:3.2, fill:"rgba(125,211,252,.95)"},"");
+        const bDot = svg("circle",{cx:leftPad + bW, cy:y + barH/2, r:3.2, fill:"rgba(167,139,250,.92)"},"");
+
+        return label + base + aBar + bBar + aDot + bDot;
+    }).join("");
+
+    const panel = svg("svg", {class:"svgFill", viewBox:`0 0 ${w} ${h}`, preserveAspectRatio:"none"}, [
+        svg("text",{x:16,y:18,fill:INK,"font-size":"12","font-family":"var(--mono)"}, title),
+        ticks,
+        bars,
+        svg("text",{x:leftPad,y:h-14,fill:MUT,"font-size":"11","font-family":"var(--mono)"}, "A (cyan) vs B (purple)")
+    ].join(""));
+
+    return `
+        <div style="height:100%; display:grid; grid-template-rows: 280px auto; gap:8px;">
+        <div style="height:280px; border:1px solid ${CARD_BORDER}; border-radius:14px; overflow:hidden; background: rgba(255,255,255,.92);">
+            ${panel}
+        </div>
+        <div style="color: var(--muted); font-size:12px; line-height:1.45;">
+            Compact <b>trade-offs</b> (not raw motion) act as the stable signature component across conditions.
+        </div>
+        </div>
+    `;
+    }
+    function makePredictionPanel(){
+    const w=520, h=280;
+
+    // Bright theme tokens
+    const GRID = "rgba(15,23,42,.08)";
+    const INK  = "rgba(11,18,32,.82)";
+    const MUT  = "rgba(75,85,101,.78)";
+    const LINE = "rgba(15,23,42,.70)";      // actual trajectory (dark ink)
+    const CARD_BORDER = "rgba(15,23,42,.10)";
+
+    const actual = makeTrajectory(2, "B");
+    const predicted = makeTrajectory(2, "A").map(([x,y],i)=>{
+        const t = i/(actual.length-1);
+        const bump = 0.06*Math.exp(-Math.pow((t-0.55)/0.12,2));
+        return [x - 0.02*bump, y + bump];
+    });
+    const generic = makeTrajectory(3, "A");
+
+    const grid = svg("g", {opacity:"1"}, [
+        ...Array.from({length:6}).map((_,i)=>svg("line",{
+        x1:0,y1:(h/6)*i,x2:w,y2:(h/6)*i,stroke:GRID,"stroke-width":"1"
+        },"")),
+        ...Array.from({length:8}).map((_,i)=>svg("line",{
+        x1:(w/8)*i,y1:0,x2:(w/8)*i,y2:h,stroke:GRID,"stroke-width":"1"
+        },""))
+    ].join(""));
+
+    // Order: generic (back), predicted (mid), actual (front)
+    const gen = svg("polyline",{
+        points: polylineFrom(generic,w,h,20),
+        fill:"none",
+        stroke:"rgba(251,191,36,.95)",
+        "stroke-width":"2.5",
+        "stroke-linecap":"round",
+        "stroke-linejoin":"round",
+        "stroke-dasharray":"4 6"
+    },"");
+
+    const pred = svg("polyline",{
+        points: polylineFrom(predicted,w,h,20),
+        fill:"none",
+        stroke:"rgba(52,211,153,.95)",
+        "stroke-width":"3",
+        "stroke-linecap":"round",
+        "stroke-linejoin":"round",
+        "stroke-dasharray":"7 6"
+    },"");
+
+    const act = svg("polyline",{
+        points: polylineFrom(actual,w,h,20),
+        fill:"none",
+        stroke:LINE,
+        "stroke-width":"3",
+        "stroke-linecap":"round",
+        "stroke-linejoin":"round"
+    },"");
+
+    const panel = svg("svg",{class:"svgFill",viewBox:`0 0 ${w} ${h}`,preserveAspectRatio:"none"},[
+        grid, gen, pred, act,
+        svg("text",{x:16,y:18,fill:INK,"font-size":"12","font-family":"var(--mono)"}, "Prediction under change (test)"),
+        svg("text",{x:16,y:h-14,fill:MUT,"font-size":"11","font-family":"var(--mono)"}, "Actual (ink) • Predicted (green) • Generic (yellow)")
+    ].join(""));
+
+    const metric = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div style="border:1px solid ${CARD_BORDER}; border-radius:14px; padding:12px; background: rgba(255,255,255,.92); box-shadow: 0 10px 22px rgba(2,6,23,.06);">
+            <div style="font-size:11px; color: var(--muted2); font-family: var(--mono);">Prediction error</div>
+            <div style="font-size:24px; font-weight:950; margin-top:6px; color: rgba(52,211,153,.95);">↓ 35%</div>
+            <div style="font-size:12px; color: var(--muted); font-family: var(--mono); margin-top:4px;">vs generic baseline</div>
+        </div>
+
+        <div style="border:1px solid ${CARD_BORDER}; border-radius:14px; padding:12px; background: rgba(255,255,255,.92); box-shadow: 0 10px 22px rgba(2,6,23,.06);">
+            <div style="font-size:11px; color: var(--muted2); font-family: var(--mono);">Generalization</div>
+            <div style="font-size:24px; font-weight:950; margin-top:6px; color: rgba(37,99,235,.95);">Condition B</div>
+            <div style="font-size:12px; color: var(--muted); font-family: var(--mono); margin-top:4px;">context shift</div>
+        </div>
+        </div>
+    `;
+
+    return `
+        <div style="display:grid; grid-template-rows: 280px 96px auto; gap:10px; height:100%; min-height:0;">
+        <div style="border:1px solid ${CARD_BORDER}; border-radius:14px; overflow:hidden; min-height:0; background: rgba(255,255,255,.92);">
+            ${panel}
+        </div>
+        ${metric}
+        </div>
+    `;
+    }
+
+
+  function makeCMGPanel(){
+    return `
+      <div class="card">
+        <div class="cmgToolbar">
+          <button
+            type="button"
+            class="cmgOpenBtn"
+            onclick="window.open('rast-cmg-viewer.html', '_blank', 'noopener,noreferrer')"
+          >
+            Open CMG Viewer
+          </button>
+          <span class="micro">Interactive CMG graph (embedded)</span>
+        </div>
+
+        <div class="cmgEmbed">
+          <iframe
+            src="rast-cmg-viewer.html"
+            title="CMG Viewer"
+            loading="lazy"
+          ></iframe>
+        </div>        
+      </div>
+    `;
+  }
+
+    function makeGuidancePanel(){
+    const items = [
+        ["Goal", "Restore function without overwriting strategy"],
+        ["Constraint", "Safety envelope + dose-aware progression"],
+        ["Guidance", "Minimal change to achieve target metric"],
+        ["Output", "Clinician-readable progression + provenance"]
+    ];
+
+    const CARD_BORDER = "rgba(15,23,42,.10)";
+    const SOFT_SHADOW = "0 10px 22px rgba(2,6,23,.06)";
+    const TINT = "rgba(37,99,235,.05)";
+
+    return `
+        <div style="display:grid; gap:10px;">
+        ${items.map(([k,v])=>`
+            <div style="
+            border:1px solid ${CARD_BORDER};
+            border-radius:14px;
+            padding:12px;
+            background: rgba(255,255,255,.92);
+            box-shadow: ${SOFT_SHADOW};
+            ">
+            <div style="font-size:11px; color: var(--muted2); letter-spacing:.14em; text-transform:uppercase;">
+                ${k}
+            </div>
+            <div style="font-size:14px; font-weight:850; margin-top:8px; color: rgba(11,18,32,.88); line-height:1.35;">
+                ${v}
+            </div>
+            </div>
+        `).join("")}
+
+        <div style="
+            border:1px solid ${CARD_BORDER};
+            border-radius:14px;
+            padding:12px;
+            background: ${TINT};
+            color: rgba(11,18,32,.80);
+            font-size:13px;
+            line-height:1.5;
+        ">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2); margin-bottom:6px;">
+            Closing question
+            </div>
+            If we can infer what the person is optimizing, can rehab stop guessing—and start prescribing <b>minimal-change</b> progressions?
+        </div>
+        </div>
+    `;
+    }
+    // Scenes
+    const scenes = [
+      {
+        kicker:"Scene 1",
+        title:"Same person. Same task.",
+        subtitle:"A simple task, two conditions. The motion changes; the intent/strategy can persist.",
+        badges:[{dot:"", text:"Simple sensors"},{dot:"purple", text:"Context shift"}],
+        leftTitle:"Condition A",
+        rightTitle:"Condition B",
+        leftHint:"3D camera • pressure • accel",
+        rightHint:"obstacle / speed / fatigue",
+        left: ()=> makeOverlayPanel("A: baseline", "B: constraint"),
+        right: ()=> `
+        <div style="display:grid; grid-template-rows: auto auto; gap:10px; height:100%;">
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:16px; padding:12px; background: rgba(255,255,255,.90);">
+            <div style="font-family: var(--mono); font-size:12px; color: var(--muted2);">One minute demo</div>
+            <div style="margin-top:8px; font-size:16px; line-height:1.45;">
+                Same person. Same task. Two conditions.<br/>
+                Motion changes—strategy can persist.
+            </div>
+            <div style="margin-top:8px; font-size:13px; color: var(--muted); line-height:1.45;">
+                Simple sensors → inferred objectives + constraints → prediction under change.
+            </div>
+            </div>
+
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:16px; overflow:hidden; background:#fff;">
+            <img src="./art/problem-treadmill.jpeg" alt="treadmill sketch"
+                style="display:block; width:100%; height:100%; object-fit:cover; opacity:.92;">
+            </div>
+        </div>
+        `,        
+        
+        bottomTitle:"Overlays & Claims",
+        bottomHint:"what the viewer should take away",
+        bottom: ()=>`
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:10px; background: rgba(15,23,42,.18);">
+              <div style="font-size:11px; color: var(--muted2); font-family: var(--mono);">Claim</div>
+              <div style="font-size:13px; font-weight:850; margin-top:6px; line-height:1.35;">
+                A “motor signature” is not just <b>what</b> you do, but <b>why</b> your motor system does it.
+              </div>
+            </div>
+            <div style="flex:1; min-width:260px; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:10px; background: rgba(15,23,42,.18);">
+              <div style="font-size:11px; color: var(--muted2); font-family: var(--mono);">Demo design</div>
+              <div style="font-size:13px; font-weight:850; margin-top:6px; line-height:1.35;">
+                Same person + condition change → test stability of strategy under constraints.
+              </div>
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`We learn to move from age zero. Every movement reflects our body, our priorities, and our current conditions.`,
+          ons:`Same person. Same task. Two conditions. Motion changes—strategy can persist.`
+        }
+      },
+      {
+        kicker:"Scene 2",
+        title:"Conditions change. Signature persists.",
+        subtitle:"Different trajectories and traces, but a stable fingerprint-like structure can remain.",
+        badges:[{dot:"", text:"Trajectory overlay"},{dot:"purple", text:"Wearable traces"}],
+        leftTitle:"A vs B Overlay",
+        rightTitle:"What stays stable?",
+        leftHint:"trajectory + acceleration",
+        rightHint:"fingerprint-like invariants",
+        left: ()=> makeOverlayPanel("A: baseline", "B: constraint"),
+            right: ()=> `
+            <div style="display:grid; gap:10px;">
+                <div style="
+                border:1px solid rgba(15,23,42,.10);
+                border-radius:16px;
+                padding:12px;
+                background: rgba(255,255,255,.92);
+                box-shadow: 0 10px 22px rgba(2,6,23,.06);
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82);">
+                    Signature components
+                </div>
+                <ul style="
+                    margin:10px 0 0 18px;
+                    color: rgba(11,18,32,.86);
+                    font-size:13px;
+                    line-height:1.55;
+                ">
+                    <li>Trade-offs (speed vs effort vs stability)</li>
+                    <li>Control structure (what is corrected vs tolerated)</li>
+                    <li>Preferred coordination & variability patterns</li>
+                </ul>
+                </div>
+
+                <div style="
+                    border:none;
+                    border-left:4px solid rgba(37,99,235,.30);
+
+                    border-radius:16px;
+                    padding:12px;
+                    background: rgba(37,99,235,.05);
+                    color: rgba(11,18,32,.78);
+                    font-size:13px;
+                    line-height:1.5;
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82); margin-bottom:6px;">
+                    Interpretation
+                </div>
+                This is why “signature” is closer to a <b>generative explanation</b> than a descriptive label.
+                </div>
+            </div>
+        `,        
+        bottomTitle:"Key point",
+        bottomHint:"avoid “just analytics”",
+        bottom: ()=>`
+          <div style="border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Contrast</div>
+            <div style="margin-top:6px; font-size:14px; line-height:1.4;">
+              <b>Analytics:</b> summarize what happened.<br/>
+              <b>Motor intelligence:</b> infer what the system is optimizing, then predict adaptation under new constraints.
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`Change the condition and the movement changes. Yet some structure stays stable—like a fingerprint. Not just what you do, but why you do it.`,
+          ons:`Different motion. Stable trade-offs and control structure.`
+        }
+      },
+      {
+        kicker:"Scene 3",
+        title:"Traditional analytics vs Motor Intelligence",
+        subtitle:"Outcome metrics are useful, but they do not identify objectives and constraints.",
+        badges:[{dot:"yellow", text:"Traditional: outcomes"},{dot:"green", text:"Novel: objectives"}],
+        leftTitle:"Traditional Analytics",
+        rightTitle:"Motor Intelligence Pipeline",
+        leftHint:"cadence • symmetry • ROM",
+        rightHint:"forward model + IOC",
+        left: ()=> makeTraditionalPanel(),
+        right: ()=> `
+          <div style="display:grid; gap:10px;">
+            <div style="border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:12px; background: rgba(15,23,42,.18);">
+              <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Pipeline</div>
+              <div style="margin-top:8px; display:grid; gap:10px;">
+                ${[
+                  ["Sensors", "accelerometer • pressure • 3D camera"],
+                  ["Kinematics", "trajectories • variability • coordination"],
+                  ["Forward model", "feasible trajectories under constraints"],
+                  ["IOC / OFC", "infer trade-offs (objective weights)"],
+                  ["CMG", "strategies + switching logic"]
+                ].map(([k,v])=>`
+                  <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid rgba(255,255,255,.06); border-radius:14px; background: rgba(15,23,42,.16);">
+                    <div style="font-weight:900;">${k}</div>
+                    <div style="color: var(--muted); font-family: var(--mono); font-size:11px; text-align:right;">${v}</div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        `,
+        bottomTitle:"Why it’s deep-tech",
+        bottomHint:"combinatorial stack",
+        bottom: ()=>`
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+              <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Stack</div>
+              <div style="margin-top:6px; font-size:13px; line-height:1.45;">
+                Kinematics + optimal control + forward modeling + machine learning.
+              </div>
+            </div>
+            <div style="flex:1; min-width:260px; border:1px dashed rgba(255,255,255,.12); border-radius:14px; padding:12px; background: rgba(15,23,42,.14); color: var(--muted); font-size:12px; line-height:1.45;">
+                The differentiator is not “more data.” It’s a <b>generative model</b> that can be tested by prediction under change.
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`Most systems stop at measurement: cadence, symmetry, range of motion. Useful—but they don’t tell you what the motor system is optimizing.`,
+          ons:`Traditional: outcomes. Novel: objective + constraints + prediction.`
+        }
+      },
+      {
+        kicker:"Scene 4",
+        title:"Infer trade-offs with IOC (signature)",
+        subtitle:"We infer a compact set of trade-offs that remains informative across conditions.",
+        badges:[{dot:"green", text:"IOC"},{dot:"purple", text:"Trade-offs"}],
+        leftTitle:"Inferred Trade-offs (IOC)",
+        rightTitle:"Principles Anchors",
+        leftHint:"compact signature",
+        rightHint:"not name-dropping",
+        left: ()=> makeIOCPanel([
+          {name:"smoothness ↔ speed", a:0.72, b:0.68},
+          {name:"stability ↔ effort", a:0.64, b:0.70},
+          {name:"precision ↔ comfort", a:0.58, b:0.56},
+          {name:"reactivity ↔ efficiency", a:0.61, b:0.63},
+          {name:"variability tolerance", a:0.47, b:0.45}
+        ], "Inferred trade-offs (IOC)"),
+        right: ()=> `
+        <div style="display:grid; grid-template-rows: auto auto; gap:10px; height:100%;">
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:16px; padding:12px; background: rgba(255,255,255,.90);">
+            ${makePrinciplesStrip()}
+            <div style="margin-top:10px; font-size:13px; color: var(--muted); line-height:1.45;">
+                Show trade-offs, not raw motion. Anchor to OFC, forward prediction, levels of analysis.
+            </div>
+            </div>
+
+            <div style="border:1px solid rgba(15,23,42,.10); border-radius:16px; overflow:hidden; background:#fff;">
+            <img src="./art/approach-decoupling.jpeg" alt="approach decoupling"
+                style="display:block; width:100%; height:100%; object-fit:cover; opacity:.92;">
+            </div>
+        </div>
+        `,
+        bottomTitle:"Definition",
+        bottomHint:"what “signature” means here",
+        bottom: ()=>`
+          <div style="border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Motor signature</div>
+            <div style="margin-top:6px; font-size:14px; line-height:1.4;">
+              A compact set of inferred <b>trade-offs</b> + <b>control structure</b> that explains how motion is generated—across conditions.
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`To capture movement structure, we can’t look only at what’s visible. We infer the objective and constraints that generate the movement—using forward modeling and inverse optimal control.`,
+          ons:`Show trade-offs, not raw motion. Anchor to OFC, forward prediction, levels of analysis.`
+        }
+      },
+      {
+        kicker:"Scene 5",
+        title:"Prediction under change (the test)",
+        subtitle:"From Session 0, predict adaptation under a new condition. This separates model from dashboard.",
+        badges:[{dot:"green", text:"Prediction"},{dot:"yellow", text:"Generic baseline"}],
+        leftTitle:"Predicted vs Actual",
+        rightTitle:"Why this matters",
+        leftHint:"test under context shift",
+        rightHint:"falsifiable",
+        left: ()=> makePredictionPanel(),
+        right: ()=> `
+            <div style="display:grid; gap:10px;">
+                <div style="
+                border:1px solid rgba(15,23,42,.10);
+                border-radius:16px;
+                padding:12px;
+                background: rgba(255,255,255,.92);
+                box-shadow: 0 10px 22px rgba(2,6,23,.06);
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82);">
+                    Falsifiable criterion
+                </div>
+                <div style="margin-top:8px; font-size:13px; line-height:1.5; color: rgba(11,18,32,.86);">
+                    If the signature is meaningful, it should <b>predict</b> adaptation when constraints change, better than a generic model.
+                </div>
+                </div>
+
+                <div style="
+                    border:none;
+                    border-left:4px solid rgba(37,99,235,.30);
+
+                    border-radius:16px;
+                    padding:12px;
+                    background: rgba(37,99,235,.05);
+                    color: rgba(11,18,32,.78);
+                    font-size:13px;
+                    line-height:1.5;
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82); margin-bottom:6px;">
+                    Why this matters
+                </div>
+                “Prediction-under-change” is the credibility anchor for non-experts.
+                </div>
+            </div>
+        `,        
+        bottomTitle:"Result",
+        bottomHint:"keep it to one number",
+        bottom: ()=>`
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+              <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Outcome</div>
+              <div style="margin-top:6px; font-size:16px; font-weight:950; color: rgba(52,211,153,.95);">Prediction error ↓ 35%</div>
+              <div style="margin-top:4px; font-size:12px; color: var(--muted); font-family: var(--mono);">vs generic baseline</div>
+            </div>
+            <div style="flex:1; min-width:260px; border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+              <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Interpretation</div>
+              <div style="margin-top:6px; font-size:13px; line-height:1.45;">
+                We’re not just describing. We’re modeling the <b>generator</b> of behavior.
+              </div>
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`Here is the test. From Session 0, we predict how this person adapts when the condition changes. If we’re right, it’s not just a signature—it’s a generative model of behavior.`,
+          ons:`Predicted vs actual overlay + one error metric vs baseline.`
+        }
+      },
+      {
+        kicker:"Scene 6",
+        title:"Session 0 → CMG (strategies + switching)",
+        subtitle:"The representation becomes a graph of stable strategies and context-driven transitions.",
+        badges:[{dot:"", text:"CMG"},{dot:"green", text:"Strategies"}],
+        leftTitle:"CMG",
+        rightTitle:"What do we do with it?",
+        leftHint:"nodes + transitions",
+        rightHint:"rehab guidance",
+        left: ()=> makeCMGPanel(),
+        right: ()=> makeGuidancePanel(),
+        bottomTitle:"Why CMG matters",
+        bottomHint:"transfer unit",
+        bottom: ()=>`
+          <div style="border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">CMG benefit</div>
+            <div style="margin-top:6px; font-size:14px; line-height:1.4;">
+              CMG captures <b>how</b> strategies switch under constraints—so guidance can target transitions, not just a metric.
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`Session 0 yields a compact motor graph: stable strategies and the logic that switches between them when constraints change.`,
+          ons:`Session 0 → CMG → minimal-change guidance.`
+        }
+      },
+      {
+        kicker:"Scene 7",
+        title:"Close with the rehab question",
+        subtitle:"Physiology can change, priorities may persist. Can rehab prescribe minimal-change progressions?",
+        badges:[{dot:"green", text:"Minimal-change"},{dot:"purple", text:"Personalization"}],
+        leftTitle:"Guidance concept",
+        rightTitle:"Optional teaser",
+        leftHint:"clinician-in-loop",
+        rightHint:"next post",
+        left: ()=> makeGuidancePanel(),
+        right: ()=> `
+            <div style="display:grid; gap:10px;">
+                <div style="
+                border:1px solid rgba(15,23,42,.10);
+                border-radius:16px;
+                padding:12px;
+                background: rgba(255,255,255,.92);
+                box-shadow: 0 10px 22px rgba(2,6,23,.06);
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82);">
+                    Signature components
+                </div>
+                <ul style="
+                    margin:10px 0 0 18px;
+                    color: rgba(11,18,32,.86);
+                    font-size:13px;
+                    line-height:1.55;
+                ">
+                    <li>Trade-offs (speed vs effort vs stability)</li>
+                    <li>Control structure (what is corrected vs tolerated)</li>
+                    <li>Preferred coordination & variability patterns</li>
+                </ul>
+                </div>
+
+                <div style="
+                    border:none;
+                    border-left:4px solid rgba(37,99,235,.30);
+
+                    border-radius:16px;
+                    padding:12px;
+                    background: rgba(37,99,235,.05);
+                    color: rgba(11,18,32,.78);
+                    font-size:13px;
+                    line-height:1.5;
+                ">
+                <div style="font-family: var(--mono); font-size:11px; color: rgba(75,85,101,.82); margin-bottom:6px;">
+                    Interpretation
+                </div>
+                This is why “signature” is closer to a <b>generative explanation</b> than a descriptive label.
+                </div>
+            </div>
+
+            <!-- OPEN CR DEMO -->
+            <div style="margin-top:16px; text-align:center;">
+              <a href="rast-cr-with-cmg.html" target="_blank"  class="linkBtn"
+                style="display:inline-flex; align-items:center; gap:8px; padding:14px 24px; 
+                        background:linear-gradient(135deg, rgba(220,38,38,.90), rgba(124,58,237,.85));
+                        color:#fff; font-weight:700; border-radius:14px; text-decoration:none;
+                        box-shadow: 0 10px 22px rgba(2,6,23,.15);">
+                See RAST-CR in action →
+              </a>
+            </div>
+        `,        
+        bottomTitle:"Final card",
+        bottomHint:"the question",
+        bottom: ()=>`
+          <div style="border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px; background: rgba(15,23,42,.18);">
+            <div style="font-family: var(--mono); font-size:11px; color: var(--muted2);">Question</div>
+            <div style="margin-top:6px; font-size:16px; font-weight:950; line-height:1.25;">
+              If we can infer what a person is optimizing, can rehab stop guessing—and start prescribing minimal-change progressions?
+            </div>
+          </div>
+        `,
+        script:{
+          vo:`When physiology changes—injury, stroke, or a prosthesis—the motion will change. But many priorities don’t. If we understand that signature, we can design training that is more effective, efficient, and safe.`,
+          ons:`Close with one question. Keep it clinician-relevant.`
+        }
+      }
+    ];
+
+    // State + rendering
+    let sceneIndex = 0;
+    let playing = false;
+    let autoplay = false;
+    let playTimer = null;
+
+    const approxSceneSeconds = [10, 12, 12, 14, 16, 14, 12];
+    const totalSeconds = approxSceneSeconds.reduce((a,b)=>a+b,0);
+    const sceneStartSeconds = approxSceneSeconds.reduce((acc,sec,i)=>{
+      acc.push((acc[i-1] ?? 0) + (i===0 ? 0 : approxSceneSeconds[i-1]));
+      return acc;
+    }, []);
+
+    function renderBadges(badges){
+      const row = el("badgeRow");
+      row.innerHTML = "";
+      badges.forEach(b=>{
+        const dclass = b.dot ? `dot ${b.dot}` : `dot`;
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.innerHTML = `<span class="${dclass}"></span><span>${b.text}</span>`;
+        row.appendChild(badge);
+      });
+    }
+
+    function renderScene(i){
+      sceneIndex = clamp(i, 0, scenes.length-1);
+      const s = scenes[sceneIndex];
+
+      el("scenePill").textContent = `Scene ${sceneIndex+1}/${scenes.length}`;
+      el("kicker").textContent = s.kicker;
+      el("sceneTitle").textContent = s.title;
+      el("sceneSubtitle").textContent = s.subtitle;
+      renderBadges(s.badges);
+
+
+      el("leftCardTitle").textContent = s.leftTitle;
+      el("rightCardTitle").textContent = s.rightTitle;
+      el("leftCardHint").textContent = s.leftHint;
+      el("rightCardHint").textContent = s.rightHint;
+
+      el("leftCardBody").innerHTML = s.left();
+      el("rightCardBody").innerHTML = s.right();
+
+      // Mount embedded CMG viewer when present in a scene
+      const cmgMount = document.getElementById('cmgViewerMount');
+      if (cmgMount && window.CmgViewer && typeof window.CmgViewer.mount === 'function') {
+        window.CmgViewer.mount({
+          root: cmgMount,
+          openStandaloneHref: 'rast-cmg-viewer.html',
+          initialLod: 2,
+          showLegend: true,
+          showLod: true
+        }).catch(err => console.error('CMG viewer mount failed:', err));
+      }
+
+      el("bottomTitle").textContent = s.bottomTitle;
+      el("bottomHint").textContent = s.bottomHint;
+      el("bottomBody").innerHTML = s.bottom();
+
+      el("sceneSlider").value = String(sceneIndex);
+
+      const secs = sceneStartSeconds[sceneIndex] ?? 0;
+      el("timeBox").textContent = fmtTime(secs);
+
+      el("scriptBox").innerHTML = `
+        <div class="label">VO (what you will record)</div>
+        <p class="vo">${s.script.vo}</p>
+        <div class="label">ON SCREEN (text you can keep minimal)</div>
+        <p class="ons">${s.script.ons}</p>
+      `;
+    }
+
+    function nextScene(){
+      if(sceneIndex < scenes.length-1){
+        renderScene(sceneIndex+1);
+      }else{
+        stop();
+        renderScene(scenes.length-1);
+      }
+    }
+    function prevScene(){
+      renderScene(sceneIndex-1);
+    }
+
+    function play(){
+      playing = true;
+      el("playBtn").textContent = "Pause";
+      el("playBtn").classList.add("primary");
+
+      let t0 = performance.now();
+      let localElapsed = 0;
+      const currentDuration = approxSceneSeconds[sceneIndex] ?? 12;
+
+      const tick = (now)=>{
+        if(!playing) return;
+        const dt = (now - t0)/1000;
+        t0 = now;
+        localElapsed += dt;
+
+        const global = (sceneStartSeconds[sceneIndex] ?? 0) + localElapsed;
+        el("timeBox").textContent = fmtTime(Math.min(global, totalSeconds));
+
+        if(autoplay && localElapsed >= currentDuration){
+          nextScene();
+          localElapsed = 0;
+        }
+        playTimer = requestAnimationFrame(tick);
+      };
+      playTimer = requestAnimationFrame(tick);
+    }
+
+    function stop(){
+      playing = false;
+      el("playBtn").textContent = "Play";
+      el("playBtn").classList.add("primary");
+      if(playTimer) cancelAnimationFrame(playTimer);
+      playTimer = null;
+      el("timeBox").textContent = fmtTime(sceneStartSeconds[sceneIndex] ?? 0);
+    }
+
+    // Wiring
+    el("prevBtn").addEventListener("click", ()=>{ stop(); prevScene(); });
+    el("nextBtn").addEventListener("click", ()=>{ stop(); nextScene(); });
+
+    el("playBtn").addEventListener("click", ()=>{
+      if(playing) stop(); else play();
+    });
+
+    /*
+    el("autoplayBtn").addEventListener("click", ()=>{
+      autoplay = !autoplay;
+      el("autoplayBtn").textContent = `Autoplay: ${autoplay ? "On" : "Off"}`;
+      if(autoplay) el("autoplayBtn").classList.add("primary");
+      else el("autoplayBtn").classList.remove("primary");
+    });
+*/
+    document.getElementById("autoplayBtn")?.addEventListener("click", ()=>{
+        autoplayEnabled = !autoplayEnabled;
+        updateAutoplayUI(autoplayEnabled);
+
+        if(autoplayEnabled) startAutoplay();
+        else stopAutoplay();
+    });    
+
+    el("sceneSlider").addEventListener("input", (e)=>{
+      stop();
+      renderScene(Number(e.target.value));
+    });
+
+    // Footer toggle
+    const footer = el("footer");
+    const footerBtn = el("toggleFooterBtn");
+    footerBtn.addEventListener("click", ()=>{
+      const show = !footer.classList.contains("show");
+      footer.classList.toggle("show", show);
+      footerBtn.textContent = show ? "Hide details" : "Show details";
+    });
+
+    // Project footer details
+    el("footerDetail").innerHTML = `
+      <div><b>Assumptions:</b> Screen-recorded 75–90s demo; synthetic trajectories stand in for real sensor feeds; you will add your own voiceover; no clinical claims beyond “prediction-under-change” framing.</div>
+      <div style="margin-top:6px;"><b>Next step:</b> Replace synthetic traces with your real sensor capture (if available) and tune the “Prediction error ↓” number to match your actual result or label as illustrative.</div>
+      <div style="margin-top:6px;"><b>Owner:</b> Nitsan</div>
+      <div style="margin-top:6px;"><b>Date:</b> 2026-01-15</div>
+    `;
+
+    // Init
+
+    renderDoodleLayer();
+    renderScene(0);
+  </script>
+</body>
+</html>
