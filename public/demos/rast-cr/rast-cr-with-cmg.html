@@ -1092,7 +1092,7 @@
           <div style="font-size:48px; margin-bottom:16px;">🎯</div>
           <div style="font-size:24px; font-weight:900; margin-bottom:12px;">Personalized. Safe. Documented.</div>
           <div style="font-size:16px; color:var(--muted); line-height:1.5; max-width:400px; margin:0 auto;">
-            RAST-CR transforms cardiac rehabilitation from generic protocols to patient-specific guidance—with built-in safety and automatic documentation.
+            RAST-CR transforms cardiac rehabilitation from generic protocols to patient-specific guidance, with built-in safety and automatic documentation.
           </div>
         </div>
       `;
@@ -1127,7 +1127,7 @@
         left: makeObservationPanel, right: makeSensorPanel,
         bottomTitle:"Extraction", bottomHint:"IOC running",
         bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><div style="flex:1;"><div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Motor signature extraction</div><div class="progressBar"><div class="fill" style="width:42%;"></div></div></div><span style="font-family:var(--mono); font-size:12px;">~3 min remaining</span></div>`,
-        script:{ vo:`During baseline exercise, we're not just monitoring vitals. We're extracting the patient's motor signature—their preferences for stability, effort, pacing. This uses the same IOC pipeline from the concepts demo.`, ons:`Live monitoring + background extraction. Zero extra equipment—uses existing HR monitor and treadmill.` }
+        script:{ vo:`During baseline exercise, we're not just monitoring vitals. We're extracting the patient's motor signature - their preferences for stability, effort, pacing. This uses the same IOC pipeline from the concepts demo.`, ons:`Live monitoring + background extraction. Zero extra equipment—uses existing HR monitor and treadmill.` }
       },
       { kicker:"Scene 3", title:"Motor Signature Extracted", subtitle:"Patient-specific cost function weights reveal how they prefer to move.",
         badges:[{dot:"green", text:"Signature"},{dot:"purple", text:"IOC complete"}],
@@ -1135,7 +1135,7 @@
         left: makeSignaturePanel, right: makeComparisonPanel,
         bottomTitle:"Clinical Implication", bottomHint:"what this means",
         bottom: ()=>`<div style="border-left:3px solid var(--accent); padding-left:12px;"><div style="font-size:14px; line-height:1.5;">This patient's signature shows <b>high stability preference</b> and <b>lower variability tolerance</b> than average. Standard protocols would progress too aggressively. RAST adjusts automatically.</div></div>`,
-        script:{ vo:`Here's what makes RAST different. We've extracted this patient's motor signature—their actual preferences, not assumptions. High stability priority, moderate effort tolerance. This patient needs gradual progression, not aggressive targets.`, ons:`Cost function weights + comparison to protocol average. The "why" behind personalization.` }
+        script:{ vo:`Here's what makes RAST different. We've extracted this patient's motor signature - their actual preferences, not assumptions. High stability priority, moderate effort tolerance. This patient needs gradual progression, not aggressive targets.`, ons:`Cost function weights + comparison to protocol average. The "why" behind personalization.` }
       },
       { kicker:"Scene 4", title:"CMG Generated", subtitle:"Patient's Contextual Motor Graph: the computational representation of their motor identity.",
         badges:[{dot:"", text:"CMG"},{dot:"green", text:"Interactive"}],
@@ -1143,7 +1143,7 @@
         left: makeCMGPanel, right: makeZonesPanel,
         bottomTitle:"What CMG enables", bottomHint:"guidance foundation",
         bottom: ()=>`<div style="font-size:13px; line-height:1.5;">CMG isn't just zones—it's the <b>complete motor identity</b>: constraints, preferences, cost weights, and transition logic. The graph shows how patient-specific parameters drive personalized guidance.</div>`,
-        script:{ vo:`From the signature, we generate a Contextual Motor Graph. This is the computational representation of the patient's motor identity—what they can do, how they prefer to do it, and what will transfer across contexts.`, ons:`Interactive CMG visualization. Drag nodes to explore relationships. Hover for details. Inline viewer is integrated directly into the demo.` },
+        script:{ vo:`From the signature, we generate a Contextual Motor Graph. This is the computational representation of the patient's motor identity - what they can do, how they prefer to do it, and what will transfer across contexts.`, ons:`Interactive CMG visualization. Drag nodes to explore relationships. Hover for details. Inline viewer is integrated directly into the demo.` },
         onRender: ()=> {}
       },
       { kicker:"Scene 5", title:"Live Session", subtitle:"Real-time guidance with safety governor and therapist dashboard.",
@@ -1152,7 +1152,7 @@
         left: makeLiveSessionPanel, right: makeGuidancePanel,
         bottomTitle:"Safety Governor", bottomHint:"1kHz deterministic",
         bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><div style="display:flex; align-items:center; gap:8px;"><span style="color:var(--ok);">●</span><span style="font-weight:600;">Loop active</span></div><span style="color:var(--muted);">|</span><span style="font-family:var(--mono); font-size:12px;">Last check: 0.8ms ago</span><span style="color:var(--muted);">|</span><span style="font-size:12px;">All constraints satisfied</span></div>`,
-        script:{ vo:`During the session, the safety governor runs at 1kHz—checking every millisecond that we're within the patient's envelope. The therapist sees real-time guidance with rationale. Not "increase intensity" but "increase 0.5%, here's why."`, ons:`Safety indicator + live trace + guidance card. Show the product in action.` }
+        script:{ vo:`During the session, the safety governor runs at 1kHz, checking every millisecond that we're within the patient's envelope. The therapist sees real-time guidance with rationale. Not "increase intensity" but "increase 0.5%, here's why."`, ons:`Safety indicator + live trace + guidance card. Show the product in action.` }
       },
       { kicker:"Scene 6", title:"Session Summary", subtitle:"Auto-generated documentation and progress tracking.",
         badges:[{dot:"green", text:"Complete"},{dot:"", text:"Documented"}],
@@ -1160,7 +1160,7 @@
         left: makeSummaryPanel, right: makeDocPanel,
         bottomTitle:"Next Session", bottomHint:"progression plan",
         bottom: ()=>`<div style="display:flex; align-items:center; gap:16px;"><span style="font-weight:600;">Recommended:</span><span>Increase target HR zone by 5 bpm</span><span style="color:var(--muted);">|</span><span style="font-family:var(--mono); font-size:12px;">Based on today's stability + TTTC trajectory</span></div>`,
-        script:{ vo:`Session complete. Documentation is auto-generated—FHIR-compatible, ready for EMR. TTTC shows we're 68% to goal, on track to finish in 4 sessions instead of the protocol average of 6. That's measurable personalization.`, ons:`Summary metrics + documentation export. The "what happened" and "what's next."` }
+        script:{ vo:`Session complete. Documentation is auto-generated, FHIR-compatible, ready for EMR. TTTC shows we're 68% to goal, on track to finish in 4 sessions instead of the protocol average of 6. That's measurable personalization.`, ons:`Summary metrics + documentation export. The "what happened" and "what's next."` }
       },
       { kicker:"Scene 7", title:"RAST-CR", subtitle:"Infrastructure for Precision Rehabilitation",
         badges:[{dot:"red", text:"Cardiac"},{dot:"green", text:"Ready"}],
