@@ -648,7 +648,7 @@
           <button
             type="button"
             class="cmgOpenBtn"
-            onclick="window.open('rast-cmg-viewer.html', '_blank', 'noopener,noreferrer')"
+            onclick="window.open('./rast-cmg-viewer.html', '_blank', 'noopener,noreferrer')"
           >
             Open CMG Viewer
           </button>
@@ -657,7 +657,7 @@
 
         <div class="cmgEmbed">
           <iframe
-            src="rast-cmg-viewer.html"
+            src="./rast-cmg-viewer.html"
             title="CMG Viewer"
             loading="lazy"
           ></iframe>
@@ -984,7 +984,7 @@
 
     window.CmgViewer.mount({
       root,
-      openStandaloneHref: 'rast-cmg-viewer.html',
+      openStandaloneHref: './rast-cmg-viewer.html',
       initialLod: 2,
       showLegend: true,
       showLod: true

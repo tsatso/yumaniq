@@ -1,0 +1,85 @@
+{
+  "cmg_id": "uuid-patient-8842",
+  "version": "1.4",
+  "timestamp": "2025-10-27T10:00:00Z",
+  "provenance": {
+    "session_id": "sess-05",
+    "sensor_suite": ["IMU_x6", "HR_Polar", "ForcePlate"],
+    "ioc_confidence_score": 0.85
+  },
+  "layer_1_structural": {
+    "model_type": "opensim_compatible",
+    "model_ref": "uri/to/patient_scaled_model.osim",
+    "constraints": {
+      "hard_rom_limits": {
+        "shoulder_flexion_left": { "max": 90, "unit": "deg" },
+        "knee_extension_right": { "max": 0, "unit": "deg" }
+      }
+    }
+  },
+  "layer_3_metabolic_uthpc": {
+    "baseline_envelope": {
+      "vo2_max_estimate": 28.5,
+      "hr_rest": 65,
+      "hr_max_safe": 140,
+      "recovery_slope_threshold": 12
+    },
+    "dynamic_state": {
+      "current_hr_zone": "stable_zone",
+      "fatigue_index": 0.4,
+      "perceived_exertion_scale": "Borg_CR10"
+    },
+    "motor_modulation": {
+      "description": "Function f(M(t)) mapping fatigue to motor limits",
+      "fatigue_impact_on_stability": "high"
+    }
+  },
+  "layer_4_intent_optimization": {
+    "description": "Inferred Cost Function Weights",
+    "weights": [
+      {
+        "term": "w_effort",
+        "value": 0.8,
+        "variance": 0.05,
+        "classification": "trait",
+        "transferability": "high",
+        "description": "Stable preference for energy conservation"
+      },
+      {
+        "term": "w_smoothness",
+        "value": 0.72,
+        "variance": 0.03,
+        "classification": "trait",
+        "transferability": "high",
+        "description": "Jerk minimization preference (Kinematic Invariant)"
+      },
+      {
+        "term": "w_stability",
+        "value": 0.95,
+        "variance": 0.2,
+        "classification": "state",
+        "transferability": "low",
+        "context_dependency": ["surface_friction", "fatigue"],
+        "description": "High fear of falling, varies with context"
+      },
+      {
+        "term": "w_speed",
+        "value": 0.3,
+        "variance": 0.15,
+        "classification": "state",
+        "transferability": "low",
+        "description": "Task-dependent urgency"
+      }
+    ]
+  },
+  "layer_5_action_bank": {
+    "primitives": [
+      {
+        "id": "sit_to_stand",
+        "type": "ProMP",
+        "parameters": "uri/to/weights.npy",
+        "feasibility_check": "metabolic_feasible AND motor_feasible"
+      }
+    ]
+  }
+}

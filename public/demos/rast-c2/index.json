@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "label": "CR sample full",
+      "href": "cmg/cmg-cr-sample-full.json"
+    },
+    {
+      "label": "CR sample partial",
+      "href": "cmg/cmg-cr-sample-partial.json"
+    },
+    {
+      "label": "Foot drop",
+      "href": "cmg/cmg-footdrop.json"
+    },
+    {
+      "label": "cmg-small",
+      "href": "cmg/cmg-small.json"
+    },
+    {
+      "label": "cmg-large",
+      "href": "cmg/cmg-large.json"
+    },
+    {
+      "label": "cmg-huge",
+      "href": "cmg/cmg-huge.json"
+    }
+
+  ]
+}

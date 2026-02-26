@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "label": "Small sample", "file": "cmg-small.json" },
+    { "label": "Large sample", "file": "cmg-large.json" },
+    { "label": "Huge sample", "file": "cmg-huge.json" },
+    { "label": "Foot drop", "file": "cmg-footdrop.json" },
+    { "label": "CR sample full", "file": "cmg-cr-sample-full.json" },
+    { "label": "CR sample partial", "file": "cmg-cr-sample-partial.json" }
+  ]
+}

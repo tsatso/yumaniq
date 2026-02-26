@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAST IOC Pipeline - Voice</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+
+  :root {
+    --bg: #FAFBFD;
+    --surface: #FFFFFF;
+    --surface2: #F1F5F9;
+    --border: #E2E8F0;
+    --border2: #CBD5E1;
+    --text: #1E293B;
+    --text2: #475569;
+    --text3: #94A3B8;
+    --accent: #2563EB;
+    --accent-light: #DBEAFE;
+    --accent2: #DB2777;
+    --accent2-light: #FCE7F3;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --green-text: #065F46;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --yellow: #D97706;
+    --yellow-light: #FFFBEB;
+    --code-bg: #F8FAFC;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+
+  .header-logo-img{
+    height: 56px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    filter: drop-shadow(0 6px 18px rgba(0, 163, 255, 0.25));
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font: 700 14px var(--mono); color: var(--accent); letter-spacing: 2.5px; }
+  .header-sep { color: var(--border); font-size: 12px; }
+  .header-sub { font-size: 13px; color: var(--text3); }
+  .header-phase { font: 400 11px var(--mono); color: var(--text3); }
+  .header-right { display:flex; align-items:center; gap:14px; }
+  .scorecard {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background: linear-gradient(180deg, #FFFFFF, #F8FAFC);
+    box-shadow: 0 1px 0 rgba(15,23,42,0.04);
+    position: sticky;
+    top: 10px;
+    z-index: 5;
+  }
+  .score-item { display:flex; flex-direction:column; gap:2px; min-width:120px; }
+  .score-label { font:600 9px var(--mono); letter-spacing: 0.6px; color: var(--text3); text-transform: uppercase; }
+  .score-value { font:700 14px var(--mono); color: var(--text); }
+  .score-divider { width:1px; height:26px; background: var(--border); opacity: 0.9; }
+
+
+  .nav {
+    display: flex; gap: 4px; padding: 10px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+  .nav-btn {
+    padding: 6px 14px; font: 400 11px var(--mono); letter-spacing: 0.3px;
+    color: var(--text3); background: transparent;
+    border: 1px solid transparent; border-radius: 6px;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-btn:hover { background: var(--surface2); }
+  .nav-btn.active {
+    font-weight: 700; color: var(--text);
+    background: var(--surface2); border-color: var(--border);
+  }
+  .nav-num { opacity: 0.45; margin-right: 4px; }
+
+  .content { max-width: 920px; margin: 0 auto; padding: 28px 28px 80px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card-dark {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+
+  .label {
+    font: 700 10px var(--mono); letter-spacing: 2px;
+    color: var(--text3); text-transform: uppercase; margin-bottom: 8px;
+  }
+
+  .stage-title { font-size: 19px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .stage-desc { font-size: 13px; color: var(--text2); margin-bottom: 0; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .btn-group { display: flex; gap: 8px; }
+  .tab-btn {
+    padding: 5px 16px; font: 600 12px var(--mono);
+    border: 1px solid var(--border); border-radius: 6px;
+    background: transparent; color: var(--text3); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { border-color: var(--border2); }
+  .tab-btn.active-a { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab-btn.active-b { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+  .ctx-btn {
+    padding: 4px 14px; font: 400 11px var(--mono);
+    border: 1px solid transparent; border-radius: 5px;
+    background: transparent; color: var(--text3); cursor: pointer;
+  }
+  .ctx-btn.active { background: var(--surface2); border-color: var(--border); color: var(--text); }
+
+  .weight-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .weight-label { width: 82px; font: 400 11px var(--mono); color: var(--text2); text-align: right; }
+  .weight-track { flex: 1; height: 14px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .weight-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+  .weight-val { width: 38px; font: 400 11px var(--mono); color: var(--text3); }
+
+  .badge {
+    font: 700 9px var(--mono); letter-spacing: 1.5px;
+    padding: 2px 8px; border-radius: 3px; display: inline-block;
+  }
+  .badge-trait { background: var(--green-light); border: 1px solid #059669; color: var(--green-text); }
+  .badge-state { background: var(--red-light); border: 1px solid var(--red); color: var(--red); }
+  .badge-mixed { background: var(--yellow-light); border: 1px solid var(--yellow); color: #92400E; }
+
+  .accent-box {
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    border-radius: 8px; padding: 16px 20px;
+  }
+  .accent-box-title { font: 700 13px var(--sans); color: var(--accent); margin-bottom: 6px; }
+  .accent-box-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  .green-box {
+    border: 1px solid var(--green); border-left: 4px solid var(--green);
+    background: var(--green-light); border-radius: 8px; padding: 14px 18px;
+  }
+
+  .footer-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(250,251,253,0.92); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    padding: 10px 28px; display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  .footer-btn {
+    padding: 6px 22px; border-radius: 6px; font-size: 12px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .footer-back { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .footer-next { background: var(--accent); border: 1px solid var(--accent); color: #fff; font-weight: 600; }
+  .footer-label { font: 400 11px var(--mono); color: var(--text3); }
+
+  .intro-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420; text-align: center; gap: 20px; }
+  .intro-tag { font: 700 11px var(--mono); letter-spacing: 4px; color: var(--accent); }
+  .intro-headline { font: 300 28px var(--sans); color: var(--text); line-height: 1.35; max-width: 540px; }
+  .intro-headline b { font-weight: 700; }
+  .intro-body { font-size: 14px; color: var(--text2); max-width: 480px; line-height: 1.65; }
+  .intro-btn {
+    margin-top: 12px; padding: 11px 36px; background: var(--accent);
+    color: #fff; border: none; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer;
+  }
+
+  .btn{
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:#0F172A;
+    color:white;
+    font:700 12px var(--sans);
+    cursor:pointer;
+    transition:.15s;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(2,6,23,.10); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+
+  .kpi-pill{
+    border:1px solid var(--border);
+    background:rgba(15,23,42,.04);
+    border-radius:999px;
+    padding:10px 12px;
+    font:800 12px var(--sans);
+    color:var(--text);
+    display:inline-flex;
+    gap:6px;
+    align-items:baseline;
+    justify-content:center;
+  }
+
+  .singer-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+  .decomp-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(3, 1fr) 70px 55px 85px;
+    gap: 4px; align-items: center;
+  }
+  .decomp-cell { font: 400 11px var(--mono); color: var(--text2); }
+  .decomp-header { font: 700 10px var(--mono); letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; }
+  .decomp-row { border-top: 1px solid var(--border); padding: 6px 0; }
+  .decomp-bar { height: 10px; border-radius: 2px; opacity: 0.7; display: inline-block; }
+
+  .pred-bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .pred-bar-fill { height: 100%; border-radius: 4px; }
+
+  .improvement-box {
+    text-align: center; padding: 14px;
+    background: var(--green-light); border: 1px solid #05966940;
+    border-radius: 8px;
+  }
+  .improvement-num { font: 700 30px var(--mono); color: var(--green); }
+  .improvement-label { font-size: 11px; color: var(--green-text); }
+
+  .confirm-btn {
+    width: 100%; padding: 9px; border-radius: 6px;
+    font: 600 12px var(--mono); cursor: pointer; transition: all 0.2s;
+  }
+  .confirm-btn.pending { background: transparent; border: 1px solid var(--border); color: var(--text3); }
+  .confirm-btn.confirmed { background: var(--green-light); border: 1px solid var(--green); color: var(--green-text); }
+
+  canvas.vis { border-radius: 8px; border: 1px solid var(--border); display: block; }
+
+  .invariant-box { padding: 10px 14px; background: var(--surface2); border-radius: 6px; margin-top: 12px; }
+  .invariant-title { font: 700 10px var(--mono); color: var(--text3); letter-spacing: 1px; margin-bottom: 4px; }
+  .invariant-text { font-size: 11px; color: var(--text2); line-height: 1.7; white-space: pre-line; }
+
+  .meta-row { display: flex; gap: 28px; font-size: 12px; color: var(--text3); }
+  .meta-row span { color: var(--text2); }
+
+  .center-text { text-align: center; }
+  .mt12 { margin-top: 12px; } .mt16 { margin-top: 16px; } .mt20 { margin-top: 20px; }
+  .mb12 { margin-bottom: 12px; } .mb16 { margin-bottom: 16px; }
+  .gap12 { gap: 12px; } .gap16 { gap: 16px; }
+  .hidden { display: none; }
+
+  /* Provenance + guide */
+  .prov-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+  .prov-pill{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff}
+  .prov-k{font-size:11px;color:var(--text2)}
+  .prov-v{font:700 9px var(--mono);letter-spacing:0.7px}
+  .prov-used{border-color:rgba(34,197,94,0.35);background:rgba(34,197,94,0.06)}
+  .prov-used .prov-v{color:var(--green)}
+  .prov-off{border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.05)}
+  .prov-off .prov-v{color:var(--red)}
+  .prov-mock{border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.06)}
+  .prov-mock .prov-v{color:var(--yellow)}
+  .prov-planned{border-color:rgba(99,102,241,0.25);background:rgba(99,102,241,0.05)}
+  .prov-planned .prov-v{color:#4F46E5}
+
+  .guide{margin:10px 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#FFFFFF,#F8FAFC)}
+  .guide-title{font:700 10px var(--mono);letter-spacing:0.8px;color:var(--text3);text-transform:uppercase;margin-bottom:6px}
+  .guide-list{margin:0;padding-left:18px;color:var(--text2);font-size:12px;line-height:1.6}
+
+  .controls-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:8px 0 12px}
+  .segmented{display:flex;gap:6px;padding:4px;background:var(--surface2);border:1px solid var(--border);border-radius:999px}
+  .seg-btn{border:0;background:transparent;padding:6px 10px;border-radius:999px;font-size:12px;color:var(--text2);cursor:pointer}
+  .seg-btn.active{background:#fff;border:1px solid var(--border);color:var(--text);box-shadow:0 1px 0 rgba(15,23,42,0.04)}
+  .sort-select{padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:12px;color:var(--text2)}
+
+</style>
+</head>
+<body>
+<div class="header">
+<div class="header-left">
+<img class="header-logo-img" src="rast-logo-artech.png" alt="RAST" />
+<span class="header-sep">|</span>
+<span class="header-sub">Identity Pipeline Mockup</span>
+</div>
+<div class="header-right">
+<div class="scorecard" id="scorecard">
+<div class="score-item">
+<div class="score-label">Identity confidence</div>
+<div class="score-value" id="scoreIdentity">—</div>
+</div>
+<div class="score-divider"></div>
+<div class="score-item">
+<div class="score-label">Transfer readiness</div>
+<div class="score-value" id="scoreTransfer">—</div>
+</div>
+</div>
+<div class="header-phase" id="phaseIndicator">Overview</div>
+</div>
+</div>
+<div class="nav" id="navBar"></div>
+<div class="content" id="content"></div>
+<div class="footer-nav hidden" id="footerNav">
+<button class="footer-btn footer-back" onclick="prevStage()">← Back</button>
+<span class="footer-label" id="footerLabel"></span>
+<button class="footer-btn footer-next" id="footerNext" onclick="nextStage()">Next →</button>
+</div>
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const FEATURES = ["accuracy","smoothness","effort","timing","expression","vibrato"];
+
+const SINGER_A_WEIGHTS = {
+  ballad:    {accuracy:0.14,smoothness:0.34,effort:0.18,timing:0.12,expression:0.08,vibrato:0.14},
+  uptempo:   {accuracy:0.16,smoothness:0.32,effort:0.22,timing:0.09,expression:0.06,vibrato:0.15},
+  acappella: {accuracy:0.13,smoothness:0.36,effort:0.15,timing:0.14,expression:0.09,vibrato:0.13},
+};
+const SINGER_B_WEIGHTS = {
+  ballad:    {accuracy:0.32,smoothness:0.08,effort:0.12,timing:0.10,expression:0.28,vibrato:0.10},
+  uptempo:   {accuracy:0.35,smoothness:0.06,effort:0.18,timing:0.08,expression:0.22,vibrato:0.11},
+  acappella: {accuracy:0.30,smoothness:0.10,effort:0.10,timing:0.15,expression:0.26,vibrato:0.09},
+};
+
+function generateTrajectory(singer, context, length=200) {
+  const pts = [];
+  const seed = singer==="A" ? 42 : 137;
+  let rng = seed + (context==="ballad"?0:context==="uptempo"?100:200);
+  const rand = () => { rng=(rng*16807)%2147483647; return (rng%10000)/10000; };
+  const profiles = {
+    A: { smoothness:0.85, baseF0: context==="ballad"?22:context==="uptempo"?26:20, vibRate:0.02 },
+    B: { smoothness:0.4,  baseF0: context==="ballad"?20:context==="uptempo"?28:18, vibRate:0.06 },
+  };
+  const p = profiles[singer];
+  const tempo = context==="uptempo"?1.8:context==="ballad"?0.7:1.0;
+  const notes = [0,2,4,5,7,5,4,2,0,-1,0,2,4,7,5,4,2,0,2,0];
+  for (let i=0;i<length;i++) {
+    const t=i/length;
+    const ni=Math.floor(t*notes.length)%notes.length;
+    const targetF0=p.baseF0+notes[ni];
+    const nextTarget=p.baseF0+notes[(ni+1)%notes.length];
+    const sharp=singer==="A"?0.15:0.6;
+    const phase=(t*notes.length)%1;
+    const smoothed=phase<sharp?targetF0+(nextTarget-targetF0)*(phase/sharp)*0.3:targetF0;
+    const vib=Math.sin(i*p.vibRate*tempo*Math.PI*2)*(singer==="A"?0.8:0.3);
+    const noise=(rand()-0.5)*(singer==="A"?0.3:0.6);
+    const f0=smoothed+vib+noise;
+    const baseI=0.4+0.3*Math.sin(t*Math.PI*4*tempo);
+    const exprMod=singer==="B"?0.25*Math.sin(t*Math.PI*7+rand()):0.08*Math.sin(t*Math.PI*3);
+    const intensity=Math.max(0.1,Math.min(1,baseI+exprMod));
+    pts.push({t:t*(context==="ballad"?8:context==="uptempo"?4:6),f0,intensity,targetF0});
+  }
+  return pts;
+}
+
+function getDecomposition(weights) {
+  return FEATURES.map(f => {
+    const vals=Object.values(weights).map(ctx=>ctx[f]);
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const variance=vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length;
+    const cv=Math.sqrt(variance)/(Math.abs(mean)+0.001);
+    const icc=1/(1+cv*cv);
+    const cls=icc>0.75?"TRAIT":icc<0.4?"STATE":"MIXED";
+    return {feature:f,mean,variance,icc,classification:cls};
+  });
+}
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+
+const stages = [
+  {id:"intro",label:"Intro",num:"—"},
+  {id:"session0",label:"Session-0",num:"01"},
+  {id:"features",label:"Features",num:"02"},
+  {id:"ioc",label:"IOC",num:"03"},
+  {id:"decomp",label:"Decompose",num:"04"},
+  {id:"predict",label:"Predict",num:"05"},
+  {id:"simgate",label:"SIM Gate",num:"06"},
+  {id:"live",label:"A/B Live",num:"07"},
+];
+
+// ─── DEMO CONFIG ─────────────────────────────────────────────────────────────
+
+const PROVENANCE = {
+  intro:     [{k:"Audio (mic)",v:"planned"},{k:"MIDI",v:"optional"},{k:"Crowd pulse",v:"planned"}],
+  session0:  [{k:"Audio (mic)",v:"used"},{k:"Pitch tracking",v:"used"},{k:"Dynamics",v:"used"},{k:"Crowd pulse",v:"off"}],
+  features:  [{k:"Audio (mic)",v:"used"},{k:"Onsets / groove",v:"used"},{k:"F0 / pitch",v:"used"},{k:"Crowd pulse",v:"off"}],
+  ioc:       [{k:"Traits",v:"used"},{k:"Contexts",v:"used"},{k:"IOC solver",v:"mock"},{k:"Safety cage",v:"planned"}],
+  decomp:    [{k:"Weights",v:"used"},{k:"ICC (trait/state)",v:"used"},{k:"Baseline",v:"used"},{k:"Crowd pulse",v:"off"}],
+  predict:   [{k:"Holdout context",v:"used"},{k:"Generic baseline",v:"used"},{k:"Trait predictor",v:"mock"}],
+  simgate:   [{k:"Identity preview",v:"used"},{k:"Artist confirmation",v:"used"},{k:"Signature lock",v:"planned"}],
+  live:      [{k:"Performance control",v:"planned"},{k:"Crowd pulse",v:"planned"},{k:"A/B switch",v:"used"}],
+};
+
+const STAGE_GUIDE = {
+  session0: {lookFor:["Session‑0 baseline takes 2–5 minutes","You get a personal ‘normal range’ envelope","No coaching yet. Just measurement"]},
+  features: {lookFor:["Signals are continuous (not commands)","Features are repeatable proxies","These become the ‘control primitives’"]},
+  ioc:      {lookFor:["Weights differ by context","Solver infers stable structure","Identity ≠ one fixed setting"]},
+  decomp:   {lookFor:["High ICC → trait (transferable)","Low ICC → state (context)","Top traits tell a retellable story"]},
+  predict:  {lookFor:["Holdout test (falsifiable)","Personal beats generic","Improvement is the business proof"]},
+  simgate:  {lookFor:["Singer sees ‘model of me’","Confirmation gates going live","Knobs show causality, not decoration"]},
+  live:     {lookFor:["Generic prompt vs performance‑control","Crowd joins the loop","Outputs stay inside signature"]},
+};
+
+function provenancePills(stageId){
+  const items = PROVENANCE[stageId] || [];
+  const pill = (k,v)=>{
+    const cls = v==="used"?"prov-used":v==="off"?"prov-off":v==="mock"?"prov-mock":"prov-planned";
+    const label = v==="used"?"USED":v==="off"?"OFF":v==="mock"?"MOCK":"PLANNED";
+    return `<span class="prov-pill ${cls}"><span class="prov-k">${k}</span><span class="prov-v">${label}</span></span>`;
+  };
+  return `<div class="prov-row">${items.map(i=>pill(i.k,i.v)).join("")}</div>`;
+}
+
+function guideBox(stageId){
+  const g = STAGE_GUIDE[stageId];
+  if(!g) return "";
+  return `<div class="guide">
+    <div class="guide-title">Look for</div>
+    <ul class="guide-list">${g.lookFor.map(x=>`<li>${x}</li>`).join("")}</ul>
+  </div>`;
+}
+
+function stageScores(){
+  // Scores should NOT change just because we navigate steps.
+  // They change only when new evidence is added.
+  const s = state.singer;
+
+  let identity = 12; // initial placeholder (no evidence yet)
+  let transfer  = 0;
+
+  // Evidence 1: Session-0 baseline captured
+  if(state.session0Done){
+    identity = 55;
+    transfer = 15;
+  }
+
+  // Evidence 2: Artist confirms identity (SIM Gate)
+  if(state.simConfirmed[s]){
+    identity = Math.max(identity, 82);
+    transfer = Math.max(transfer, 55);
+  }
+
+  // Evidence 3: A/B lift demonstrated in Live stage
+  if(state.abLift){
+    identity = Math.max(identity, 86);
+    transfer = Math.max(transfer, 82);
+  }
+
+  return {identity, transfer};
+}
+
+function updateScorecard(){
+  const elI = document.getElementById("scoreIdentity");
+  const elT = document.getElementById("scoreTransfer");
+  if(!elI || !elT) return;
+  const {identity, transfer} = stageScores();
+  elI.textContent = `${identity}%`;
+  elT.textContent = `${transfer}%`;
+}
+
+
+let state = {
+  stageIdx: 0,
+  singer: "A",
+  context: "ballad",
+  simConfirmed: {A:false, B:false},
+  session0Done: false,
+  abLift: false,
+
+
+  // UI preferences
+  decompView: "top",        // "top" | "all"
+  decompSort: "icc_desc",   // "icc_desc" | "var_asc" | "feature_asc"
+
+  // Visual signature knobs (demo-only)
+  sigKnobs: {
+    A: { smoothness: 0.70, expression: 0.45 },
+    B: { smoothness: 0.35, expression: 0.75 },
+  },
+};
+
+const animFrames = {};
+
+function setState(updates) {
+  Object.assign(state, updates);
+  render();
+}
+
+function setDecompView(v){ setState({decompView:v}); }
+function setDecompSort(v){ setState({decompSort:v}); }
+
+function updateSigKnob(s,key,val){
+  state.sigKnobs[s][key]=Number(val);
+  // restart preview visual if present
+  const id = `simVis${s}`;
+  if(document.getElementById(id)){
+    startVisual(id, s, "personal", state.sigKnobs[s]);
+  }
+}
+
+
+// ─── SVG CHARTS ─────────────────────────────────────────────────────────────
+
+function lineChartSVG(data, field, color, w=380, h=100, showTarget=false) {
+  const vals = data.map(d=>d[field]);
+  const mn = Math.min(...vals)-1, mx = Math.max(...vals)+1;
+  const sx=i=>(i/(data.length-1))*w;
+  const sy=v=>h-((v-mn)/(mx-mn))*h;
+  let pathD=vals.map((v,i)=>`${i===0?"M":"L"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(" ");
+  let targetPath="";
+  if(showTarget){
+    const tv=data.map(d=>d.targetF0);
+    targetPath=`<path d="${tv.map((v,i)=>`${i===0?"M":"L"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(" ")}" fill="none" stroke="#CBD5E1" stroke-width="1.2" stroke-dasharray="4,4"/>`;
+  }
+  return `<svg width="${w}" height="${h}" style="display:block">${targetPath}<path d="${pathD}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
+}
+
+// ─── CANVAS VISUALS ─────────────────────────────────────────────────────────
+
+function startVisual(canvasId, singer, mode, knobs) {
+  if(animFrames[canvasId]) cancelAnimationFrame(animFrames[canvasId]);
+  let frame=0;
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width, H=canvas.height;
+  const K = knobs || (state.sigKnobs ? state.sigKnobs[singer] : null) || {smoothness:0.6,expression:0.6};
+
+  function draw() {
+    frame++;
+    ctx.fillStyle="#F1F5F9";
+    ctx.fillRect(0,0,W,H);
+
+    if(mode==="generic") {
+      const intensity=0.5+0.3*Math.sin(frame*0.05);
+      for(let i=0;i<5;i++){
+        ctx.beginPath();
+        ctx.arc(W/2,H/2,20+i*15+Math.sin(frame*0.03)*10,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(100,120,180,${intensity*(1-i*0.18)})`;
+        ctx.lineWidth=2; ctx.stroke();
+      }
+    } else if(singer==="A") {
+      for(let i=0;i<8;i++){
+        const r=15+i*12; const wobbleAmp = 2 + (1-K.smoothness)*7; const wobble=Math.sin(frame*0.015+i*0.5)*wobbleAmp;
+        ctx.beginPath();
+        for(let a=0;a<=Math.PI*2;a+=0.05){
+          const radius=r+wobble*Math.sin(a*3+frame*0.02);
+          const x=W/2+Math.cos(a)*radius, y=H/2+Math.sin(a)*radius;
+          a===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle=`hsla(${215+i*6},65%,50%,${0.55-i*0.05})`;
+        ctx.lineWidth=1.5; ctx.stroke();
+      }
+      const pCount = Math.round(18 + K.expression*28);
+      for(let i=0;i<pCount;i++){
+        const a=(i/30)*Math.PI*2+frame*0.005;
+        const r=60+Math.sin(frame*0.01+i)*20;
+        ctx.beginPath();
+        ctx.arc(W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,1.8,0,Math.PI*2);
+        ctx.fillStyle=`rgba(37,99,235,${0.25+0.15*Math.sin(frame*0.02+i)})`;
+        ctx.fill();
+      }
+    } else {
+      const segs=12;
+      for(let i=0;i<segs;i++){
+        const angle=(i/segs)*Math.PI*2+frame*0.008;
+        const baseLen = 26 + K.expression*18;
+        const varLen = 22 + (1-K.smoothness)*34;
+        const len=baseLen + varLen*Math.abs(Math.sin(frame*0.04+i*1.2));
+        const x1=W/2+Math.cos(angle)*15, y1=H/2+Math.sin(angle)*15;
+        const x2=W/2+Math.cos(angle)*(15+len), y2=H/2+Math.sin(angle)*(15+len);
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+        ctx.strokeStyle=`hsla(${330+i*10},70%,48%,${0.45+0.3*Math.sin(frame*0.05+i)})`;
+        ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x2,y2,3+Math.sin(frame*0.06+i)*2,0,Math.PI*2);
+        ctx.fillStyle=`hsla(${330+i*10},70%,55%,0.5)`; ctx.fill();
+      }
+      if(frame % Math.max(2, Math.round(5 - K.expression*3)) === 0){
+        const ba=Math.random()*Math.PI*2, br=18+Math.random()*(30 + K.expression*40);
+        ctx.beginPath();
+        ctx.arc(W/2+Math.cos(ba)*br,H/2+Math.sin(ba)*br,2,0,Math.PI*2);
+        ctx.fillStyle="rgba(217,119,6,0.7)"; ctx.fill();
+      }
+    }
+    animFrames[canvasId]=requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── RENDERING ──────────────────────────────────────────────────────────────
+
+function badge(cls) {
+  const c = cls==="TRAIT"?"badge-trait":cls==="STATE"?"badge-state":"badge-mixed";
+  return `<span class="badge ${c}">${cls}</span>`;
+}
+
+function weightBars(weights, color) {
+  return FEATURES.map(f => {
+    const pct = Math.min(100,(weights[f]/0.4)*100);
+    return `<div class="weight-row">
+      <div class="weight-label">${f}</div>
+      <div class="weight-track"><div class="weight-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="weight-val">${weights[f].toFixed(2)}</div>
+    </div>`;
+  }).join("");
+}
+
+function singerTabs() {
+  return `<div class="btn-group mb16">
+    <button class="tab-btn ${state.singer==="A"?"active-a":""}" onclick="setState({singer:'A'})">Singer A</button>
+    <button class="tab-btn ${state.singer==="B"?"active-b":""}" onclick="setState({singer:'B'})">Singer B</button>
+  </div>`;
+}
+
+function contextTabs() {
+  return `<div class="btn-group gap12 mb16">
+    ${["ballad","uptempo","acappella"].map(c=>`<button class="ctx-btn ${state.context===c?"active":""}" onclick="setState({context:'${c}'})">${c}</button>`).join("")}
+  </div>`;
+}
+
+function renderIntro() {
+  return `<div class="intro-center">
+    <div class="intro-tag">RAST · IOC PIPELINE</div>
+    <div class="intro-headline">From <b>observed performance</b> to <b>motor identity</b> to <b>personalized response</b></div>
+    <div class="intro-body">This walkthrough simulates the full IOC pipeline with two synthetic singers. Same song, different identities. Watch the system extract <em>why</em> they sing differently, not just <em>what</em> they sing.</div>
+    <div style="display:flex;gap:24px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="singer-dot" style="background:var(--accent)"></span><span style="font-size:13px;color:var(--text2)">Singer A: legato, smooth, flowing</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="singer-dot" style="background:var(--accent2)"></span><span style="font-size:13px;color:var(--text2)">Singer B: precise, expressive, dynamic</span></div>
+    </div>
+    <button class="intro-btn" onclick="setState({stageIdx:1})">Begin Pipeline →</button>
+  </div>`;
+}
+
+function renderSession0() {
+  const s = state.singer;
+  const c = state.context;
+  const traj = generateTrajectory(s, c);
+  const color = s==="A"?"#2563EB":"#DB2777";
+  const color2 = s==="A"?"#60A5FA":"#F472B6";
+  const descF0 = s==="A"?"Smooth transitions, gradual approaches to target notes. Consistent vibrato.":"Sharp attacks on target notes. Wide dynamic swings. Irregular ornamentation.";
+  const descI = s==="A"?"Gentle dynamics. Steady intensity with subtle phrasing.":"Dramatic expression. Large intensity range. Sudden shifts.";
+  const dur = c==="ballad"?"8.0s":c==="uptempo"?"4.0s":"6.0s";
+  const bpm = c==="ballad"?"72 BPM":c==="uptempo"?"132 BPM":"free";
+
+  return `<div>
+    <div class="mb16"><div class="stage-title">Session-0: Capture</div><div class="stage-desc">Record 2-3 pieces per singer. The system needs multiple contexts for identifiability.</div></div>
+    ${provenancePills("session0")}${guideBox("session0")}
+    ${singerTabs()}${contextTabs()}
+    <div class="grid-2 mb16">
+      <div class="card"><div class="label">Pitch Contour (F0)</div>${lineChartSVG(traj,"f0",color,380,120,true)}<div style="font-size:11px;color:var(--text3);margin-top:8px">${descF0}</div></div>
+      <div class="card"><div class="label">Intensity Contour</div>${lineChartSVG(traj,"intensity",color2,380,120)}<div style="font-size:11px;color:var(--text3);margin-top:8px">${descI}</div></div>
+    </div>
+    <div class="card-dark"><div class="label">Context: ${c}</div><div class="meta-row"><div>Duration: <span>${dur}</span></div><div>Tempo: <span>${bpm}</span></div><div>State: <span>[F0, intensity, centroid, phase]</span></div><div>Control: <span>[dF0/dt, dI/dt]</span></div></div></div>
+  </div>`;
+}
+
+function renderFeatures() {
+  const trajA = generateTrajectory("A", state.context);
+  const trajB = generateTrajectory("B", state.context);
+  const invA = "• Single-peaked velocity profiles\n• Smooth portamento transitions\n• Regular vibrato (5.2 Hz ± 0.3)\n• Low trial-to-trial variability";
+  const invB = "• Multi-peaked velocity (correction events)\n• Sharp onset attacks\n• Irregular ornamentation\n• High expressive variability";
+
+  return `<div>
+    <div class="mb16"><div class="stage-title">Feature Extraction</div><div class="stage-desc">Audio → Trajectory object. Same state space for both singers, wildly different patterns.</div></div>
+    <div class="grid-2">
+      ${["A","B"].map(s=>{
+        const traj=s==="A"?trajA:trajB;
+        const color=s==="A"?"#2563EB":"#DB2777";
+        const color2=s==="A"?"#60A5FA":"#F472B6";
+        const inv=s==="A"?invA:invB;
+        return `<div class="card" style="border-color:${color}20">
+          <div class="label" style="color:${color}">Singer ${s}: ${s==="A"?"Legato":"Precise"}</div>
+          <div class="mb12"><div style="font:700 10px var(--mono);color:var(--text3);margin-bottom:4px">PITCH (F0 semitones)</div>${lineChartSVG(traj,"f0",color,380,80,true)}</div>
+          <div><div style="font:700 10px var(--mono);color:var(--text3);margin-bottom:4px">INTENSITY (normalized)</div>${lineChartSVG(traj,"intensity",color2,380,60)}</div>
+          <div class="invariant-box"><div class="invariant-title">INVARIANTS DETECTED</div><div class="invariant-text">${inv}</div></div>
+        </div>`;
+      }).join("")}
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn" onclick="runABLift()" ${state.abLift?'disabled style="opacity:.6;cursor:not-allowed"':''}>Run A/B check</button>
+          <div class="kpi-pill" style="min-width:140px;text-align:center">
+            ${state.abLift?'<span style="font-weight:800;color:var(--green)">+67%</span><span style="color:var(--text3)"> avg lift</span>':'<span style="color:var(--text3)">not run</span>'}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </div>`;
+}
+
+function renderIOC() {
+  return `<div>
+    <div class="mb16"><div class="stage-title">Inverse Optimal Control</div><div class="stage-desc">Given behavior + dynamics model → infer cost function weights. Not <em>what</em> they did, but <em>why</em>.</div></div>
+    ${contextTabs()}
+    <div class="grid-2 mb16">
+      ${["A","B"].map(s=>{
+        const w=s==="A"?SINGER_A_WEIGHTS[state.context]:SINGER_B_WEIGHTS[state.context];
+        const color=s==="A"?"#2563EB":"#DB2777";
+        const desc=s==="A"?"Smoothness-dominant: optimizes for fluid transitions over precision.":"Accuracy + expression: hits notes precisely while maximizing dynamic range.";
+        return `<div class="card" style="border-color:${color}20">
+          <div class="label" style="color:${color}">Singer ${s}: ${state.context}</div>
+          <div style="font:400 11px var(--mono);color:var(--text3);margin-bottom:12px">J = Σ wᵢ · φᵢ(trajectory)</div>
+          ${weightBars(w,color)}
+          <div style="margin-top:12px;font-size:11px;color:var(--text3);font-style:italic">${desc}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="card-dark center-text"><div style="font-size:12px;color:var(--text2)">Same song. Same dynamics model. Same cost features. <strong style="color:var(--text)">Different weights.</strong> That's motor identity.</div></div>
+  </div>`;
+}
+
+function renderDecomp() {
+  const s = state.singer;
+  const decomp = s==="A"?getDecomposition(SINGER_A_WEIGHTS):getDecomposition(SINGER_B_WEIGHTS);
+  const weights = s==="A"?SINGER_A_WEIGHTS:SINGER_B_WEIGHTS;
+  const color = s==="A"?"#2563EB":"#DB2777";
+  const summaryA = "Singer A's smoothness is a trait: legato style persists across ballad, uptempo, and a cappella.";
+  const summaryB = "Singer B's accuracy and expression are traits: precision and dynamics persist across all contexts.";
+
+  
+  let list = [...decomp];
+
+  // Sorting
+  if(state.decompSort==="icc_desc") list.sort((a,b)=>b.icc-a.icc);
+  if(state.decompSort==="var_asc") list.sort((a,b)=>a.variance-b.variance);
+  if(state.decompSort==="feature_asc") list.sort((a,b)=>a.feature.localeCompare(b.feature));
+
+  // Default view: top 3 traits (or top 3 overall if not enough traits)
+  if(state.decompView==="top"){
+    const traitsOnly = list.filter(d=>d.classification==="TRAIT");
+    const pick = traitsOnly.length>=3 ? traitsOnly.slice(0,3) : list.slice(0,3);
+    list = pick;
+  }
+
+  let rows = list.map(d=>{
+    const ctxCells = ["ballad","uptempo","acappella"].map(c=>{
+      const pct = (weights[c][d.feature]/0.4)*100;
+      return `<div style="text-align:center"><div class="decomp-bar" style="width:${pct}%;background:${color}"></div><div style="font:400 10px var(--mono);color:var(--text3)">${weights[c][d.feature].toFixed(2)}</div></div>`;
+    }).join("");
+    const iccColor = d.icc>0.75?"var(--green)":d.icc<0.4?"var(--red)":"var(--yellow)";
+    return `<div class="decomp-grid decomp-row">
+      <div class="decomp-cell"><strong style="color:var(--text)">${d.feature}</strong></div>
+      ${ctxCells}
+      <div class="decomp-cell" style="text-align:center">${d.variance.toFixed(4)}</div>
+      <div style="text-align:center;font:600 11px var(--mono);color:${iccColor}">${d.icc.toFixed(2)}</div>
+      <div style="text-align:center">${badge(d.classification)}</div>
+    </div>`;
+  }).join("");
+
+
+  return `<div>
+    <div class="mb16"><div class="stage-title">Decomposition: Trait vs State</div><div class="stage-desc">Same singer across 3 contexts. Which weights stay stable? Those are traits - transferable identity.</div></div>
+    ${singerTabs()}
+    <div class="controls-row">
+      <div class="segmented" role="tablist" aria-label="Decomposition view">
+        <button class="seg-btn ${state.decompView==="top"?"active":""}" onclick="setDecompView('top')">Top 3 traits</button>
+        <button class="seg-btn ${state.decompView==="all"?"active":""}" onclick="setDecompView('all')">Show all</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font:700 9px var(--mono);letter-spacing:0.8px;color:var(--text3);text-transform:uppercase">Sort</span>
+        <select class="sort-select" onchange="setDecompSort(this.value)">
+          <option value="icc_desc" ${state.decompSort==="icc_desc"?"selected":""}>ICC (traitness) ↓</option>
+          <option value="var_asc" ${state.decompSort==="var_asc"?"selected":""}>Variance ↑ stability</option>
+          <option value="feature_asc" ${state.decompSort==="feature_asc"?"selected":""}>Feature A→Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="decomp-grid mb12">
+        <div class="decomp-header">Feature</div>
+        <div class="decomp-header" style="text-align:center">Ballad</div>
+        <div class="decomp-header" style="text-align:center">Uptempo</div>
+        <div class="decomp-header" style="text-align:center">A cappella</div>
+        <div class="decomp-header" style="text-align:center">Var</div>
+        <div class="decomp-header" style="text-align:center">ICC</div>
+        <div class="decomp-header" style="text-align:center">Class</div>
+      </div>
+      ${rows}
+      <div style="margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:var(--green)">Traits</strong> remain stable regardless of genre. This is who ${s==="A"?"Singer A":"Singer B"} IS as a vocalist.
+          <strong style="color:var(--red)"> States</strong> shift with context - adaptation, not identity.
+          ${s==="A"?summaryA:summaryB}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPredict() {
+  return `<div>
+    <div class="mb16"><div class="stage-title">Prediction Validation</div><div class="stage-desc">Extract traits from ballad + uptempo → predict behavior in a cappella. Does personalization beat generic?</div></div>
+    ${provenancePills("predict")}${guideBox("predict")}
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div style="font:700 10px var(--mono);letter-spacing:0.8px;color:var(--text3);text-transform:uppercase">Hero KPI</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:6px">Personal trait model beats generic baseline on holdout context</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font:800 26px var(--mono);color:var(--green)">+${Math.round(((0.38-0.12)/0.38*100 + (0.41-0.15)/0.41*100)/2)}%</div>
+        <div style="font-size:11px;color:var(--text3)">avg improvement</div>
+      </div>
+    </div>
+    <div class="grid-2 mb16">
+      ${["A","B"].map(s=>{
+        const predErr=s==="A"?0.12:0.15, baseErr=s==="A"?0.38:0.41;
+        const impr=((baseErr-predErr)/baseErr*100).toFixed(0);
+        const color=s==="A"?"#2563EB":"#DB2777";
+        return `<div class="card">
+          <div class="label" style="color:${color}">Singer ${s}</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Holdout context: a cappella</div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>Generic baseline (equal weights)</span><span style="color:var(--red);font-family:var(--mono)">error: ${baseErr.toFixed(2)}</span></div>
+            <div class="pred-bar-track"><div class="pred-bar-fill" style="width:${baseErr*100}%;background:var(--border2)"></div></div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>Trait-weight prediction</span><span style="color:var(--green);font-family:var(--mono)">error: ${predErr.toFixed(2)}</span></div>
+            <div class="pred-bar-track"><div class="pred-bar-fill" style="width:${predErr*100}%;background:${color}"></div></div>
+          </div>
+          <div class="improvement-box"><div class="improvement-num">+${impr}%</div><div class="improvement-label">improvement over generic</div></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--text3);font-style:italic">Trait weights from ballad + uptempo predicted a cappella behavior ${impr}% more accurately than equal weights.</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="card-dark center-text"><div style="font-size:13px;color:var(--text2)">This is the decomposition hypothesis test. Traits extracted in two contexts predict behavior in a third.<br><span style="color:var(--text3)">Same test structure applies to surgical data: extract from easy tasks → predict in hard tasks.</span></div></div>
+  </div>`;
+}
+
+function renderSimGate() {
+  return `<div>
+    <div class="mb16"><div class="stage-title">SIM Gate: Identity Verification</div><div class="stage-desc">The singer sees the system\'s model of them before going live. "Does this feel like me?"</div></div>
+    ${provenancePills("simgate")}${guideBox("simgate")}
+    <div class="grid-2 mb16">
+      ${["A","B"].map(s=>{
+        const decomp=s==="A"?getDecomposition(SINGER_A_WEIGHTS):getDecomposition(SINGER_B_WEIGHTS);
+        const color=s==="A"?"#2563EB":"#DB2777";
+        const traits=decomp.filter(d=>d.classification==="TRAIT");
+        const confirmed=state.simConfirmed[s];
+        const predText=s==="A"
+          ? "\"When you sing a new piece, I expect smooth pitch transitions, gentle dynamics, and regular vibrato. You'll approach target notes gradually rather than attacking them.\""
+          : "\"When you sing a new piece, I expect precise note attacks, dramatic dynamic shifts, and high expressive range. You'll hit targets sharply with wide intensity modulation.\"";
+        const visDesc=s==="A"?"flowing, concentric, calm":"radial, dynamic, explosive";
+        return `<div class="card" style="border-color:${confirmed?"var(--green)":color}30">
+          <div class="label" style="color:${color}">Singer ${s}: Identity Model</div>
+          <div class="mb12">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">The system believes your core identity is:</div>
+            ${traits.map(t=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              ${badge("TRAIT")}
+              <span style="font-size:13px;color:var(--text)">${t.feature}</span>
+              <span style="font:400 11px var(--mono);color:var(--text3)">μ=${t.mean.toFixed(2)}, ICC=${t.icc.toFixed(2)}</span>
+            </div>`).join("")}
+          </div>
+          <div style="padding:12px;background:var(--surface2);border-radius:8px;margin-bottom:12px">
+            <div style="font:700 10px var(--mono);color:var(--text3);margin-bottom:6px">PREDICTION PREVIEW</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">${predText}</div>
+          </div>
+          <div style="display:flex;justify-content:center"><canvas id="simVis${s}" class="vis" width="180" height="180"></canvas></div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin:8px 0 10px">Visual signature preview - ${visDesc}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 12px">
+            <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff">
+              <div style="font:700 9px var(--mono);letter-spacing:0.7px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Smoothness</div>
+              <input type="range" min="0" max="1" step="0.01" value="${state.sigKnobs[s].smoothness}" oninput="updateSigKnob('${s}','smoothness',this.value)" style="width:100%"/>
+              <div style="display:flex;justify-content:space-between;font:400 10px var(--mono);color:var(--text3)"><span>raw</span><span>legato</span></div>
+            </div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff">
+              <div style="font:700 9px var(--mono);letter-spacing:0.7px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Expression</div>
+              <input type="range" min="0" max="1" step="0.01" value="${state.sigKnobs[s].expression}" oninput="updateSigKnob('${s}','expression',this.value)" style="width:100%"/>
+              <div style="display:flex;justify-content:space-between;font:400 10px var(--mono);color:var(--text3)"><span>flat</span><span>dynamic</span></div>
+            </div>
+          </div>
+          <button class="confirm-btn ${confirmed?"confirmed":"pending"}" onclick="toggleConfirm('${s}')">${confirmed?"✓ Identity Confirmed":"Confirm: \"This is me\""}</button>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="card-dark center-text"><div style="font-size:12px;color:var(--text2)">In clinical RAST: therapist verifies before patient receives guidance. In space RAST: operator verifies before robot executes.<br>In Artech: singer verifies before visuals go live. <strong style="color:var(--text)">Same architecture. Same purpose.</strong></div></div>
+  </div>`;
+}
+
+function renderLive() {
+  const s = state.singer;
+  const color = s==="A"?"#2563EB":"#DB2777";
+  const visDesc = s==="A"?"Flowing, concentric, smooth transitions.\nDriven by smoothness-dominant identity.":"Radial, explosive, sharp dynamics.\nDriven by accuracy + expression identity.";
+
+  return `<div>
+    <div class="mb16"><div class="stage-title">A/B Comparison: Generic vs Personal</div><div class="stage-desc">The proof. Same audio input. Left: audio-reactive (any VJ tool). Right: identity-driven (RAST).</div></div>
+    ${provenancePills("live")}${guideBox("live")}
+    ${singerTabs()}
+    <div class="grid-2 mb16">
+      <div class="card" style="border-color:var(--border)">
+        <div class="label" style="color:var(--text3)">Mode A: Generic Audio-Reactive</div>
+        <div style="display:flex;justify-content:center;margin-bottom:12px"><canvas id="liveGeneric" class="vis" width="180" height="180"></canvas></div>
+        <div style="font-size:11px;color:var(--text3);text-align:center">Same response regardless of who sings.<br>Driven by RMS loudness. No identity.</div>
+      </div>
+      <div class="card" style="border-color:${color}30">
+        <div class="label" style="color:${color}">Mode B: RAST Identity-Driven</div>
+        <div style="display:flex;justify-content:center;margin-bottom:12px"><canvas id="livePersonal" class="vis" width="180" height="180"></canvas></div>
+        <div style="font-size:11px;color:var(--text3);text-align:center;white-space:pre-line">${visDesc}</div>
+      </div>
+    </div>
+    <div class="card mt16">
+      <div style="font-size:12px;color:var(--text2);text-align:center;line-height:1.7">
+        <strong style="color:var(--text)">Switch between Singer A and Singer B.</strong> The left side stays the same. The right side changes.<br>
+        That difference is motor identity. The same mathematics that would transfer a surgeon's skill to a robot,<br>
+        or predict how an astronaut walks on the Moon. <span style="color:var(--text3)">The math doesn't care which motor system. It asks the same question.</span>
+      </div>
+    </div>
+
+    <div class="card mt16">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="min-width:260px">
+          <div class="label">A/B Lift</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.5">
+            Demonstrates that <b>personal beats generic</b>. This is the evidence that increases <b>Transfer Readiness</b>.
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn" onclick="runABLift()" ${state.abLift?'disabled':''}>${state.abLift?'A/B checked':'Run A/B check'}</button>
+          <div class="kpi-pill" style="min-width:140px;text-align:center">
+            ${state.abLift?'<span style="font-weight:900;color:var(--green)">+67%</span><span style="color:var(--text3)"> avg lift</span>':'<span style="color:var(--text3)">not run</span>'}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+// ─── MAIN RENDER ────────────────────────────────────────────────────────────
+
+function render() {
+  // Stop all animations
+  Object.keys(animFrames).forEach(k=>{cancelAnimationFrame(animFrames[k]);delete animFrames[k];});
+
+  const stg = stages[state.stageIdx];
+
+  // Phase indicator
+  document.getElementById("phaseIndicator").textContent = stg.num!=="—"?`Phase ${stg.num} / 07`:"Overview";
+
+  // Nav
+  document.getElementById("navBar").innerHTML = stages.map((s,i)=>`<button class="nav-btn ${i===state.stageIdx?"active":""}" onclick="setState({stageIdx:${i}})">${s.num!=="—"?`<span class="nav-num">${s.num}</span>`:""}${s.label}</button>`).join("");
+
+  // Content
+  const renderers = {intro:renderIntro,session0:renderSession0,features:renderFeatures,ioc:renderIOC,decomp:renderDecomp,predict:renderPredict,simgate:renderSimGate,live:renderLive};
+  document.getElementById("content").innerHTML = (renderers[stg.id]||renderIntro)();
+
+  // Scorecard
+  updateScorecard();
+
+  // Footer
+  const footer = document.getElementById("footerNav");
+  const nextBtn = document.getElementById("footerNext");
+  const labelEl = document.getElementById("footerLabel");
+  if(stg.id==="intro"){ footer.classList.add("hidden"); }
+  else {
+    footer.classList.remove("hidden");
+
+    // Default label
+    labelEl.textContent = stg.label;
+
+    // Hard gate: SIM Gate must be confirmed before going live
+    if(stg.id==="simgate" && !state.simConfirmed[state.singer]){
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = 0.55;
+      nextBtn.style.cursor = "not-allowed";
+      labelEl.textContent = `${stg.label} - confirm identity to continue`;
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = 1;
+      nextBtn.style.cursor = "pointer";
+    }
+
+    nextBtn.style.display = state.stageIdx<stages.length-1 ? "" : "none";
+  }
+
+  // Start canvases after DOM update
+  requestAnimationFrame(()=>{
+    if(stg.id==="simgate"){
+      startVisual("simVisA","A","personal", state.sigKnobs.A);
+      startVisual("simVisB","B","personal", state.sigKnobs.B);
+    }
+    if(stg.id==="live"){
+      startVisual("liveGeneric",state.singer,"generic");
+      startVisual("livePersonal",state.singer,"personal", state.sigKnobs[state.singer]);
+    }
+  });
+}
+
+function prevStage(){ if(state.stageIdx>0) setState({stageIdx:state.stageIdx-1}); }
+function nextStage(){
+  const id = stages[state.stageIdx].id;
+  if(id==="session0") state.session0Done = true;
+  if(state.stageIdx<stages.length-1) setState({stageIdx:state.stageIdx+1});
+}
+function toggleConfirm(s){ state.simConfirmed[s]=!state.simConfirmed[s]; render(); }
+function runABLift(){ setState({abLift:true}); }
+
+// Init
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RAST CMG Graph — Canonical Motor Representation</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+
+    :root{
+        --bg:#fbfcff;
+        --bg2:#f3f6ff;
+        --panel:#ffffff;
+        --panel2:#ffffff;
+        --line: rgba(15,23,42,.10);
+
+        --text:#0b1220;
+        --muted:#4b5565;
+        --muted2:#6b7280;
+
+        --accent:#2563eb;   /* blue */
+        --accent2:#7c3aed;  /* purple */
+        --ok:#059669;
+        --warn:#b45309;
+        --bad:#be123c;
+        --cardiac:#dc2626;
+
+        --shadow: 0 18px 38px rgba(2,6,23,.10);
+        --radius: 18px;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+        margin:0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+            radial-gradient(900px 520px at 70% 0%, rgba(220,38,38,.06), transparent 60%),
+            radial-gradient(850px 560px at 10% 15%, rgba(37,99,235,.08), transparent 60%),
+            linear-gradient(180deg, #fbfcff, #f3f6ff);
+        overflow:auto;
+    }
+
+    .app{
+      min-height:100%;
+      height:100%;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:14px;
+      padding:18px;
+    }
+
+    .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:14px 18px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+    }
+
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logoMark{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        border:1px solid rgba(15,23,42,.12);
+        background: linear-gradient(135deg, rgba(220,38,38,.15), rgba(37,99,235,.15));
+        display:grid;
+        place-items:center;
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+    }
+    .logoMark svg { width: 28px; height: 28px; }
+    .brand h1{ margin:0; font-size:18px; font-weight:850; letter-spacing:.2px; line-height:1.1; }
+    .brand .sub{ margin:0; font-size:13.5px; color:var(--muted); line-height:1.2; }
+
+    .controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    button, label[role="button"], select, .pill{
+        border:1px solid rgba(15,23,42,.12);
+        background: rgba(255,255,255,.92);
+        color: #0b1220;
+        padding:12px 14px;
+        border-radius: 14px;
+        cursor:pointer;
+        font-weight:700;
+        font-size:13px;
+        box-shadow: 0 10px 22px rgba(2,6,23,.08);
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+    button:hover, label[role="button"]:hover{ border-color: rgba(37,99,235,.25); background: rgba(255,255,255,1); }
+    button.primary, label[role="button"].primary{
+        background: linear-gradient(135deg, rgba(220,38,38,.90), rgba(37,99,235,.85));
+        color:#ffffff;
+        border-color: transparent;
+    }
+    button.primary, label[role="button"].primary:hover{ filter: brightness(1.05); }
+    .pill{ cursor:default; color: var(--muted); font-family: var(--mono); font-size:12px; padding:9px 11px; box-shadow:none; }
+    .pill strong{ color: var(--text); }
+
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right: 36px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(11,18,32,.75) 50%),
+        linear-gradient(135deg, rgba(11,18,32,.75) 50%, transparent 50%),
+        linear-gradient(to right, transparent, transparent);
+      background-position:
+        calc(100% - 18px) 52%,
+        calc(100% - 12px) 52%,
+        calc(100% - 2.2em) 0.6em;
+      background-size:
+        6px 6px,
+        6px 6px,
+        1px 1.8em;
+      background-repeat:no-repeat;
+    }
+    select:focus{ outline:none; border-color: rgba(37,99,235,.35); }
+
+    .stage{
+      display:grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap:14px;
+      min-height:0;
+    }
+
+    .main{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        display:grid;
+        grid-template-rows: auto 1fr;
+        min-height:0;
+    }
+
+    .header{
+      padding:16px 18px 10px 18px;
+      border-bottom:1px solid rgba(15,23,42,.06);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .sceneTitle{ display:flex; flex-direction:column; gap:6px; max-width:78%; }
+    .sceneTitle .kicker{ font-size:12px; color: var(--muted2); letter-spacing:.16em; text-transform:uppercase; }
+    .sceneTitle h2{ margin:0; font-size:28px; font-weight:900; letter-spacing:.2px; line-height:1.18; }
+    .sceneTitle p{ margin:0; color: var(--muted); font-size:14px; line-height:1.5; }
+
+    .canvasWrap{ position:relative; padding:14px; min-height:0; display:grid; grid-template-rows: 1fr auto; gap:12px; }
+    .card{
+      border-radius:16px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 22px rgba(2,6,23,.06);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:10px 14px;
+      border-bottom:1px solid rgba(15,23,42,.06);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .cardHead .title{ font-weight:800; font-size:13px; }
+    .cardHead .hint{ font-family: var(--mono); font-size:11px; color: var(--muted2); }
+    .cardBody{ flex:1; padding:0; overflow:hidden; min-height:0; }
+
+    .bottomStrip{
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.88);
+      padding:12px 16px;
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      min-height: 58px;
+    }
+    .bottomStrip .title{ font-weight:800; font-size:13px; min-width:140px; }
+    .bottomStrip .hint{ font-family: var(--mono); font-size:11px; color: var(--muted2); }
+    .bottomStrip .body{ flex:1; font-size:12px; color: var(--muted); line-height:1.5; }
+
+    .sidebar{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        display:flex;
+        flex-direction:column;
+        min-height:0;
+        overflow:hidden;
+    }
+    .sideHead{ padding:14px 16px; border-bottom:1px solid rgba(15,23,42,.06); font-weight:800; font-size:14px; }
+    .sideBody{ flex:1; padding:14px; overflow:auto; min-height:0; }
+
+    .section{ margin-bottom:14px; }
+    .section h3{ margin:0 0 8px 0; font-size:13px; font-weight:900; }
+    .micro{ font-family: var(--mono); font-size:11px; color: var(--muted2); }
+
+    .legend{ display:grid; gap:8px; font-size:12px; }
+    .legend-item{ display:flex; align-items:center; gap:8px; }
+    .swatch{ width:10px; height:10px; border-radius:50%; }
+    .legendIcon{ width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 18px; }
+    .legendIcon svg{ width:18px; height:18px; display:block; }
+
+
+    .field{ display:grid; gap:6px; margin-top:10px; }
+    .field input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      font-family: inherit;
+      font-size:13px;
+    }
+    .toggleList{ display:grid; gap:8px; }
+    .toggleRow{ display:flex; gap:10px; align-items:center; font-size:12px; }
+    .toggleRow label{ cursor:pointer; }
+    .rule{ width:22px; height:0; border-top-width:3px; border-top-style:solid; border-radius:999px; }
+
+    .tooltip{
+      position: absolute;
+      pointer-events: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #111f20;
+      color: #f8f7f2;
+      font-size: 11px;
+      box-shadow: 0 8px 16px rgba(0,0,0,.15);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      max-width: 260px;
+      z-index: 999;
+    }
+
+    #graph{ width:100%; height:100%; }
+
+    .footer{
+        border-radius: var(--radius);
+        border: 1px solid rgba(15,23,42,.10);
+        background: rgba(255,255,255,.78);
+        backdrop-filter: blur(10px);
+        padding:12px 18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        color: var(--muted);
+        font-size:12px;
+    }
+
+    /* small screens */
+    @media (max-width: 1060px){
+      body{ overflow:auto; }
+      .app{ height:auto; min-height:100%; overflow:auto; }
+      .stage{ grid-template-columns: 1fr; }
+      .controls { gap: 6px; }
+      button, label[role="button"]{ padding: 10px 12px; font-size: 12px; }
+    }
+  
+      .fileInputHidden{
+        position:absolute;
+        left:-9999px;
+        width:1px;
+        height:1px;
+        opacity:0;
+      }
+    
+    /* Payload formatting */
+    pre.payloadPre{
+      margin:0;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.35;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.08);
+      color: rgba(15,29,31,0.92);
+    }
+    .tooltip pre.payloadPre{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.14);
+      color: #f8f7f2;
+    }
+    
+
+    /* Compact selection card (human-readable; no raw JSON) */
+    .selCard{
+      background:#111f20;
+      color:#f8f7f2;
+      border-radius:14px;
+      padding:12px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 18px 40px rgba(0,0,0,.12);
+    }
+    .selTitle{
+      font-weight:800;
+      font-size:13px;
+      margin:0 0 8px 0;
+      letter-spacing:.2px;
+    }
+    .kv{
+      display:grid;
+      gap:6px;
+      font-size:12px;
+      opacity:.95;
+    }
+    .kvRow{
+      display:grid;
+      grid-template-columns: 92px 1fr;
+      gap:10px;
+      align-items:start;
+    }
+    .kvKey{ font-weight:700; opacity:.95; }
+    .kvVal{ opacity:.9; word-break:break-word; }
+    
+
+  /* Node icons inside the graph */
+  .nodeIcon{
+    font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", var(--sans);
+    font-weight: 700;
+    pointer-events: none;
+    user-select: none;
+  }
+
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logoMark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="#dc2626"/>
+            <path d="M12 5.67v7" stroke="#2563eb" stroke-width="1.5"/>
+            <circle cx="12" cy="15" r="2" fill="#2563eb"/>
+          </svg>
+        </div>
+        <div>
+          <h1>RAST CMG Viewer</h1>
+          <p class="sub">Canonical computational motor representation • semantic graph</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input id="cmgFile" type="file" accept="application/json,.json" class="fileInputHidden" />
+        <label id="loadBtn" type="button" for="cmgFile" role="button" tabindex="0">Load CMG</label>
+        <button id="loadSample" type="button">Sample</button>
+        <!-- button id="loadLarge" type="button" class="primary">Very large</button -->
+
+        <select id="lodSelect" aria-label="Level of detail">
+          <option value="1">LOD1 — Overview</option>
+          <option value="2" selected>LOD2 — Layers</option>
+          <option value="3">LOD3 — Full</option>
+        </select>
+
+        <span class="pill" id="statsPill"><strong>0</strong> nodes • <strong>0</strong> edges</span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="main">
+        <div class="header">
+          <div class="sceneTitle">
+            <span class="kicker">Interactive graph</span>
+            <h2>CMG as a prescriptive motor identity</h2>
+            <p>Drag nodes, zoom/pan, click to select, and filter by group/edge-type. Designed for actionability: what is constrained, what modulates, what parameterizes decisions.</p>
+          </div>
+          <div class="micro" id="status">Ready</div>
+        </div>
+
+        <div class="canvasWrap">
+          <div class="card">
+            <div class="cardHead">
+              <span class="title">Graph</span>
+              <span class="hint">drag • scroll to zoom • click to focus</span>
+            </div>
+            <div class="cardBody">
+              <svg id="graph" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+
+          <div class="bottomStrip">
+            <div>
+              <div class="title">Selection</div>
+              <div class="hint">details</div>
+            </div>
+            <div class="body" id="selectionInline">None (click a node or edge)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="sideHead">Filters & Metadata</div>
+        <div class="sideBody">
+          <div class="section">
+            <h3>Legend</h3>
+            <div class="legend" id="legend"></div>
+          </div>
+
+          <div class="section">
+            <h3>Search</h3>
+            <div class="field">
+              <input id="search" type="text" placeholder="Search nodes (label or payload)…" />
+              <div class="micro">Search keeps matches + their 1-hop neighbors.</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Node groups</h3>
+            <div class="toggleList" id="groupToggles"></div>
+          </div>
+
+          <div class="section">
+            <h3>Edge types</h3>
+            <div class="toggleList" id="edgeToggles"></div>
+            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+              <button id="allOn" type="button">All on</button>
+              <button id="reset" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>CMG Metadata</h3>
+            <div class="micro" id="metadata">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>RAST • Deterministic safety + IOC/OFC pipeline • CMG as the canonical motor representation</div>
+      <div class="micro">Tip: load your JSON via “Load CMG”.</div>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script src="rast-cmg-viewer.js" defer></script>
+</body>
+</html>

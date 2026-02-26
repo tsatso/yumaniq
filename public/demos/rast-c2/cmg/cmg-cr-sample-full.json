@@ -1,0 +1,212 @@
+ {
+  "cmg_id": "uuid-cr-patient-0021",
+  "cmg_type": "CR_UTHPC_CMG",
+  "version": "0.9",
+  "timestamp": "2026-01-21T14:10:00Z",
+
+  "provenance": {
+    "site": "Ziv Medical Center",
+    "session_id": "cr-sess-07",
+    "clinician_id": "ron-golan-md",
+    "sensor_suite": ["HR_cheststrap", "BP_cuff", "IMU_x2", "treadmill_interface"],
+    "calibration": {
+      "session0_date": "2026-01-05",
+      "baseline_envelope_source": "Session-0 + cohort prior",
+      "cohort_prior_id": "CR_age60-70_betaBlocker_yes"
+    },
+    "ioc_confidence_score": 0.82
+  },
+
+  "patient_context": {
+    "age": 66,
+    "sex": "M",
+    "diagnosis": ["post_MI", "stent"],
+    "comorbidities": ["hypertension"],
+    "medications": [
+      { "name": "beta_blocker", "dose": "standard", "note": "HR response damped" }
+    ],
+    "contraindications_flags": {
+      "unstable_angina": false,
+      "uncontrolled_arrhythmia": false,
+      "resting_bp_high": false
+    }
+  },
+
+  "layer_M_metabolic_state": {
+    "measured": {
+      "hr_bpm": 112,
+      "hrv_rmssd_ms": 24,
+      "bp_mmHg": { "sys": 128, "dia": 76 },
+      "spo2_pct": 97,
+      "recovery_slope_bpm_per_min": 14
+    },
+    "estimated": {
+      "vo2_ml_kg_min_est": 20.8,
+      "lactate_proxy": 0.35,
+      "fatigue_latent": 0.42
+    },
+    "uncertainty": {
+      "vo2_ml_kg_min_est_sd": 2.6,
+      "fatigue_latent_sd": 0.12
+    },
+    "safety_envelope": {
+      "metabolic_ceiling": {
+        "hr_bpm": 150,
+        "rule": "clinical ceiling for this patient on current meds"
+      },
+      "safe_zone": {
+        "hr_upper_bpm": 135,
+        "hr_lower_bpm": 95,
+        "bp_sys_upper_mmHg": 180,
+        "spo2_lower_pct": 92
+      },
+      "gating_rules": [
+        { "if": "hr_bpm > hr_upper_bpm", "action": "downshift_intensity" },
+        { "if": "spo2_pct < spo2_lower_pct", "action": "stop_and_assess" },
+        { "if": "bp_mmHg.sys > bp_sys_upper_mmHg", "action": "stop_and_assess" }
+      ]
+    }
+  },
+
+  "layer_task_and_workload": {
+    "modality": "treadmill_walk",
+    "environment": {
+      "surface": "treadmill",
+      "handrail_allowed": true,
+      "handrail_used": "intermittent"
+    },
+    "commanded_workload": { "speed_kmh": 4.6, "incline_pct": 1.0, "duration_min": 5 },
+    "observed_workload": { "speed_kmh": 4.4, "incline_pct": 1.0, "duration_min": 5 }
+  },
+
+  "layer_C_motor_capability": {
+    "kinematic_metrics": {
+      "cadence_spm": 104,
+      "stride_length_m": 0.68,
+      "symmetry_index": 0.91,
+      "smoothness_jerk": 0.38
+    },
+    "stability_metrics": {
+      "cop_sway_proxy": 0.22,
+      "handrail_reliance": 0.35
+    },
+    "capability_mapping": {
+      "model_id": "f_personal_M_to_C_v3",
+      "definition": "C(t)=f(M(t))",
+      "fatigue_sensitivity": {
+        "stability_degrades_with_hr": "high",
+        "smoothness_degrades_with_fatigue": "medium"
+      }
+    },
+    "motor_feasibility_constraints": {
+      "rom_limits_deg": { "knee_extension_right_max": 0, "shoulder_flex_left_max": 90 },
+      "variability_sigma_max": 0.35
+    }
+  },
+
+  "layer_PE_and_psychology": {
+    "perceived_exertion": {
+      "scale": "Borg_CR10",
+      "rpe": 4,
+      "dyspnea": 3,
+      "angina": 0
+    },
+    "perceived_ceiling": {
+      "hr_bpm_subjective_stop": 138,
+      "note": "patient tends to stop early"
+    },
+    "safety_gap": {
+      "definition": "Metabolic_Ceiling - Perceived_Ceiling",
+      "value_hr_bpm": 12
+    },
+    "psychological_state": {
+      "fear_of_falling_index": 0.6,
+      "anxiety_index": 0.3,
+      "motivation_index": 0.7
+    }
+  },
+
+  "layer_intent_and_optimization": {
+    "cost_function_form": "quadratic_like",
+    "weights": [
+      {
+        "term": "w_effort",
+        "value": 0.78,
+        "variance": 0.05,
+        "classification": "trait",
+        "transferability": "high",
+        "description": "strong effort avoidance"
+      },
+      {
+        "term": "w_stability",
+        "value": 0.90,
+        "variance": 0.12,
+        "classification": "state",
+        "context_dependency": ["fatigue_latent", "surface", "handrail_used"],
+        "transferability": "low",
+        "description": "cautious gait under load"
+      },
+      {
+        "term": "w_smoothness",
+        "value": 0.70,
+        "variance": 0.04,
+        "classification": "trait",
+        "transferability": "medium",
+        "description": "prefers low-jerk movement"
+      },
+      {
+        "term": "w_hr_margin",
+        "value": 0.55,
+        "variance": 0.10,
+        "classification": "state",
+        "context_dependency": ["perceived_ceiling", "anxiety_index"],
+        "transferability": "low",
+        "description": "keeps buffer from subjective ceiling"
+      }
+    ],
+    "ioc_update": {
+      "method_id": "ioc_chunkwise_v2",
+      "update_granularity": "phase_chunk",
+      "notes": "weights updated only at chunk boundaries"
+    }
+  },
+
+  "layer_phase_graph": {
+    "phase_nodes": ["WarmUp", "StableZone", "MicroProgress", "Recovery", "CoolDown"],
+    "current_phase": "StableZone",
+    "transition_criteria": {
+      "StableZone_to_MicroProgress": {
+        "hr_stability_window_s": 60,
+        "hr_var_max_bpm": 5,
+        "recovery_slope_min_bpm_per_min": 12,
+        "motor_quality_min": { "symmetry_index": 0.88, "smoothness_jerk_max": 0.55 },
+        "rpe_max": 5
+      },
+      "MicroProgress_to_Recovery": {
+        "if_any": [
+          "hr_bpm > safety_envelope.safe_zone.hr_upper_bpm",
+          "perceived_exertion.rpe >= 7",
+          "perceived_exertion.angina > 0",
+          "motor_capability.stability_metrics.handrail_reliance > 0.7"
+        ],
+        "action": "downshift_then_recover"
+      }
+    }
+  },
+
+  "layer_longitudinal_TTTC": {
+    "functional_goal": {
+      "definition": "6MWT_distance_m >= 420",
+      "clinical_rationale": "target functional capacity"
+    },
+    "trend_vectors": {
+      "hrr_improvement_slope_per_week": 0.06,
+      "vo2_est_improvement_slope_per_week": 0.04,
+      "motor_quality_improvement_slope_per_week": 0.02
+    },
+    "forecast": {
+      "tttc_date": "2026-03-18",
+      "confidence": { "p50_days": 56, "p80_days": 78 }
+    }
+  }
+}

@@ -106,24 +106,52 @@
 },
   "solutions": {
       "kicker": "Solutions",
-      "headline": "Cardiac rehab first. Built to expand.",
-      "intro": "We start with cardiac rehabilitation to validate outcomes, workflow fit, and safety constraints. The same execution layer extends to other domains where conditions shift and correctness matters.",
+      "headline": "One engine. Four ways conditions change.",
+      "intro": "",
       "items": [
         {
-          "title": "Cardiac Rehabilitation",
-          "body": "Objective baseline, dose aware progression, and payer ready reporting. State aware guidance with hard safety limits, designed for clinic workflows.",
-          "demo": {
-             "label": "RAST Cardiac Rehab Demo",
-             "href": "/demos/rast-cr/rast-c2-motor-intelligence.html"
-          }
+          "title": "Health and Rehabilitation",
+          "body": "When the body changes after cardiac events, surgery, or neurological injury, rehabilitation means learning to move within new physical constraints. Generic protocols ignore the motor strategy each patient already has.\n\nRAST extracts individual movement priorities and guides progression that respects them: objective baselines, dose-aware targets, and safety limits enforced in the loop. The therapist stays in charge. The dosing gets precise.",
+          "demos": [
+            {
+              "label": "RAST Cardiac Rehab Demo",
+              "href": "/demos/rast-cr/rast-cr-with-cmg.html"
+            }
+          ]
         },
         {
-          "title": "Neuro and MSK Rehabilitation",
-          "body": "Personalized movement change is not just harder exercises. RAST models each person’s movement strategy and guides minimal, safe adjustments that can be measured session by session."
+          "title": "Driver Safety and ADAS",
+          "body": "When the situation changes, a pedestrian steps out, traction breaks, reaction time compresses. Your driving strategy faces conditions it wasn't practiced for.\n\nRAST models the motor strategy behind normal driving and infers how each driver balances precision, reaction, and risk. That profile can inform predictive safety systems and personalize ADAS response to how you actually drive, not a population average.",
+          "demos": [
+            {
+              "label": "ADAS Demo",
+              "href": "/demos/adas/rast-adas.html"
+            }
+          ]
         },
         {
           "title": "Robotics and Teleoperation",
-          "body": "When latency or environments break direct control, send intent and let the system execute locally under current conditions, inside explicit constraints."
+          "body": "When the physics change, policies trained in one environment fail in another. Different gravity, communication latency, unfamiliar actuators.\n\nRAST captures expert motor intent on Earth and re-optimizes for target conditions. No retraining. No million-episode simulation. The operator's strategy transfers; the robot computes locally within explicit safety bounds.",
+          "demos": [
+            {
+              "label": "Explore the motor intelligence pipeline",
+              "href": "/demos/rast-c2/rast-c2-motor-intelligence.html"
+            }
+          ]
+        },
+        {
+          "title": "Music and Expression",
+          "body": "When the environment changes, from practice room to stage, from studio control to live response, musical performance demands the same intent under different physical and acoustic conditions.\n\nRAST captures the motor signature of musical expression: how you shape pitch, dynamics, and rhythm. Not what you played, but how you meant it.",
+          "demos": [
+            {
+              "label": "Voice Demo",
+              "href": "/demos/voice/rast-artech-voice.html"
+            },
+            {
+              "label": "Rhythm Demo",
+              "href": "/demos/rhythm/rast-artech-rhythm.html"
+            }
+          ]
         }
       ],
       "backgroundImage": "/art/problem-transfer-motor-minimal.png",
@@ -135,7 +163,7 @@
   "contact": {
     "kicker": "Contact",
     "headline": "Contact",
-    "line": "If you are building a system where intent meets dynamics - robotics, rehab, or safety-critical automation - let’s talk about deployment paths and pilot design.",
+    "line": "If you are building a system where intent meets dynamics - robotics, rehab, or safety-critical automation - let's talk about deployment paths and pilot design.",
     "email": "info@yumaniq.com",
     "backgroundImage": "/art/hero-motor-intelligence-minimal.png",
     "watermarkOpacity": 0.10,

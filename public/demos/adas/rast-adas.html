@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RAST - Driver Motor Intelligence</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg: #ffffff; --bg2: #f8f9fc; --surface: #f3f5f9; --surface2: #ebeef5;
+  --border: rgba(15,23,42,0.10); --border2: rgba(15,23,42,0.06);
+  --text: #0f172a; --muted: #64748b;
+  --driverA: #2563eb; --driverA-bg: rgba(37,99,235,0.08);
+  --driverB: #d97706; --driverB-bg: rgba(217,119,6,0.08);
+  --danger: #dc2626; --danger-bg: rgba(220,38,38,0.07);
+  --safe: #059669; --safe-bg: rgba(5,150,105,0.07);
+  --accent: #4f46e5; --accent-bg: rgba(79,70,229,0.06);
+  --generic: #6b7280; --generic-bg: rgba(107,114,128,0.08);
+  --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 16px rgba(15,23,42,0.08);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; font-size: 16px; }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+
+  .header-logo-img{
+    height: 56px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    filter: drop-shadow(0 6px 18px rgba(0, 163, 255, 0.25));
+  }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 36px; background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-brand { display: flex; align-items: center; gap: 14px; }
+.nav-logo { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--driverA), var(--accent)); display: grid; place-items: center; font-weight: 900; font-size: 16px; color: #fff; }
+.nav-title { font-weight: 800; font-size: 18px; }
+.nav-sub { font-size: 13px; color: var(--muted); }
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab { padding: 9px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--muted); background: transparent; border: none; cursor: pointer; transition: all 0.25s; }
+.nav-tab:hover { color: var(--text); background: var(--surface); }
+.nav-tab.active { color: var(--accent); background: var(--accent-bg); }
+
+/* SECTIONS */
+section { min-height: 100vh; padding: 110px 40px 70px; display: flex; flex-direction: column; align-items: center; position: relative; }
+section + section { border-top: 1px solid var(--border2); }
+.section-kicker { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.section-title { font-size: clamp(30px, 4.5vw, 46px); font-weight: 900; text-align: center; line-height: 1.15; margin-bottom: 14px; max-width: 720px; }
+.section-desc { font-size: 17px; color: var(--muted); text-align: center; max-width: 640px; line-height: 1.65; margin-bottom: 52px; }
+
+/* HERO */
+#hero { justify-content: center; background: var(--bg2); }
+#hero .section-title { font-size: clamp(38px, 5.5vw, 58px); }
+.hero-glow { position: absolute; top: -150px; left: 50%; transform: translateX(-50%); width: 900px; height: 500px; background: radial-gradient(ellipse, rgba(79,70,229,0.07) 0%, transparent 65%); pointer-events: none; }
+.hero-stat-row { display: flex; gap: 48px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+.hero-stat { text-align: center; }
+.hero-stat .val { font-size: 42px; font-weight: 900; font-family: var(--mono); }
+.hero-stat .lbl { font-size: 14px; color: var(--muted); margin-top: 6px; max-width: 200px; }
+.hero-stat:nth-child(1) .val { color: var(--driverA); }
+.hero-stat:nth-child(2) .val { color: var(--danger); }
+.hero-stat:nth-child(3) .val { color: var(--accent); }
+
+/* PROFILES */
+.profiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; max-width: 960px; }
+.profile-card { border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+.profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.profile-card.a::before { background: linear-gradient(90deg, var(--driverA), transparent 80%); }
+.profile-card.b::before { background: linear-gradient(90deg, var(--driverB), transparent 80%); }
+.profile-label { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+.profile-card.a .profile-label { color: var(--driverA); }
+.profile-card.b .profile-label { color: var(--driverB); }
+.profile-name { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+.profile-desc { font-size: 15px; color: var(--muted); margin-bottom: 28px; line-height: 1.55; }
+.weight-bars { display: grid; gap: 16px; }
+.weight-row { display: grid; grid-template-columns: 130px 1fr 48px; align-items: center; gap: 14px; }
+.weight-label { font-size: 14px; font-weight: 600; }
+.weight-track { height: 10px; border-radius: 99px; background: var(--surface); overflow: hidden; }
+.weight-fill { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+.profile-card.a .weight-fill { background: linear-gradient(90deg, var(--driverA), rgba(37,99,235,0.4)); }
+.profile-card.b .weight-fill { background: linear-gradient(90deg, var(--driverB), rgba(217,119,6,0.4)); }
+.weight-val { font-size: 14px; font-family: var(--mono); font-weight: 600; color: var(--muted); text-align: right; }
+.tag-row { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+.tag { padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tag.trait { background: rgba(5,150,105,0.10); color: #059669; border: 1px solid rgba(5,150,105,0.18); }
+.tag.state { background: rgba(217,119,6,0.10); color: #b45309; border: 1px solid rgba(217,119,6,0.18); }
+
+/* SCENARIO */
+.scenario-outer { width: 100%; max-width: 1100px; }
+.scenario-container { border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); overflow: hidden; }
+.scenario-header { padding: 22px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.scenario-label { font-weight: 800; font-size: 17px; }
+.scenario-tag { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; background: var(--danger-bg); color: var(--danger); letter-spacing: 0.08em; text-transform: uppercase; }
+.scenario-body { display: grid; grid-template-columns: 1fr 1fr; }
+.scenario-half { display: flex; flex-direction: column; }
+.scenario-half + .scenario-half { border-left: 1px solid var(--border); }
+.scenario-half-header { padding: 16px 24px; border-bottom: 1px solid var(--border2); font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.scenario-half.a .scenario-half-header { color: var(--driverA); }
+.scenario-half.b .scenario-half-header { color: var(--driverB); }
+
+.road-svg-wrap { position: relative; background: #1e293b; height: 420px; }
+.road-svg { width: 100%; height: 100%; display: block; }
+.road-legend { position: absolute; bottom: 10px; left: 12px; right: 12px; display: flex; gap: 14px; align-items: center; z-index: 5; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.75); }
+.legend-swatch { width: 22px; height: 3px; border-radius: 2px; }
+.legend-swatch.generic-dash { background: none; border-top: 3px dashed #6b7280; }
+.legend-swatch.fail-dash { background: none; border-top: 3px dashed #dc2626; }
+.legend-swatch.safe-a { background: #60a5fa; }
+.legend-swatch.safe-b { background: #fbbf24; }
+
+/* 3-Step Chain */
+.rast-chain { padding: 20px 24px; display: grid; gap: 10px; }
+.chain-step { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--border2); background: var(--bg); transition: all 0.3s; }
+.chain-step.highlight { border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.03); }
+.chain-num { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 15px; font-weight: 900; font-family: var(--mono); }
+.chain-step.extract .chain-summary { color: var(--accent); }
+.chain-step.predict .chain-summary { color: var(--danger); }
+.chain-step.intervene .chain-summary { color: var(--safe); }
+.chain-step.extract .chain-num { background: var(--accent-bg); color: var(--accent); }
+.chain-step.predict .chain-num { background: var(--danger-bg); color: var(--danger); }
+.chain-step.intervene .chain-num { background: var(--safe-bg); color: var(--safe); }
+.chain-text { font-size: 14px; color: var(--text); line-height: 1.55; }
+.chain-text .cf { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--surface); padding: 2px 6px; border-radius: 4px; }
+.chain-text em { color: var(--muted); font-style: normal; }
+.chain-insight { margin-top: 8px; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
+.chain-insight.danger { background: var(--danger-bg); border: 1px solid rgba(220,38,38,0.10); color: #991b1b; }
+.chain-insight.compare { background: var(--generic-bg); border: 1px solid rgba(107,114,128,0.15); color: #374151; }
+.chain-insight strong { font-weight: 800; }
+
+.scenario-play-row { padding: 20px 32px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
+.play-btn { padding: 12px 28px; border-radius: 12px; font-size: 15px; font-weight: 700; background: var(--accent); color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-sm); transition: filter 0.2s, transform 0.15s; flex-shrink: 0; }
+.play-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.scenario-note { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* Scenario Controls (above road) */
+.scenario-controls { padding: 14px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: var(--bg2); }
+.scenario-controls-left { display: flex; gap: 10px; align-items: center; }
+.reset-btn { padding: 10px 22px; border-radius: 12px; font-size: 14px; font-weight: 700; background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+.reset-btn:hover { background: var(--surface2); color: var(--text); }
+.scenario-legend-inline { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.legend-inline-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.li-swatch { width: 20px; height: 3px; border-radius: 2px; }
+.li-swatch.generic-d { background: none; border-top: 3px dashed #6b7280; }
+.li-swatch.fail-d { background: none; border-top: 3px dashed #dc2626; }
+.li-swatch.safe-s { background: linear-gradient(90deg, #60a5fa, #fbbf24); height: 3px; }
+
+/* Collapsible chain steps */
+.chain-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 10px; user-select: none; }
+.chain-header-left { display: flex; align-items: center; gap: 10px; }
+.chain-summary { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.chain-arrow { font-size: 16px; color: var(--muted); transition: transform 0.3s; flex-shrink: 0; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; }
+.chain-arrow:hover { background: var(--surface); }
+.chain-step.open .chain-arrow { transform: rotate(180deg); }
+.chain-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.chain-step.open .chain-body { max-height: 400px; }
+.chain-body-inner { padding-top: 10px; }
+
+/* HANDOFF */
+.handoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; max-width: 960px; }
+.handoff-card { border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+.handoff-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.handoff-card.generic::before { background: linear-gradient(90deg, var(--danger), transparent 80%); }
+.handoff-card.personal::before { background: linear-gradient(90deg, var(--safe), transparent 80%); }
+.handoff-type { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+.handoff-card.generic .handoff-type { color: var(--danger); }
+.handoff-card.personal .handoff-type { color: var(--safe); }
+.handoff-title { font-size: 24px; font-weight: 900; margin-bottom: 20px; }
+.handoff-metrics { display: grid; gap: 10px; margin-bottom: 24px; }
+.hm-row { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border2); }
+.hm-label { font-size: 14px; font-weight: 600; }
+.hm-system { font-size: 13px; font-family: var(--mono); color: var(--muted); }
+.hm-match { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.hm-match.miss { background: var(--danger-bg); color: var(--danger); }
+.hm-match.hit { background: var(--safe-bg); color: var(--safe); }
+.handoff-result { padding: 18px 20px; border-radius: 14px; font-size: 15px; font-weight: 600; text-align: center; line-height: 1.5; }
+.handoff-card.generic .handoff-result { background: var(--danger-bg); color: #b91c1c; border: 1px solid rgba(220,38,38,0.12); }
+.handoff-card.personal .handoff-result { background: var(--safe-bg); color: #047857; border: 1px solid rgba(5,150,105,0.12); }
+
+/* PREDICTION */
+.prediction-container { width: 100%; max-width: 960px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); padding: 36px; }
+.pred-visual { display: grid; grid-template-columns: 200px 1fr; gap: 36px; align-items: center; margin-bottom: 32px; }
+.steering-wheel { width: 170px; height: 170px; border-radius: 50%; border: 6px solid var(--surface2); position: relative; display: grid; place-items: center; margin: 0 auto; }
+.steering-inner { width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--surface2); }
+.steering-spoke { position: absolute; border-radius: 2px; background: var(--surface2); }
+.steering-spoke.top { top: 6px; left: calc(50% - 2px); width: 4px; height: 48px; }
+.steering-spoke.left { left: 6px; top: calc(50% - 2px); width: 48px; height: 4px; }
+.steering-spoke.right { right: 6px; top: calc(50% - 2px); width: 48px; height: 4px; }
+.steering-indicator { position: absolute; top: -6px; left: calc(50% - 10px); width: 20px; height: 20px; border-radius: 50%; background: var(--driverA); box-shadow: 0 0 14px rgba(37,99,235,0.3); transition: transform 1s cubic-bezier(0.16,1,0.3,1); }
+.pred-timeline { display: grid; gap: 10px; }
+.pred-phase { display: grid; grid-template-columns: 80px 1fr; gap: 14px; align-items: start; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border2); transition: all 0.4s; }
+.pred-phase.active { background: var(--accent-bg); border-color: rgba(79,70,229,0.18); }
+.pred-time { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent); }
+.pred-desc { font-size: 14px; color: var(--muted); line-height: 1.55; }
+.pred-desc strong { color: var(--text); }
+.pred-bottom { padding: 24px 28px; border-radius: 14px; background: var(--accent-bg); border: 1px solid rgba(79,70,229,0.12); text-align: center; font-size: 16px; color: var(--muted); line-height: 1.65; }
+.pred-bottom strong { color: var(--text); }
+
+/* CMG */
+.cmg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; max-width: 960px; }
+.cmg-card { border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); overflow: hidden; position: relative; }
+.cmg-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--accent), transparent 80%); }
+.cmg-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--accent-bg); color: var(--accent); margin-bottom: 14px; }
+.cmg-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+.cmg-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.cmg-layers { display: grid; gap: 8px; }
+.cmg-layer { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border2); }
+.cmg-layer-icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; background: var(--bg); border: 1px solid var(--border); }
+.cmg-layer-name { font-size: 13px; font-weight: 700; }
+.cmg-layer-val { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.cmg-bottom-note { margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: var(--surface); font-size: 13px; color: var(--muted); line-height: 1.5; text-align: center; }
+.cmg-bottom-note strong { color: var(--text); }
+
+.demo-footer { padding: 48px 40px; text-align: center; border-top: 1px solid var(--border); background: var(--bg2); }
+.demo-footer p { font-size: 16px; color: var(--muted); }
+.demo-footer strong { color: var(--text); }
+
+.fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s, transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .profiles-grid, .scenario-body, .handoff-grid, .cmg-grid { grid-template-columns: 1fr; }
+  .scenario-half + .scenario-half { border-left: none; border-top: 1px solid var(--border); }
+  .pred-visual { grid-template-columns: 1fr; }
+  section { padding: 90px 24px 50px; }
+  .nav { padding: 12px 18px; }
+  .nav-tabs { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="header-left">
+<img class="header-logo-img" src="rast-logo-automotive.png" alt="RAST" />
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<nav class="nav">
+  <div class="nav-brand">
+    
+    <div><img class="header-logo-img" src="rast-logo-automotive.png" alt="RAST" /><div class="nav-sub">Driver Motor Intelligence</div></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-target="hero">Overview</button>
+    <button class="nav-tab" data-target="profiles">Profiles</button>
+    <button class="nav-tab" data-target="scenario">Emergency</button>
+    <button class="nav-tab" data-target="handoff">Handoff</button>
+    <button class="nav-tab" data-target="prediction">Prediction</button>
+    <button class="nav-tab" data-target="cmg">CMG</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="section-kicker fade-up">The Missing Layer in ADAS</div>
+  <h1 class="section-title fade-up" style="transition-delay:0.1s">Every driver optimizes<br/>for something different</h1>
+  <p class="section-desc fade-up" style="transition-delay:0.2s">
+    RAST extracts the driver's <strong>motor cost function</strong>. Not what they do,
+    but what they <em>optimize for</em>. This enables ADAS that predicts, personalizes, and earns trust.
+  </p>
+  <div class="hero-stat-row fade-up" style="transition-delay:0.3s">
+    <div class="hero-stat"><div class="val">~9 min</div><div class="lbl">Between L2 driver interventions (AAA 2025)</div></div>
+    <div class="hero-stat"><div class="val">Majority</div><div class="lbl">Cut-in events where drivers override ADAS</div></div>
+    <div class="hero-stat"><div class="val">0</div><div class="lbl">Systems personalizing to driver motor identity</div></div>
+  </div>
+</section>
+
+<!-- ═══ PROFILES ═══ -->
+<section id="profiles">
+  <div class="section-kicker fade-up">Motor Cost Function</div>
+  <h2 class="section-title fade-up">Two drivers. Same car.<br/>Different intent.</h2>
+  <p class="section-desc fade-up">
+    Extracted from everyday driving: How each driver trades off smoothness, safety, efficiency, and responsiveness. Stable traits transfer across vehicles and conditions.
+  </p>
+  <div class="profiles-grid fade-up">
+    <div class="profile-card a">
+      <div class="profile-label">Driver A</div>
+      <div class="profile-name">The Smooth Operator</div>
+      <div class="profile-desc">Optimizes for smooth trajectories and wide safety margins. Brakes early and gently. Gradual lane changes. Low rapid-correction practice.</div>
+      <div class="weight-bars">
+        <div class="weight-row"><div class="weight-label">Smoothness</div><div class="weight-track"><div class="weight-fill" data-w="88"></div></div><div class="weight-val">0.88</div></div>
+        <div class="weight-row"><div class="weight-label">Safety margin</div><div class="weight-track"><div class="weight-fill" data-w="82"></div></div><div class="weight-val">0.82</div></div>
+        <div class="weight-row"><div class="weight-label">Efficiency</div><div class="weight-track"><div class="weight-fill" data-w="45"></div></div><div class="weight-val">0.45</div></div>
+        <div class="weight-row"><div class="weight-label">Responsiveness</div><div class="weight-track"><div class="weight-fill" data-w="35"></div></div><div class="weight-val">0.35</div></div>
+        <div class="weight-row"><div class="weight-label">Stability</div><div class="weight-track"><div class="weight-fill" data-w="85"></div></div><div class="weight-val">0.85</div></div>
+      </div>
+      <div class="tag-row">
+        <span class="tag trait">Smoothness - trait</span>
+        <span class="tag trait">Safety margin - trait</span>
+        <span class="tag state">Responsiveness - state</span>
+      </div>
+    </div>
+    <div class="profile-card b">
+      <div class="profile-label">Driver B</div>
+      <div class="profile-name">The Efficient Racer</div>
+      <div class="profile-desc">Optimizes for time efficiency and responsive handling. Late braking, tight margins, decisive corrections. Strong rapid-correction repertoire.</div>
+      <div class="weight-bars">
+        <div class="weight-row"><div class="weight-label">Smoothness</div><div class="weight-track"><div class="weight-fill" data-w="35"></div></div><div class="weight-val">0.35</div></div>
+        <div class="weight-row"><div class="weight-label">Safety margin</div><div class="weight-track"><div class="weight-fill" data-w="40"></div></div><div class="weight-val">0.40</div></div>
+        <div class="weight-row"><div class="weight-label">Efficiency</div><div class="weight-track"><div class="weight-fill" data-w="90"></div></div><div class="weight-val">0.90</div></div>
+        <div class="weight-row"><div class="weight-label">Responsiveness</div><div class="weight-track"><div class="weight-fill" data-w="85"></div></div><div class="weight-val">0.85</div></div>
+        <div class="weight-row"><div class="weight-label">Stability</div><div class="weight-track"><div class="weight-fill" data-w="50"></div></div><div class="weight-val">0.50</div></div>
+      </div>
+      <div class="tag-row">
+        <span class="tag trait">Efficiency - trait</span>
+        <span class="tag trait">Responsiveness - trait</span>
+        <span class="tag state">Safety margin - state</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCENARIO ═══ -->
+<section id="scenario">
+  <div class="section-kicker fade-up">Extract → Predict → Intervene</div>
+  <h2 class="section-title fade-up">Generic ADAS solves the wrong problem.</h2>
+  <p class="section-desc fade-up">
+    A car cuts into the passing lane at 110 km/h. Generic ADAS applies the same response to every driver.
+    RAST predicts each driver's <em>specific</em> failure mode, and designs the right intervention.
+  </p>
+
+  <div class="scenario-outer fade-up">
+    <div class="scenario-container">
+      <div class="scenario-header">
+        <div class="scenario-label">Highway cut-in, 110 km/h, passing lane</div>
+        <div class="scenario-tag">Emergency</div>
+      </div>
+
+      <div class="scenario-controls">
+        <div class="scenario-controls-left">
+          <button class="play-btn" id="playBtn">▶ &nbsp;Simulate cut-in</button>
+          <button class="reset-btn" id="resetBtn">↺ &nbsp;Reset</button>
+        </div>
+        <div class="scenario-legend-inline">
+          <span class="legend-inline-item"><span class="li-swatch generic-d"></span>Generic ADAS</span>
+          <span class="legend-inline-item"><span class="li-swatch fail-d"></span>Driver failure</span>
+          <span class="legend-inline-item"><span class="li-swatch safe-s"></span>RAST intervention</span>
+        </div>
+      </div>
+
+      <div class="scenario-body">
+        <!-- ════ DRIVER A ════ -->
+        <div class="scenario-half a">
+          <div class="scenario-half-header">Driver A: Smooth Operator</div>
+          <div class="road-svg-wrap">
+            <svg id="roadA" class="road-svg" viewBox="0 0 420 420" preserveAspectRatio="xMidYMid meet">
+              <!-- Road -->
+              <rect width="420" height="420" fill="#1e293b"/>
+              <rect x="0" y="0" width="30" height="420" fill="#7f1d1d" opacity="0.45"/>
+              <line x1="30" y1="0" x2="30" y2="420" stroke="#fbbf24" stroke-width="3"/>
+              <rect x="30" y="0" width="20" height="420" fill="#334155"/>
+              <line x1="50" y1="0" x2="50" y2="420" stroke="#fff" stroke-width="2" opacity="0.4"/>
+              <line x1="160" y1="0" x2="160" y2="420" stroke="#fff" stroke-width="1.5" stroke-dasharray="18,14" opacity="0.35"/>
+              <line x1="270" y1="0" x2="270" y2="420" stroke="#fff" stroke-width="1.5" stroke-dasharray="18,14" opacity="0.35"/>
+              <line x1="365" y1="0" x2="365" y2="420" stroke="#fff" stroke-width="2" opacity="0.4"/>
+              <rect x="365" y="0" width="20" height="420" fill="#334155"/>
+              <rect x="385" y="0" width="35" height="420" fill="#475569" opacity="0.25"/>
+              <!-- Direction -->
+              <text x="105" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <text x="215" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <text x="317" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <!-- Labels -->
+              <text x="105" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">PASSING</text>
+              <text x="215" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">MIDDLE</text>
+              <text x="317" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">RIGHT</text>
+
+              <!-- GENERIC ADAS PATH — dashed gray — brakes forward but doesn't prevent swerve -->
+              <g id="genericPathGroupA" opacity="0">
+                <path d="M 105,300 L 105,220 L 105,180"
+                      stroke="#6b7280" stroke-width="2.5" stroke-dasharray="7,5" fill="none"/>
+                <!-- Generic AEB zone marker -->
+                <rect x="80" y="175" width="50" height="30" rx="6" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+                <text x="105" y="194" fill="#9ca3af" font-size="8" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">AEB</text>
+              </g>
+              <!-- Generic label -->
+              <g id="genericLabelA" opacity="0">
+                <rect x="130" y="170" width="160" height="52" rx="9" fill="rgba(107,114,128,0.88)"/>
+                <text x="210" y="187" fill="#fff" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">GENERIC ADAS</text>
+                <text x="210" y="200" fill="rgba(255,255,255,0.8)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Brakes for forward collision</text>
+                <text x="210" y="213" fill="rgba(255,255,255,0.8)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Doesn't predict the left swerve</text>
+              </g>
+
+              <!-- DRIVER FAILURE — red dashed — swerves left into barrier DESPITE generic AEB -->
+              <g id="failGroupA" opacity="0">
+                <path id="failPathA" d="M 105,210 C 100,190 78,160 55,130 L 38,100"
+                      stroke="#dc2626" stroke-width="3" stroke-dasharray="8,5" fill="none"/>
+              </g>
+              <g id="failLabelA" opacity="0">
+                <rect x="2" y="72" width="120" height="52" rx="9" fill="rgba(250,204,21,0.92)"/>
+                <text x="62" y="89" fill="#422006" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">RESULT</text>
+                <text x="62" y="102" fill="#78350f" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">AEB fires, but driver</text>
+                <text x="62" y="115" fill="#78350f" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">panics → swerves into barrier</text>
+              </g>
+              <!-- Ghost car at barrier -->
+              <g id="ghostA" opacity="0">
+                <rect x="22" y="80" width="28" height="46" rx="6" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,3" transform="rotate(-18, 36, 103)"/>
+              </g>
+
+              <!-- RAST PATH — solid blue — early gentle brake, stays in lane -->
+              <path id="safePathA" d="M 105,300 L 105,230 L 105,180"
+                    stroke="#60a5fa" stroke-width="3" fill="none" opacity="0"/>
+              <g id="safeLabelA" opacity="0">
+                <rect x="130" y="228" width="156" height="52" rx="9" fill="rgba(37,99,235,0.88)"/>
+                <text x="208" y="245" fill="#fff" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">RAST ADAS (−1.8s)</text>
+                <text x="208" y="258" fill="rgba(255,255,255,0.85)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Gentle brake before panic</text>
+                <text x="208" y="271" fill="rgba(255,255,255,0.85)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">+ ESC armed for left swerve</text>
+              </g>
+
+              <!-- Threat car -->
+              <g id="threatA">
+                <rect id="tRA" x="200" y="100" width="30" height="50" rx="7" fill="#dc2626" opacity="0.9"/>
+                <text id="tTA" x="215" y="130" fill="#fff" font-size="9" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">CUT</text>
+              </g>
+              <!-- Ego car -->
+              <g id="egoA">
+                <rect x="90" y="300" width="30" height="50" rx="7" fill="#2563eb"/>
+                <rect x="94" y="304" width="22" height="9" rx="3" fill="rgba(255,255,255,0.3)"/>
+                <rect x="94" y="337" width="22" height="9" rx="3" fill="rgba(100,150,255,0.4)"/>
+                <text x="105" y="328" fill="#fff" font-size="10" font-weight="800" text-anchor="middle" font-family="DM Sans,sans-serif">YOU</text>
+              </g>
+            </svg>
+            <div class="road-legend">
+              <div class="legend-item"><div class="legend-swatch generic-dash"></div>Generic ADAS</div>
+              <div class="legend-item"><div class="legend-swatch fail-dash"></div>Driver panics</div>
+              <div class="legend-item"><div class="legend-swatch safe-a"></div>RAST ADAS</div>
+            </div>
+          </div>
+
+          <div class="rast-chain">
+            <div class="chain-step extract open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">1</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">Extract - cost function from everyday driving</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    <span class="cf">w_smooth = 0.88</span> <span class="cf">w_safety = 0.82</span> <span class="cf">w_responsive = 0.35</span><br/>
+                    <em>Optimizes for gradual corrections. Low rapid-correction weight = unpracticed sharp maneuvers.</em>
+                  </div>
+                </div></div>
+              </div>
+            </div>
+            <div class="chain-step predict highlight open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">2</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">Predict - 38° swerve left toward barrier</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    <strong>OFC forward solve under panic:</strong> Decision time collapses from 2s to 200ms. Motor system must execute a sharp correction it has never practiced. High smoothness + low responsiveness → <strong>overshoots into barrier zone.</strong>
+                  </div>
+                  <div class="chain-insight danger">
+                    <strong>Habit tracking cannot do this.</strong> The driver has never panicked before. Only the cost function, run forward under new constraints, produces this prediction.
+                  </div>
+                </div></div>
+              </div>
+            </div>
+            <div class="chain-step intervene open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">3</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">RAST: Early gentle braking (−1.8s) + ESC armed</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    Prevents panic onset entirely. The dangerous swerve never happens.
+                  </div>
+                  <div class="chain-insight compare">
+                    <strong>Generic ADAS fires standard AEB</strong> brakes for forward collision. But the real threat is the <em>left swerve</em> it doesn't anticipate. AEB fires, driver panics anyway, swerves into barrier. <strong>Solved the wrong problem.</strong>
+                  </div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ DRIVER B ════ -->
+        <div class="scenario-half b">
+          <div class="scenario-half-header">Driver B: Efficient Racer</div>
+          <div class="road-svg-wrap">
+            <svg id="roadB" class="road-svg" viewBox="0 0 420 420" preserveAspectRatio="xMidYMid meet">
+              <rect width="420" height="420" fill="#1e293b"/>
+              <rect x="0" y="0" width="30" height="420" fill="#7f1d1d" opacity="0.45"/>
+              <line x1="30" y1="0" x2="30" y2="420" stroke="#fbbf24" stroke-width="3"/>
+              <rect x="30" y="0" width="20" height="420" fill="#334155"/>
+              <line x1="50" y1="0" x2="50" y2="420" stroke="#fff" stroke-width="2" opacity="0.4"/>
+              <line x1="160" y1="0" x2="160" y2="420" stroke="#fff" stroke-width="1.5" stroke-dasharray="18,14" opacity="0.35"/>
+              <line x1="270" y1="0" x2="270" y2="420" stroke="#fff" stroke-width="1.5" stroke-dasharray="18,14" opacity="0.35"/>
+              <line x1="365" y1="0" x2="365" y2="420" stroke="#fff" stroke-width="2" opacity="0.4"/>
+              <rect x="365" y="0" width="20" height="420" fill="#334155"/>
+              <rect x="385" y="0" width="35" height="420" fill="#475569" opacity="0.25"/>
+              <text x="105" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <text x="215" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <text x="317" y="410" fill="rgba(255,255,255,0.10)" font-size="30" text-anchor="middle">↑</text>
+              <text x="105" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">PASSING</text>
+              <text x="215" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">MIDDLE</text>
+              <text x="317" y="18" fill="rgba(255,255,255,0.20)" font-size="11" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">RIGHT</text>
+
+              <!-- GENERIC ADAS — dashed gray — fires AEB early -->
+              <g id="genericPathGroupB" opacity="0">
+                <path d="M 105,300 L 105,210"
+                      stroke="#6b7280" stroke-width="2.5" stroke-dasharray="7,5" fill="none"/>
+                <rect x="80" y="200" width="50" height="30" rx="6" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+                <text x="105" y="219" fill="#9ca3af" font-size="8" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">AEB</text>
+              </g>
+              <g id="genericLabelB" opacity="0">
+                <rect x="130" y="190" width="160" height="52" rx="9" fill="rgba(107,114,128,0.88)"/>
+                <text x="210" y="207" fill="#fff" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">GENERIC ADAS</text>
+                <text x="210" y="220" fill="rgba(255,255,255,0.8)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">AEB fires early (−2.0s)</text>
+                <text x="210" y="233" fill="rgba(255,255,255,0.8)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Driver perceives as premature</text>
+              </g>
+
+              <!-- DRIVER FAILURE — red dashed — overrides AEB, accelerates past, then brakes too late -->
+              <g id="failGroupB" opacity="0">
+                <path id="failPathB" d="M 105,210 C 108,195 110,170 108,140 L 105,110"
+                      stroke="#dc2626" stroke-width="3" stroke-dasharray="8,5" fill="none"/>
+              </g>
+              <g id="failLabelB" opacity="0">
+                <rect x="130" y="80" width="160" height="52" rx="9" fill="rgba(250,204,21,0.92)"/>
+                <text x="210" y="97" fill="#422006" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">RESULT</text>
+                <text x="210" y="110" fill="#78350f" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Driver overrides AEB, holds</text>
+                <text x="210" y="123" fill="#78350f" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">speed → brakes too late → rear-end</text>
+              </g>
+              <g id="ghostB" opacity="0">
+                <rect x="90" y="95" width="28" height="46" rx="6" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,3"/>
+              </g>
+
+              <!-- RAST PATH — solid amber — waits, then fires hard at last safe moment -->
+              <path id="safePathB" d="M 105,300 L 105,245 C 105,225 112,210 118,195"
+                    stroke="#fbbf24" stroke-width="3" fill="none" opacity="0"/>
+              <g id="safeLabelB" opacity="0">
+                <rect x="140" y="240" width="152" height="52" rx="9" fill="rgba(217,119,6,0.88)"/>
+                <text x="216" y="257" fill="#fff" font-size="10" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">RAST ADAS (−0.6s)</text>
+                <text x="216" y="270" fill="rgba(255,255,255,0.85)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">Waits, fires hard AEB at</text>
+                <text x="216" y="283" fill="rgba(255,255,255,0.85)" font-size="9" font-weight="600" text-anchor="middle" font-family="DM Sans,sans-serif">last safe moment + lane guard</text>
+              </g>
+
+              <!-- Threat car -->
+              <g id="threatB">
+                <rect id="tRB" x="200" y="100" width="30" height="50" rx="7" fill="#dc2626" opacity="0.9"/>
+                <text id="tTB" x="215" y="130" fill="#fff" font-size="9" font-weight="700" text-anchor="middle" font-family="DM Sans,sans-serif">CUT</text>
+              </g>
+              <!-- Ego car -->
+              <g id="egoB">
+                <rect x="90" y="300" width="30" height="50" rx="7" fill="#d97706"/>
+                <rect x="94" y="304" width="22" height="9" rx="3" fill="rgba(255,255,255,0.3)"/>
+                <rect x="94" y="337" width="22" height="9" rx="3" fill="rgba(255,200,50,0.4)"/>
+                <text x="105" y="328" fill="#fff" font-size="10" font-weight="800" text-anchor="middle" font-family="DM Sans,sans-serif">YOU</text>
+              </g>
+            </svg>
+            <div class="road-legend">
+              <div class="legend-item"><div class="legend-swatch generic-dash"></div>Generic ADAS</div>
+              <div class="legend-item"><div class="legend-swatch fail-dash"></div>Driver overrides</div>
+              <div class="legend-item"><div class="legend-swatch safe-b"></div>RAST ADAS</div>
+            </div>
+          </div>
+
+          <div class="rast-chain">
+            <div class="chain-step extract open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">1</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">Extract - cost function from everyday driving</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    <span class="cf">w_efficiency = 0.90</span> <span class="cf">w_responsive = 0.85</span> <span class="cf">w_safety = 0.40</span><br/>
+                    <em>Optimizes for time efficiency. Brakes late habitually. Low safety-margin weight.</em>
+                  </div>
+                </div></div>
+              </div>
+            </div>
+            <div class="chain-step predict highlight open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">2</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">Predict - brakes 400ms too late → rear-end + overrides early AEB</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    <strong>OFC forward solve under emergency:</strong> High efficiency weight means motor system is trained to delay braking for speed. Under sudden cut-in, same optimization <strong>delays braking past safe threshold.</strong> And: this driver will <strong>override early intervention</strong> - perceives it as premature.
+                  </div>
+                  <div class="chain-insight danger">
+                    <strong>Habit tracking says "brakes late."</strong> RAST says <em>why</em> the efficiency cost function computes <em>exactly how late</em>, and predicts the override of premature intervention.
+                  </div>
+                </div></div>
+              </div>
+            </div>
+            <div class="chain-step intervene open" onclick="this.classList.toggle('open')">
+              <div class="chain-num">3</div>
+              <div>
+                <div class="chain-header">
+                  <div class="chain-summary">RAST: Late sharp AEB (−0.6s). Matches aggressive style</div>
+                  <div class="chain-arrow">▾</div>
+                </div>
+                <div class="chain-body"><div class="chain-body-inner">
+                  <div class="chain-text">
+                    Waits until last safe moment. This driver accepts hard braking. Matches aggressive style. Lane departure prevention active.
+                  </div>
+                  <div class="chain-insight compare">
+                    <strong>Generic ADAS fires AEB early (−2.0s).</strong> This driver perceives it as premature, overrides by accelerating. Neither human nor system has clean control. <strong>Intervention made it worse.</strong>
+                  </div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- play row removed — controls now in scenario-controls above -->
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HANDOFF ═══ -->
+<section id="handoff">
+  <div class="section-kicker fade-up">Control Handoff</div>
+  <h2 class="section-title fade-up">The most dangerous<br/>3 seconds in driving</h2>
+  <p class="section-desc fade-up">
+    When ADAS returns control, RAST shapes the vehicle state to match
+    this specific driver. First action is continuation, not correction.
+  </p>
+  <div class="handoff-grid fade-up">
+    <div class="handoff-card generic">
+      <div class="handoff-type">Today - Generic handoff</div>
+      <div class="handoff-title">One-size-fits-all</div>
+      <div class="handoff-metrics">
+        <div class="hm-row"><div class="hm-label">Following distance</div><div class="hm-system">1.2s (default)</div><div class="hm-match miss">Mismatch</div></div>
+        <div class="hm-row"><div class="hm-label">Lane position</div><div class="hm-system">Center</div><div class="hm-match miss">Mismatch</div></div>
+        <div class="hm-row"><div class="hm-label">Speed trend</div><div class="hm-system">Decelerating</div><div class="hm-match miss">Mismatch</div></div>
+        <div class="hm-row"><div class="hm-label">Notification</div><div class="hm-system">Beep + visual</div><div class="hm-match miss">Generic</div></div>
+      </div>
+      <div class="handoff-result">Driver spends ~3 seconds correcting<br/><strong>Maximum cognitive load at worst moment</strong></div>
+    </div>
+    <div class="handoff-card personal">
+      <div class="handoff-type">RAST - Personalized handoff</div>
+      <div class="handoff-title">Shaped to Driver A</div>
+      <div class="handoff-metrics">
+        <div class="hm-row"><div class="hm-label">Following distance</div><div class="hm-system">2.1s (preference)</div><div class="hm-match hit">Match</div></div>
+        <div class="hm-row"><div class="hm-label">Lane position</div><div class="hm-system">Slight left</div><div class="hm-match hit">Match</div></div>
+        <div class="hm-row"><div class="hm-label">Speed trend</div><div class="hm-system">Stable</div><div class="hm-match hit">Match</div></div>
+        <div class="hm-row"><div class="hm-label">Notification</div><div class="hm-system">Early + haptic</div><div class="hm-match hit">Personal</div></div>
+      </div>
+      <div class="handoff-result">First action is continuation<br/><strong>Zero correction needed</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PREDICTION ═══ -->
+<section id="prediction">
+  <div class="section-kicker fade-up">Kinematic Prediction</div>
+  <h2 class="section-title fade-up">Know how the movement ends<br/>before it finishes</h2>
+  <p class="section-desc fade-up">
+    From thousands of everyday steering inputs, RAST learns the driver's
+    kinematic signature. In 100ms it predicts the full trajectory.
+  </p>
+  <div class="prediction-container fade-up">
+    <div class="pred-visual">
+      <div class="steering-wheel">
+        <div class="steering-spoke top"></div>
+        <div class="steering-spoke left"></div>
+        <div class="steering-spoke right"></div>
+        <div class="steering-inner"></div>
+        <div class="steering-indicator" id="steeringDot"></div>
+      </div>
+      <div class="pred-timeline">
+        <div class="pred-phase active" id="p0"><div class="pred-time">0 ms</div><div class="pred-desc"><strong>Steering onset.</strong> Angular acceleration detected. Direction: left.</div></div>
+        <div class="pred-phase" id="p1"><div class="pred-time">100 ms</div><div class="pred-desc"><strong>Profile matched.</strong> Velocity ramp = Driver A. Single-peaked, high-amplitude. Predicted: 38° left.</div></div>
+        <div class="pred-phase" id="p2"><div class="pred-time">200 ms</div><div class="pred-desc"><strong>Trajectory projected.</strong> Completion → exits lane in 1.2s. Decision: <strong style="color:var(--danger)">INTERVENE</strong></div></div>
+        <div class="pred-phase" id="p3"><div class="pred-time">350 ms</div><div class="pred-desc"><strong>Correction applied.</strong> Limited to 22°. Vehicle stable. Natural feel preserved.</div></div>
+      </div>
+    </div>
+    <div class="pred-bottom">
+      From <strong>everyday driving,</strong> thousands of inputs, RAST builds a <strong>kinematic signature</strong> that predicts emergency behavior <strong>before it completes</strong>. Not reaction. <strong>Prediction.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CMG ═══ -->
+<section id="cmg">
+  <div class="section-kicker fade-up">Contextual Motor Graph</div>
+  <h2 class="section-title fade-up">The driver's motor passport</h2>
+  <p class="section-desc fade-up">
+    A computational motor identity - what they can do, how they move,
+    why they move that way, and what transfers to new conditions.
+  </p>
+  <div class="cmg-grid fade-up">
+    <div class="cmg-card">
+      <div class="cmg-badge">◈ CMG: Driver A</div>
+      <div class="cmg-title">Motor Identity Layers</div>
+      <div class="cmg-sub">From physical constraints to transferable intent.</div>
+      <div class="cmg-layers">
+        <div class="cmg-layer"><div class="cmg-layer-icon">🦴</div><div><div class="cmg-layer-name">Structural</div><div class="cmg-layer-val">Arm reach, seating position, grip strength, reaction baseline</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">〰️</div><div><div class="cmg-layer-name">Kinematic</div><div class="cmg-layer-val">Single-peaked velocity, smooth corrections, low trial variability</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">💪</div><div><div class="cmg-layer-name">Kinetic</div><div class="cmg-layer-val">Low peak force, gradual torque ramps, symmetric effort</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">⚡</div><div><div class="cmg-layer-name">Cost Function</div><div class="cmg-layer-val">w_smooth=0.88 ± 0.04 · w_safety=0.82 ± 0.06 · w_effort=0.45 ± 0.12</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">🏷️</div><div><div class="cmg-layer-name">Transfer Tags</div><div class="cmg-layer-val"><strong>TRAIT:</strong> smoothness, safety, correction style · <strong>STATE:</strong> effort, responsiveness</div></div></div>
+      </div>
+      <div class="cmg-bottom-note"><strong>Versioned</strong> · <strong>Uncertain</strong> (confidence bounds) · <strong>Context-indexed</strong></div>
+    </div>
+    <div class="cmg-card">
+      <div class="cmg-badge">⬡ Why CMG is different</div>
+      <div class="cmg-title">What systems lack today</div>
+      <div class="cmg-sub">No current system combines all elements.</div>
+      <div class="cmg-layers">
+        <div class="cmg-layer"><div class="cmg-layer-icon">📊</div><div><div class="cmg-layer-name">Driver monitoring</div><div class="cmg-layer-val">Measures alertness. Nothing about <em>how</em> or <em>why</em> the driver drives.</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">📈</div><div><div class="cmg-layer-name">Behavior profiling</div><div class="cmg-layer-val">Records patterns. Patterns don't generalize to new conditions.</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">🧠</div><div><div class="cmg-layer-name">CMG adds: the "why"</div><div class="cmg-layer-val">Extracts the <strong>optimization strategy</strong>. Generalizes across vehicles, roads, conditions.</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">🔄</div><div><div class="cmg-layer-name">CMG adds: trait vs. state</div><div class="cmg-layer-val"><strong>Stable traits</strong> transfer to any car. <strong>States</strong> adapt to fatigue, weather, road.</div></div></div>
+        <div class="cmg-layer"><div class="cmg-layer-icon">☁️</div><div><div class="cmg-layer-name">CMG adds: portability</div><div class="cmg-layer-val">Compact vector. New car reads it instantly. <strong>Seat memory for driving style.</strong></div></div></div>
+      </div>
+      <div class="cmg-bottom-note"><strong>Privacy-preserving</strong> Mathematical abstraction, not a recording. No routes, no timestamps.</div>
+    </div>
+  </div>
+</section>
+
+<div class="demo-footer">
+  <p><strong>RAST</strong> - Motor Intelligence Infrastructure</p>
+  <p style="margin-top:6px">We don't learn what the driver <em>does</em>. We understand what the driver <em>optimizes for</em>.</p>
+</div>
+
+<script>
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.target)?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+const barObs = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting) e.target.querySelectorAll('.weight-fill').forEach(b => b.style.width = b.dataset.w + '%');
+}), { threshold: 0.2 });
+document.querySelectorAll('.profiles-grid').forEach(el => barObs.observe(el));
+
+// ── SVG ANIMATION HELPERS ──
+function fadeInSVG(el, delay, dur = 500) {
+  setTimeout(() => {
+    const start = performance.now();
+    (function step(now) {
+      const t = Math.min((now - start) / dur, 1);
+      el.setAttribute('opacity', t);
+      if (t < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }, delay);
+}
+
+function drawPath(el, delay, dur = 800) {
+  const len = el.getTotalLength();
+  el.style.strokeDasharray = len;
+  el.style.strokeDashoffset = len;
+  el.setAttribute('opacity', '1');
+  setTimeout(() => {
+    const start = performance.now();
+    (function step(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const ease = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      el.style.strokeDashoffset = len * (1 - ease);
+      if (t < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }, delay);
+}
+
+function moveSVGRect(rectEl, textEl, fromX, fromY, toX, toY, textOffX, textOffY, dur, delay) {
+  setTimeout(() => {
+    const start = performance.now();
+    (function step(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const ease = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      const x = fromX + (toX - fromX) * ease;
+      const y = fromY + (toY - fromY) * ease;
+      rectEl.setAttribute('x', x);
+      rectEl.setAttribute('y', y);
+      if (textEl) { textEl.setAttribute('x', x + textOffX); textEl.setAttribute('y', y + textOffY); }
+      if (t < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }, delay);
+}
+
+// ── SCENARIO RESET ──
+let playing = false;
+let playTimeout = null;
+
+function resetScenario() {
+  if (playTimeout) clearTimeout(playTimeout);
+  ['genericPathGroupA','genericLabelA','failGroupA','failLabelA','ghostA','safeLabelA',
+   'genericPathGroupB','genericLabelB','failGroupB','failLabelB','ghostB','safeLabelB'
+  ].forEach(id => document.getElementById(id).setAttribute('opacity', '0'));
+  ['safePathA','safePathB'].forEach(id => {
+    const el = document.getElementById(id);
+    el.setAttribute('opacity', '0');
+    el.style.strokeDasharray = '';
+    el.style.strokeDashoffset = '';
+  });
+  ['failPathA','failPathB'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.strokeDasharray = '';
+    el.style.strokeDashoffset = '';
+  });
+  document.getElementById('tRA').setAttribute('x', 200);
+  document.getElementById('tRA').setAttribute('y', 100);
+  document.getElementById('tTA').setAttribute('x', 215);
+  document.getElementById('tTA').setAttribute('y', 130);
+  document.getElementById('tRB').setAttribute('x', 200);
+  document.getElementById('tRB').setAttribute('y', 100);
+  document.getElementById('tTB').setAttribute('x', 215);
+  document.getElementById('tTB').setAttribute('y', 130);
+  playing = false;
+  document.getElementById('playBtn').textContent = '▶  Simulate cut-in';
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetScenario);
+
+document.getElementById('playBtn').addEventListener('click', () => {
+  if (playing) return;
+  resetScenario();
+  playing = true;
+  document.getElementById('playBtn').textContent = '⏵  Simulating…';
+
+  moveSVGRect(document.getElementById('tRA'), document.getElementById('tTA'), 200, 100, 90, 60, 15, 30, 1500, 400);
+  moveSVGRect(document.getElementById('tRB'), document.getElementById('tTB'), 200, 100, 90, 60, 15, 30, 1500, 400);
+
+  fadeInSVG(document.getElementById('genericPathGroupA'), 1800, 600);
+  fadeInSVG(document.getElementById('genericLabelA'), 2100, 500);
+  fadeInSVG(document.getElementById('genericPathGroupB'), 1800, 600);
+  fadeInSVG(document.getElementById('genericLabelB'), 2100, 500);
+
+  fadeInSVG(document.getElementById('failGroupA'), 3000, 400);
+  drawPath(document.getElementById('failPathA'), 3000, 900);
+  fadeInSVG(document.getElementById('failLabelA'), 3500, 500);
+  fadeInSVG(document.getElementById('ghostA'), 3700, 400);
+  fadeInSVG(document.getElementById('failGroupB'), 3000, 400);
+  drawPath(document.getElementById('failPathB'), 3000, 900);
+  fadeInSVG(document.getElementById('failLabelB'), 3500, 500);
+  fadeInSVG(document.getElementById('ghostB'), 3700, 400);
+
+  drawPath(document.getElementById('safePathA'), 4800, 800);
+  fadeInSVG(document.getElementById('safeLabelA'), 5200, 500);
+  drawPath(document.getElementById('safePathB'), 5000, 800);
+  fadeInSVG(document.getElementById('safeLabelB'), 5400, 500);
+
+  playTimeout = setTimeout(() => {
+    playing = false;
+    document.getElementById('playBtn').textContent = '▶  Simulate cut-in';
+  }, 9000);
+});
+
+// ── PREDICTION ──
+function animPred() {
+  const dot = document.getElementById('steeringDot');
+  const ps = ['p0','p1','p2','p3'].map(id => document.getElementById(id));
+  ps.forEach(p => p.classList.remove('active'));
+  dot.style.transform = 'rotate(0deg)';
+  ps[0].classList.add('active');
+  setTimeout(() => { ps[1].classList.add('active'); dot.style.transform = 'rotate(-20deg)'; }, 1500);
+  setTimeout(() => { ps[2].classList.add('active'); dot.style.transform = 'rotate(-38deg)'; }, 3000);
+  setTimeout(() => { ps[3].classList.add('active'); dot.style.transform = 'rotate(-22deg)'; }, 4500);
+}
+const predObs = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting) { animPred(); setInterval(animPred, 7000); predObs.unobserve(e.target); }
+}), { threshold: 0.2 });
+predObs.observe(document.getElementById('prediction'));
+
+const secs = document.querySelectorAll('section');
+window.addEventListener('scroll', () => {
+  let c = '';
+  secs.forEach(s => { if(window.scrollY >= s.offsetTop - 130) c = s.id; });
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.target === c));
+});
+</script>
+</body>
+</html>

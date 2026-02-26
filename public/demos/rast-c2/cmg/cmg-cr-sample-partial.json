@@ -1,0 +1,111 @@
+{
+  "CMG_Version": "1.0",
+  "CMG_Timestamp": "2026-01-21T10:00:00Z",
+  "CMG_Context": "Cardiac_Rehab_Treadmill_Session",
+  
+  "Layer_Structural": {
+    "medical_constraints": ["sternotomy_6_weeks_post", "no_arm_ergometer"],
+    "comorbidities": ["T2DM", "mild_OA_knee_R"],
+    "ROM_limits": {},
+    "device_status": "none",
+    "weight_bearing": "full"
+  },
+  
+  "Layer_Metabolic": {
+    "state_M_t": {
+      "HR": {"value": null, "unit": "bpm"},
+      "HRV_RMSSD": {"value": null, "unit": "ms"},
+      "BP_systolic": {"value": null, "unit": "mmHg"},
+      "Est_VO2": {"value": null, "unit": "ml/kg/min"},
+      "Recovery_slope": {"value": null, "unit": "bpm/min"}
+    },
+    "safety_envelope": {
+      "metabolic_ceiling": {"value": 165, "source": "CPET", "confidence": "high"},
+      "safe_zone_upper": 140,
+      "safe_zone_lower": 100,
+      "recovery_slope_threshold": 12
+    },
+    "medication_effects": {
+      "beta_blocker": true,
+      "chronotropic_competence_index": 0.72,
+      "HR_adjustment_factor": 1.15
+    }
+  },
+  
+  "Layer_Motor_Capability": {
+    "metrics_C_t": {
+      "smoothness_spectral_arc_length": {"value": null, "uncertainty": null},
+      "symmetry_index": {"value": null, "uncertainty": null},
+      "stability_COP_velocity": {"value": null, "uncertainty": null},
+      "cadence": {"value": null, "unit": "steps/min"},
+      "stride_length": {"value": null, "unit": "m"}
+    },
+    "fatigue_degradation_curve": {
+      "model_id": "FDC_004",
+      "parameters": {"alpha": 0.03, "threshold_HR_pct": 0.85}
+    }
+  },
+  
+  "Layer_Perceptual": {
+    "RPE_scale": "Borg_6_20",
+    "perceived_ceiling": {"value": 15, "uncertainty": 1.5},
+    "psychological_state": {
+      "fear_of_falling": {"value": 0.3, "scale": "0-1"},
+      "cardiac_anxiety": {"value": 0.5, "scale": "0-1"},
+      "motivation": {"value": 0.7, "scale": "0-1"}
+    }
+  },
+  
+  "Layer_Cost_Function": {
+    "weights": {
+      "w_effort": {"value": 0.15, "uncertainty": 0.05, "transfer_tag": "STATE"},
+      "w_stability": {"value": 0.50, "uncertainty": 0.08, "transfer_tag": "TRAIT"},
+      "w_smoothness": {"value": 0.25, "uncertainty": 0.06, "transfer_tag": "TRAIT"},
+      "w_HR_margin": {"value": 0.35, "uncertainty": 0.10, "transfer_tag": "STATE"},
+      "w_discomfort": {"value": 0.20, "uncertainty": 0.12, "transfer_tag": "MIXED"}
+    },
+    "context_conditioning": "treadmill_supervised"
+  },
+  
+  "Layer_Phases": {
+    "current_phase": "Stable_Zone",
+    "phase_history": ["Warmup"],
+    "transitions": {
+      "Warmup_to_Stable": {
+        "conditions": ["HR_var_pct < 5", "HR < safe_zone_upper", "duration > 180s"],
+        "all_required": true
+      },
+      "Stable_to_Progress": {
+        "conditions": ["HR_stable_3min", "Recovery_slope > 12", "Motor_quality_index > 0.7"],
+        "all_required": true,
+        "cooldown_after_fail_sec": 120
+      }
+    }
+  },
+  
+  "Layer_Measurement": {
+    "sensors": {
+      "HR": {"type": "chest_strap", "quality": "good", "sampling_Hz": 1},
+      "motion": {"type": "treadmill_integrated", "quality": "medium", "sampling_Hz": 100}
+    },
+    "session_provenance": {
+      "facility": "Ziv_CR_Unit",
+      "supervisor": "PT_initials",
+      "protocol_version": "ZIV_CR_v2.1"
+    }
+  },
+  
+  "Layer_Longitudinal": {
+    "baseline_session": "2026-01-07",
+    "sessions_completed": 4,
+    "TTTC_forecast": {
+      "target": "6MWD > 400m",
+      "predicted_date": "2026-03-15",
+      "confidence_interval_days": 14
+    },
+    "improvement_slopes": {
+      "metabolic": {"value": 0.05, "unit": "VO2_pct_per_week"},
+      "motor": {"value": 0.02, "unit": "quality_index_per_week"}
+    }
+  }
+}

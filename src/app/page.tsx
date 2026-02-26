@@ -109,21 +109,26 @@ export default function HomePage() {
           <p className="max-w-3xl text-white/85">{s.solutions.intro}</p>
         ) : null}
 
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
           {s.solutions.items.map((it: any) => (
             <div key={it.title} className="rounded-2xl border border-white/15 bg-white/7 p-6">
               <div className="text-sm font-semibold">{it.title}</div>
-              <p className="mt-3 text-sm text-white/80">{it.body}</p>
+              <p className="mt-3 text-sm text-white/80 whitespace-pre-line">{it.body}</p>
 
-              {it.demo?.href ? (
-                <a
-                  href={it.demo.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                >
-                  {it.demo.label ?? "Open demo"}
-                </a>
+              {it.demos?.length ? (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {it.demos.map((d: any) => (
+                    <a
+                      key={d.href}
+                      href={d.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                    >
+                      {d.label}
+                    </a>
+                  ))}
+                </div>
               ) : null}
             </div>
           ))}
