@@ -149,7 +149,11 @@
             },
             {
               "label": "Rhythm Demo",
-              "href": "/demos/rhythm/coming-soon.html"
+              "href": "/demos/rhythm/rast-rhythm-demo.html"
+            },
+            {
+              "label": "Try Blizbeat",
+              "href": "https://blizbeat.yumaniq.com"
             }
           ]
         }

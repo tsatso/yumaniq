@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Blizbeat</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c10;
+  --surface: #141418;
+  --surface2: #1c1c22;
+  --surface3: #24242c;
+  --border: #2a2a34;
+  --text: #e8e6e3;
+  --text2: #9a9890;
+  --text3: #5c5a56;
+  --accent: #e8a430;
+  --accent2: #f0c060;
+  --accent-dim: rgba(232,164,48,0.15);
+  --blue: #4488dd;
+  --blue-dim: rgba(68,136,221,0.15);
+  --green: #44bb77;
+  --green-dim: rgba(68,187,119,0.15);
+  --red: #dd5544;
+  --red-dim: rgba(221,85,68,0.15);
+  --pink: #cc55aa;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+}
+.demo-banner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 32px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+.demo-banner a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.demo-banner a:hover { text-decoration: underline }
+* { margin:0; padding:0; box-sizing:border-box }
+html { height: 100% }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px calc(40px + env(safe-area-inset-bottom, 20px));
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header { display:flex; align-items:center; padding:12px 0 20px }
+.brand { display:flex; align-items:center; gap:10px }
+.brand-icon {
+  width:36px; height:36px; background:var(--accent); border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:16px; font-family:var(--mono); color:var(--bg);
+}
+.brand-name { font-weight:700; font-size:20px; letter-spacing:-0.5px }
+.brand-tag { font-size:11px; font-family:var(--mono); color:var(--text3); letter-spacing:1px }
+
+/* STEP BAR */
+.step-bar { display:flex; gap:4px; margin-bottom:24px }
+.step-pip {
+  flex:1; height:3px; background:var(--surface3); border-radius:2px;
+  -webkit-transition:background 0.4s; transition:background 0.4s;
+}
+.step-pip.active { background:var(--accent) }
+.step-pip.done { background:var(--green) }
+.step-meta { display:flex; justify-content:space-between; margin-bottom:18px }
+.step-num { font-weight:700; font-size:11px; font-family:var(--mono); color:var(--accent); letter-spacing:2px }
+.step-of { font-size:11px; font-family:var(--mono); color:var(--text3) }
+
+.title { font-weight:700; font-size:28px; letter-spacing:-0.5px; line-height:1.15; margin-bottom:8px }
+.subtitle { font-size:14px; color:var(--text2); line-height:1.5; margin-bottom:24px }
+
+.card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:20px; margin-bottom:16px;
+}
+.card-label {
+  font-weight:700; font-size:10px; font-family:var(--mono); color:var(--text3);
+  letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;
+}
+
+/* PATTERN GRID */
+.pattern-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px }
+.pattern-btn {
+  flex:1 1 calc(33.3% - 6px); min-width:90px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:12px 8px; text-align:center;
+  font-family:var(--sans); color:var(--text);
+  -webkit-transition:all 0.2s; transition:all 0.2s;
+}
+.pattern-btn.selected { border-color:var(--accent); background:var(--accent-dim) }
+.p-name { font-weight:600; font-size:13px; margin-bottom:2px }
+.p-sig { font-size:10px; font-family:var(--mono); color:var(--text3) }
+
+/* SEQ */
+.inline-seq { display:flex; justify-content:center; gap:3px; margin:10px 0; flex-wrap:wrap }
+.seq-step {
+  width:24px; height:24px; border-radius:5px; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:9px; font-family:var(--mono);
+  -webkit-transition:all 0.12s; transition:all 0.12s;
+  flex-shrink:0;
+}
+.seq-step.on { background:var(--accent); border-color:var(--accent); color:var(--bg) }
+.seq-step.on-blue { background:var(--blue); border-color:var(--blue); color:#fff }
+.seq-step.playing {
+  -webkit-box-shadow:0 0 12px var(--accent); box-shadow:0 0 12px var(--accent);
+  -webkit-transform:scale(1.18); transform:scale(1.18);
+}
+.seq-step.playing-b {
+  -webkit-box-shadow:0 0 12px var(--blue); box-shadow:0 0 12px var(--blue);
+  -webkit-transform:scale(1.18); transform:scale(1.18);
+}
+
+/* TRANSPORT */
+.transport { display:flex; align-items:center; justify-content:center; gap:16px; margin:20px 0 }
+.play-btn {
+  width:56px; height:56px; border-radius:50%; background:var(--accent); border:none;
+  display:flex; align-items:center; justify-content:center;
+  -webkit-transition:transform 0.15s; transition:transform 0.15s;
+  -webkit-box-shadow:0 4px 20px rgba(232,164,48,0.3); box-shadow:0 4px 20px rgba(232,164,48,0.3);
+}
+.play-btn:active { -webkit-transform:scale(0.94); transform:scale(0.94) }
+.play-btn svg { fill:var(--bg) }
+.tempo-display { font-weight:700; font-size:14px; font-family:var(--mono); color:var(--text2) }
+.tempo-display span { color:var(--accent) }
+
+/* INPUT TOGGLE */
+.input-toggle {
+  display:flex; background:var(--surface2); border-radius:10px; padding:3px;
+  margin-bottom:16px; border:1px solid var(--border);
+}
+.input-toggle-btn {
+  flex:1; padding:8px 12px; border-radius:8px; border:none;
+  font-weight:600; font-size:12px; font-family:var(--sans);
+  background:transparent; color:var(--text3); text-align:center;
+}
+.input-toggle-btn.active {
+  background:var(--surface); color:var(--text);
+  -webkit-box-shadow:0 2px 8px rgba(0,0,0,0.3); box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* TAP ZONE */
+.tap-zone {
+  height:180px; background:var(--surface); border:2px dashed var(--border); border-radius:16px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  -webkit-user-select:none; user-select:none; margin-bottom:16px;
+  -webkit-transition:all 0.1s; transition:all 0.1s;
+  touch-action:manipulation;
+}
+.tap-zone.flash { background:var(--accent-dim); border-color:var(--accent) }
+.tap-zone.challenge-mode { border-color:var(--blue) }
+.tap-zone.challenge-mode.flash { background:var(--blue-dim); border-color:var(--blue) }
+.tap-icon { font-size:28px; margin-bottom:8px; opacity:0.6 }
+.tap-text { font-weight:600; font-size:15px; color:var(--text2) }
+.tap-hint { font-size:12px; color:var(--text3); margin-top:4px }
+
+/* MIC ZONE */
+.mic-zone {
+  height:180px; background:var(--surface); border:2px solid var(--border); border-radius:16px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative; overflow:hidden; margin-bottom:16px;
+  -webkit-transition:all 0.2s; transition:all 0.2s;
+}
+.mic-zone.listening { border-color:var(--green) }
+.mic-zone.onset { background:var(--green-dim); border-color:var(--green) }
+.mic-zone.challenge-mode { border-color:var(--blue) }
+.mic-zone.challenge-mode.onset { background:var(--blue-dim) }
+.mic-icon { font-size:28px; margin-bottom:8px }
+.mic-text { font-weight:600; font-size:15px; color:var(--text2) }
+.mic-hint { font-size:12px; color:var(--text3); margin-top:4px }
+.level-meter-wrap {
+  width:80%; height:8px; background:var(--surface3); border-radius:4px;
+  margin-top:12px; overflow:hidden;
+}
+.level-meter-fill {
+  height:100%; border-radius:4px; width:0%;
+  -webkit-transition:width 0.05s; transition:width 0.05s;
+  background:-webkit-linear-gradient(left, var(--green), var(--accent));
+  background:linear-gradient(90deg, var(--green), var(--accent));
+}
+.onset-ring {
+  position:absolute; width:120px; height:120px; border-radius:50%;
+  border:3px solid var(--green); opacity:0;
+  -webkit-transform:scale(0.5); transform:scale(0.5);
+  -webkit-transition:opacity 0.08s, transform 0.08s; transition:opacity 0.08s, transform 0.08s;
+  pointer-events:none;
+}
+.onset-ring.flash { opacity:0.6; -webkit-transform:scale(1.1); transform:scale(1.1) }
+
+/* MIC PERMISSION */
+.mic-permission {
+  text-align:center; padding:24px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:14px; margin-bottom:16px;
+}
+.mp-icon { font-size:32px; margin-bottom:12px }
+.mp-text { font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:16px }
+
+/* TIMELINE */
+.tap-timeline {
+  height:48px; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  position:relative; overflow:hidden; margin-bottom:16px;
+}
+.tap-mark {
+  position:absolute; top:8px; bottom:8px; width:3px; border-radius:2px;
+}
+.tap-mark.accent-mark { background:var(--accent) }
+.tap-mark.green-mark { background:var(--green) }
+
+/* SCORE */
+.score-display {
+  text-align:center; padding:16px; background:var(--surface2); border-radius:12px; margin-bottom:16px;
+}
+.score-big { font-weight:800; font-size:48px; letter-spacing:-2px }
+.score-label { font-size:12px; color:var(--text3); margin-top:4px }
+
+/* FEEDBACK DOTS */
+.challenge-feedback { display:flex; gap:4px; justify-content:center; flex-wrap:wrap; margin:12px 0 }
+.fb-dot {
+  width:12px; height:12px; border-radius:50%; border:1px solid var(--border);
+  -webkit-transition:all 0.2s; transition:all 0.2s;
+}
+.fb-dot.hit { background:var(--green); border-color:var(--green) }
+.fb-dot.miss { background:var(--red); border-color:var(--red) }
+
+/* WEIGHTS */
+.weight-row { display:flex; align-items:center; gap:8px; margin-bottom:10px }
+.weight-label { width:80px; font-weight:500; font-size:12px; color:var(--text2); text-align:right }
+.weight-track { flex:1; height:10px; background:var(--surface3); border-radius:5px; overflow:hidden }
+.weight-fill {
+  height:100%; border-radius:5px;
+  -webkit-transition:width 1.2s cubic-bezier(0.22,1,0.36,1); transition:width 1.2s cubic-bezier(0.22,1,0.36,1);
+}
+.weight-val { width:36px; font-size:11px; font-family:var(--mono); color:var(--text3) }
+.weight-badge {
+  font-weight:700; font-size:9px; font-family:var(--mono); letter-spacing:1px;
+  padding:2px 6px; border-radius:3px; white-space:nowrap;
+}
+.badge-trait { background:var(--green-dim); color:var(--green); border:1px solid rgba(68,187,119,0.3) }
+.badge-state { background:var(--red-dim); color:var(--red); border:1px solid rgba(221,85,68,0.3) }
+.badge-mixed { background:rgba(232,164,48,0.12); color:var(--accent); border:1px solid rgba(232,164,48,0.3) }
+
+/* COMPARE */
+.compare-row { display:flex; gap:12px; margin-bottom:16px }
+.compare-card {
+  flex:1; background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:14px; text-align:center; min-width:0;
+}
+.cc-label { font-weight:700; font-size:10px; font-family:var(--mono); letter-spacing:1.5px; margin-bottom:8px }
+.compare-card.yours { border-color:var(--accent) }
+.compare-card.yours .cc-label { color:var(--accent) }
+.compare-card.generic .cc-label { color:var(--text3) }
+
+/* RESULT */
+.result-hero { text-align:center; padding:24px 0 }
+.result-icon {
+  width:64px; height:64px; border-radius:50%; background:var(--accent-dim);
+  border:2px solid var(--accent); display:flex; align-items:center; justify-content:center;
+  margin:0 auto 16px; font-size:28px;
+}
+.result-title { font-weight:700; font-size:22px; margin-bottom:4px }
+.result-sub { font-size:13px; color:var(--text2) }
+
+/* BUTTONS */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 24px; border-radius:10px; font-weight:600; font-size:14px;
+  font-family:var(--sans); border:none; touch-action:manipulation;
+  -webkit-transition:all 0.15s; transition:all 0.15s;
+}
+.btn-primary {
+  background:var(--accent); color:var(--bg);
+  -webkit-box-shadow:0 4px 16px rgba(232,164,48,0.25); box-shadow:0 4px 16px rgba(232,164,48,0.25);
+}
+.btn-primary:active { -webkit-transform:scale(0.97); transform:scale(0.97) }
+.btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border) }
+.btn-blue {
+  background:var(--blue); color:#fff;
+  -webkit-box-shadow:0 4px 16px rgba(68,136,221,0.25); box-shadow:0 4px 16px rgba(68,136,221,0.25);
+}
+.btn-green {
+  background:var(--green); color:var(--bg);
+  -webkit-box-shadow:0 4px 16px rgba(68,187,119,0.25); box-shadow:0 4px 16px rgba(68,187,119,0.25);
+}
+.btn-row { display:flex; gap:10px; margin-top:20px }
+.btn-full { width:100% }
+.btn[disabled] { opacity:0.35 }
+
+/* ANIM */
+@-webkit-keyframes fadeIn { from{opacity:0;-webkit-transform:translateY(12px)} to{opacity:1;-webkit-transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@-webkit-keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+.fade-in { -webkit-animation:fadeIn 0.5s ease both; animation:fadeIn 0.5s ease both }
+.fade-in-d1 { -webkit-animation:fadeIn 0.5s ease 0.1s both; animation:fadeIn 0.5s ease 0.1s both }
+.fade-in-d2 { -webkit-animation:fadeIn 0.5s ease 0.2s both; animation:fadeIn 0.5s ease 0.2s both }
+.fade-in-d3 { -webkit-animation:fadeIn 0.5s ease 0.3s both; animation:fadeIn 0.5s ease 0.3s both }
+.fade-in-d4 { -webkit-animation:fadeIn 0.5s ease 0.4s both; animation:fadeIn 0.5s ease 0.4s both }
+.pulse-anim { -webkit-animation:pulse 1s infinite; animation:pulse 1s infinite }
+.pulse-fast { -webkit-animation:pulse 0.6s infinite; animation:pulse 0.6s infinite }
+
+@media(max-width:540px) {
+  .app { padding:12px 12px calc(40px + env(safe-area-inset-bottom, 20px)) }
+  .title { font-size:24px }
+  .seq-step { width:20px; height:20px; font-size:7px }
+  .weight-label { width:70px; font-size:11px }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div style="text-align:center;padding:60px 20px;color:var(--text2)">Loading...</div>
+</div>
+
+<script>
+// ===================================================================
+// WRAP EVERYTHING - catch parse errors
+// ===================================================================
+try {
+
+// ===================================================================
+// BJORKLUND
+// ===================================================================
+function bjorklund(pulses, steps) {
+  if (pulses >= steps) return new Array(steps).fill(1)
+  if (pulses === 0) return new Array(steps).fill(0)
+  var groups = []
+  var i
+  for (i = 0; i < pulses; i++) groups.push([1])
+  var rem = []
+  for (i = 0; i < steps - pulses; i++) rem.push([0])
+  while (rem.length > 1) {
+    var ng = []
+    var nr = []
+    var m = Math.min(groups.length, rem.length)
+    for (i = 0; i < m; i++) ng.push(groups[i].concat(rem[i]))
+    if (groups.length > rem.length) nr = groups.slice(rem.length)
+    else if (rem.length > groups.length) nr = rem.slice(groups.length)
+    groups = ng
+    rem = nr
+  }
+  var result = []
+  for (i = 0; i < groups.length; i++) result = result.concat(groups[i])
+  for (i = 0; i < rem.length; i++) result = result.concat(rem[i])
+  return result
+}
+
+function rotatePat(pat, n) {
+  var r = ((n % pat.length) + pat.length) % pat.length
+  return pat.slice(r).concat(pat.slice(0, r))
+}
+
+// ===================================================================
+// PATTERNS
+// ===================================================================
+var PATTERNS = [
+  { name:"Son Clave", sig:"E(5,16)", pulses:5, steps:16, origin:"Cuban" },
+  { name:"Tresillo", sig:"E(3,8)", pulses:3, steps:8, origin:"Afro-Latin" },
+  { name:"Rumba", sig:"E(5,8)", pulses:5, steps:8, origin:"Cuban" },
+  { name:"Fume Fume", sig:"E(5,12)", pulses:5, steps:12, origin:"Ghanaian" },
+  { name:"Aksak", sig:"E(4,9)", pulses:4, steps:9, origin:"Turkish" },
+  { name:"Bembe", sig:"E(7,12)", pulses:7, steps:12, origin:"West African" }
+]
+
+// ===================================================================
+// AUDIO - Safari safe
+// ===================================================================
+var audioCtx = null
+var audioUnlocked = false
+
+function ensureAudio() {
+  if (!audioCtx) {
+    var AC = window.AudioContext || window.webkitAudioContext
+    if (AC) audioCtx = new AC()
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume()
+  }
+  audioUnlocked = true
+}
+
+// Unlock on first touch/click anywhere
+function unlockAudio() {
+  ensureAudio()
+  document.removeEventListener('touchstart', unlockAudio, true)
+  document.removeEventListener('touchend', unlockAudio, true)
+  document.removeEventListener('click', unlockAudio, true)
+}
+document.addEventListener('touchstart', unlockAudio, true)
+document.addEventListener('touchend', unlockAudio, true)
+document.addEventListener('click', unlockAudio, true)
+
+function playHit(accent) {
+  if (!audioCtx) return
+  try {
+    var now = audioCtx.currentTime
+    var osc = audioCtx.createOscillator()
+    var gain = audioCtx.createGain()
+    var filt = audioCtx.createBiquadFilter()
+    osc.type = 'triangle'
+    osc.frequency.setValueAtTime(accent ? 880 : 440, now)
+    osc.frequency.exponentialRampToValueAtTime(accent ? 120 : 80, now + 0.08)
+    filt.type = 'lowpass'
+    filt.frequency.setValueAtTime(accent ? 4000 : 2000, now)
+    filt.frequency.exponentialRampToValueAtTime(200, now + 0.1)
+    gain.gain.setValueAtTime(accent ? 0.5 : 0.3, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12)
+    osc.connect(filt)
+    filt.connect(gain)
+    gain.connect(audioCtx.destination)
+    osc.start(now)
+    osc.stop(now + 0.15)
+  } catch(e) {}
+}
+
+function playTapSound() {
+  if (!audioCtx) return
+  try {
+    var now = audioCtx.currentTime
+    var osc = audioCtx.createOscillator()
+    var gain = audioCtx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(660, now)
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.05)
+    gain.gain.setValueAtTime(0.3, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08)
+    osc.connect(gain)
+    gain.connect(audioCtx.destination)
+    osc.start(now)
+    osc.stop(now + 0.1)
+  } catch(e) {}
+}
+
+// ===================================================================
+// MIC ENGINE
+// ===================================================================
+var micStream = null
+var micAnalyser = null
+var micSource = null
+var micDataArray = null
+var micActive = false
+var micPermissionGranted = false
+var micMonitorRAF = null
+var micNoiseFloor = 0.02
+var micThreshold = 0.08
+var micLastOnsetTime = 0
+var micOnsetCooldown = 80
+var micOnsetCallback = null
+var micLevelCallback = null
+var micSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+var isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+var micAvailable = micSupported && (isSecure || !isIOS)
+
+function requestMic(onDone) {
+  if (!micAvailable) {
+    if (onDone) onDone(false)
+    return
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+    micStream = stream
+    micPermissionGranted = true
+    if (onDone) onDone(true)
+  }).catch(function(e) {
+    console.warn('Mic error:', e)
+    micPermissionGranted = false
+    if (onDone) onDone(false)
+  })
+}
+
+function startMicListening(onOnset, onLevel) {
+  if (!micStream) return
+  ensureAudio()
+  if (!audioCtx) return
+
+  micSource = audioCtx.createMediaStreamSource(micStream)
+  micAnalyser = audioCtx.createAnalyser()
+  micAnalyser.fftSize = 512
+  micAnalyser.smoothingTimeConstant = 0.3
+  micSource.connect(micAnalyser)
+  micDataArray = new Float32Array(micAnalyser.fftSize)
+  micActive = true
+  micOnsetCallback = onOnset
+  micLevelCallback = onLevel
+  micLastOnsetTime = 0
+
+  var calibrationSamples = []
+  var calibrationStart = performance.now()
+
+  function monitor() {
+    if (!micActive) return
+    micAnalyser.getFloatTimeDomainData(micDataArray)
+    var sum = 0
+    for (var i = 0; i < micDataArray.length; i++) {
+      sum += micDataArray[i] * micDataArray[i]
+    }
+    var rms = Math.sqrt(sum / micDataArray.length)
+    var now = performance.now()
+    if (now - calibrationStart < 500) {
+      calibrationSamples.push(rms)
+      var maxCal = 0
+      for (var j = 0; j < calibrationSamples.length; j++) {
+        if (calibrationSamples[j] > maxCal) maxCal = calibrationSamples[j]
+      }
+      micNoiseFloor = maxCal * 1.5 + 0.01
+      micThreshold = micNoiseFloor * 2.5
+    }
+    var normalizedLevel = Math.min(1, rms / 0.15)
+    if (micLevelCallback) micLevelCallback(normalizedLevel)
+    if (rms > micThreshold && (now - micLastOnsetTime) > micOnsetCooldown) {
+      micLastOnsetTime = now
+      if (micOnsetCallback) micOnsetCallback(now)
+      var zone = document.querySelector('.mic-zone')
+      if (zone) {
+        zone.classList.add('onset')
+        setTimeout(function() { zone.classList.remove('onset') }, 100)
+      }
+      var ring = document.querySelector('.onset-ring')
+      if (ring) {
+        ring.classList.add('flash')
+        setTimeout(function() { ring.classList.remove('flash') }, 120)
+      }
+    }
+    micMonitorRAF = requestAnimationFrame(monitor)
+  }
+  monitor()
+}
+
+function stopMicListening() {
+  micActive = false
+  micOnsetCallback = null
+  micLevelCallback = null
+  if (micMonitorRAF) { cancelAnimationFrame(micMonitorRAF); micMonitorRAF = null }
+  if (micSource) { try { micSource.disconnect() } catch(e) {} micSource = null }
+  micAnalyser = null
+}
+
+function updateMicLevel(level) {
+  var fill = document.querySelector('.level-meter-fill')
+  if (fill) fill.style.width = (level * 100) + '%'
+}
+
+// ===================================================================
+// STATE
+// ===================================================================
+var STEP_LABELS = ['Explore', 'Challenge', 'Free Play', 'Your Beat']
+
+var S = {
+  step: 0,
+  inputMode: 'tap',
+  patternIdx: 0,
+  playing: false,
+  currentBeat: -1,
+  bpm: 100,
+  cp: null,
+  cPlaying: false,
+  cBeat: -1,
+  cTaps: [],
+  cHitTimes: [],
+  cResults: [],
+  cScore: null,
+  cListened: false,
+  cTapping: false,
+  fTaps: [],
+  fRecording: false,
+  fStart: 0,
+  weights: null,
+  sigPat: null,
+  micRequested: false
+}
+
+var seqIV = null
+var chalIV = null
+
+// ===================================================================
+// CHALLENGE GEN
+// ===================================================================
+function genChallenge() {
+  var opts = [
+    {p:7,s:16},{p:9,s:16},{p:5,s:12},{p:7,s:12},
+    {p:5,s:9},{p:6,s:13},{p:8,s:15},{p:7,s:15},
+    {p:11,s:16},{p:5,s:11},{p:4,s:7}
+  ]
+  var pick = opts[Math.floor(Math.random() * opts.length)]
+  var rot = Math.floor(Math.random() * pick.s)
+  return { pattern: rotatePat(bjorklund(pick.p, pick.s), rot), pulses: pick.p, steps: pick.s }
+}
+
+// ===================================================================
+// EXPLORE SEQ
+// ===================================================================
+function startSeq() {
+  stopSeq()
+  ensureAudio()
+  S.playing = true
+  S.currentBeat = -1
+  var pat = bjorklund(PATTERNS[S.patternIdx].pulses, PATTERNS[S.patternIdx].steps)
+  var stepMs = (60000 / S.bpm) / (PATTERNS[S.patternIdx].steps / 4)
+  seqIV = setInterval(function() {
+    S.currentBeat = (S.currentBeat + 1) % pat.length
+    if (pat[S.currentBeat]) playHit(S.currentBeat === 0)
+    var els = document.querySelectorAll('.explore-seq .seq-step')
+    for (var i = 0; i < els.length; i++) {
+      if (i === S.currentBeat) els[i].classList.add('playing')
+      else els[i].classList.remove('playing')
+    }
+  }, stepMs)
+}
+
+function stopSeq() {
+  S.playing = false
+  S.currentBeat = -1
+  if (seqIV) { clearInterval(seqIV); seqIV = null }
+}
+
+// ===================================================================
+// CHALLENGE SEQ
+// ===================================================================
+function startCListen() {
+  stopChal()
+  ensureAudio()
+  if (!S.cp) S.cp = genChallenge()
+  S.cPlaying = true
+  S.cBeat = -1
+  S.cTapping = false
+  var pat = S.cp.pattern
+  var stepMs = (60000 / S.bpm) / (pat.length / 4)
+  var loops = 0
+  chalIV = setInterval(function() {
+    S.cBeat = (S.cBeat + 1) % pat.length
+    if (S.cBeat === 0) loops++
+    if (loops >= 3) {
+      stopChal()
+      S.cListened = true
+      render()
+      return
+    }
+    if (pat[S.cBeat]) playHit(S.cBeat === 0)
+    var els = document.querySelectorAll('.challenge-seq .seq-step')
+    for (var i = 0; i < els.length; i++) {
+      if (i === S.cBeat) els[i].classList.add('playing-b')
+      else els[i].classList.remove('playing-b')
+    }
+  }, stepMs)
+}
+
+function startCTap() {
+  stopChal()
+  ensureAudio()
+  var pat = S.cp.pattern
+  S.cTapping = true
+  S.cPlaying = true
+  S.cBeat = -1
+  S.cTaps = []
+  S.cResults = []
+  S.cHitTimes = []
+  S.cScore = null
+  var stepMs = (60000 / S.bpm) / (pat.length / 4)
+  var startTime = performance.now()
+  var loop, idx
+  for (loop = 0; loop < 2; loop++) {
+    for (idx = 0; idx < pat.length; idx++) {
+      if (pat[idx]) S.cHitTimes.push(startTime + (loop * pat.length + idx) * stepMs)
+    }
+  }
+  if (S.inputMode === 'mic' && micPermissionGranted) {
+    startMicListening(function(t) { S.cTaps.push(t) }, updateMicLevel)
+  }
+  var gStep = 0
+  render()
+  chalIV = setInterval(function() {
+    var beat = gStep % pat.length
+    S.cBeat = beat
+    if (pat[beat]) playHit(beat === 0)
+    var els = document.querySelectorAll('.challenge-seq .seq-step')
+    for (var i = 0; i < els.length; i++) {
+      if (i === beat) els[i].classList.add('playing-b')
+      else els[i].classList.remove('playing-b')
+    }
+    gStep++
+    if (gStep >= pat.length * 2) {
+      setTimeout(function() {
+        stopChal()
+        stopMicListening()
+        scoreChal()
+        render()
+      }, 200)
+    }
+  }, stepMs)
+}
+
+function stopChal() {
+  S.cPlaying = false
+  S.cBeat = -1
+  S.cTapping = false
+  if (chalIV) { clearInterval(chalIV); chalIV = null }
+}
+
+function recChalTap() {
+  if (!S.cTapping) return
+  playTapSound()
+  S.cTaps.push(performance.now())
+  var zone = document.querySelector('.tap-zone')
+  if (zone) { zone.classList.add('flash'); setTimeout(function() { zone.classList.remove('flash') }, 80) }
+}
+
+function scoreChal() {
+  var tolerance = (60000 / S.bpm) / 4 * 0.4
+  var hits = S.cHitTimes.slice()
+  var taps = S.cTaps.slice()
+  var results = []
+  var matched = 0
+  var h, best, d, j
+  for (h = 0; h < hits.length; h++) {
+    best = { d: Infinity, idx: -1 }
+    for (j = 0; j < taps.length; j++) {
+      d = Math.abs(taps[j] - hits[h])
+      if (d < best.d) { best.d = d; best.idx = j }
+    }
+    if (best.d < tolerance) {
+      results.push('hit')
+      matched++
+      if (best.idx > -1) taps.splice(best.idx, 1)
+    } else {
+      results.push('miss')
+    }
+  }
+  S.cResults = results
+  S.cScore = Math.round((matched / hits.length) * 100)
+}
+
+// ===================================================================
+// FREE TAP
+// ===================================================================
+function startFreeRec() {
+  S.fTaps = []
+  S.fRecording = true
+  S.fStart = performance.now()
+  if (S.inputMode === 'mic' && micPermissionGranted) {
+    startMicListening(function(t) {
+      S.fTaps.push(t - S.fStart)
+      updateFreeTimeline()
+    }, updateMicLevel)
+  }
+}
+
+function recFreeTap() {
+  if (!S.fRecording) return
+  playTapSound()
+  S.fTaps.push(performance.now() - S.fStart)
+  updateFreeTimeline()
+  var zone = document.querySelector('.tap-zone')
+  if (zone) { zone.classList.add('flash'); setTimeout(function() { zone.classList.remove('flash') }, 80) }
+}
+
+function updateFreeTimeline() {
+  var tl = document.querySelector('.tap-timeline')
+  if (!tl) return
+  var maxT = 10000
+  tl.innerHTML = ''
+  var cls = S.inputMode === 'mic' ? 'green-mark' : 'accent-mark'
+  for (var i = 0; i < S.fTaps.length; i++) {
+    var pct = Math.min(98, (S.fTaps[i] / maxT) * 100)
+    var mk = document.createElement('div')
+    mk.className = 'tap-mark ' + cls
+    mk.style.left = pct + '%'
+    tl.appendChild(mk)
+  }
+}
+
+// ===================================================================
+// WEIGHTS
+// ===================================================================
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
+
+function analyzeTiming(taps) {
+  if (!taps || taps.length < 3) return { precision:0.5, groove:0.5, complexity:0.5, swing:0.5, density:0.5 }
+  var iois = []
+  var i
+  for (i = 1; i < taps.length; i++) iois.push(taps[i] - taps[i-1])
+  var sum = 0
+  for (i = 0; i < iois.length; i++) sum += iois[i]
+  var mean = sum / iois.length
+  var varSum = 0
+  for (i = 0; i < iois.length; i++) varSum += (iois[i] - mean) * (iois[i] - mean)
+  var std = Math.sqrt(varSum / iois.length)
+  var cv = std / (mean + 1)
+  var precision = 1 - clamp(cv * 2, 0, 0.9)
+  var swingVal = 0
+  for (i = 0; i < iois.length - 1; i += 2) {
+    if (iois[i+1]) swingVal += Math.abs(iois[i] - iois[i+1]) / mean
+  }
+  swingVal = clamp(swingVal / Math.max(1, iois.length / 2), 0, 0.95)
+  var dur = (taps[taps.length-1] - taps[0]) / 1000
+  var tps = taps.length / Math.max(0.5, dur)
+  var density = clamp(tps / 6, 0, 0.95)
+  var complexity = clamp(cv * 1.5 + swingVal * 0.3, 0, 0.95)
+  var groove = clamp(0.3 + swingVal * 0.6 + (1 - precision) * 0.2, 0, 0.95)
+  return { precision:precision, groove:groove, complexity:complexity, swing:swingVal, density:density }
+}
+
+function computeWeights() {
+  var cTaps = []
+  for (var i = 0; i < S.cTaps.length; i++) {
+    cTaps.push(i === 0 ? 0 : S.cTaps[i] - S.cTaps[0])
+  }
+  var cD = analyzeTiming(cTaps)
+  var fD = analyzeTiming(S.fTaps)
+  return {
+    precision: +(clamp(0.5*cD.precision + 0.5*fD.precision, 0.08, 0.95).toFixed(2)),
+    groove: +(clamp(0.3*cD.groove + 0.7*fD.groove, 0.08, 0.95).toFixed(2)),
+    complexity: +(clamp(0.4*cD.complexity + 0.6*fD.complexity, 0.08, 0.95).toFixed(2)),
+    swing: +(clamp(0.4*cD.swing + 0.6*fD.swing, 0.08, 0.95).toFixed(2)),
+    density: +(clamp(0.3*cD.density + 0.7*fD.density, 0.08, 0.95).toFixed(2))
+  }
+}
+
+function genSignature(w) {
+  var steps = w.complexity > 0.6 ? 16 : w.complexity > 0.4 ? 12 : 8
+  var pFrac = 0.25 + w.density * 0.45
+  var pulses = Math.max(2, Math.min(steps-1, Math.round(steps * pFrac)))
+  var pattern = bjorklund(pulses, steps)
+  if (w.swing > 0.4) pattern = rotatePat(pattern, Math.round(w.groove * 2))
+  return { pattern: pattern, pulses: pulses, steps: steps }
+}
+
+// ===================================================================
+// PLAY ONCE
+// ===================================================================
+function playOnce(patStr, cardCls) {
+  var pattern = JSON.parse(patStr)
+  ensureAudio()
+  stopSeq()
+  stopChal()
+  var i = 0
+  var stepMs = (60000 / S.bpm) / (pattern.length / 4)
+  var iv = setInterval(function() {
+    if (i >= pattern.length) {
+      clearInterval(iv)
+      var all = document.querySelectorAll('.seq-step.playing, .seq-step.playing-b')
+      for (var k = 0; k < all.length; k++) { all[k].classList.remove('playing', 'playing-b') }
+      return
+    }
+    if (pattern[i]) playHit(i === 0)
+    var card = document.querySelector('.' + cardCls)
+    if (card) {
+      var steps = card.querySelectorAll('.seq-step')
+      var useCls = cardCls === 'yours-card' ? 'playing' : 'playing-b'
+      for (var j = 0; j < steps.length; j++) {
+        if (j === i) steps[j].classList.add(useCls)
+        else steps[j].classList.remove(useCls)
+      }
+    }
+    i++
+  }, stepMs)
+}
+
+// ===================================================================
+// RENDER
+// ===================================================================
+function h(tag, cls, inner) { return '<div class="' + (cls||'') + '">' + (inner||'') + '</div>' }
+
+function renderHeader() {
+  return '<div class="header"><div class="brand">' +
+    '<div class="brand-icon">B</div>' +
+    '<div><div class="brand-name">Blizbeat</div><div class="brand-tag">RHYTHMIC IDENTITY</div></div>' +
+    '</div></div>'
+}
+
+function renderStepBar() {
+  var pips = ''
+  for (var i = 0; i < 4; i++) {
+    var c = i < S.step ? 'done' : (i === S.step ? 'active' : '')
+    pips += '<div class="step-pip ' + c + '" onclick="goTo(' + i + ')"></div>'
+  }
+  return '<div class="step-bar">' + pips + '</div>' +
+    '<div class="step-meta"><span class="step-num">STEP ' + (S.step+1) + '</span>' +
+    '<span class="step-of">' + STEP_LABELS[S.step] + '</span></div>'
+}
+
+function renderSeq(pattern, cls, wrap) {
+  var out = '<div class="inline-seq ' + (wrap||'') + '">'
+  for (var i = 0; i < pattern.length; i++) {
+    out += '<div class="seq-step ' + (pattern[i] ? cls : '') + '" data-idx="' + i + '">'
+    out += (pattern[i] ? '&#9679;' : '') + '</div>'
+  }
+  return out + '</div>'
+}
+
+function renderToggle() {
+  return '<div class="input-toggle">' +
+    '<button class="input-toggle-btn ' + (S.inputMode==='tap'?'active':'') + '" onclick="setMode(\'tap\')">&#9995; Tap</button>' +
+    '<button class="input-toggle-btn ' + (S.inputMode==='mic'?'active':'') + '" onclick="setMode(\'mic\')">&#127908; Mic</button>' +
+    '</div>'
+}
+
+// --- STEP 0 ---
+function renderStep0() {
+  var pat = PATTERNS[S.patternIdx]
+  var seq = bjorklund(pat.pulses, pat.steps)
+  var out = '<div class="fade-in"><div class="title">Explore rhythms</div>' +
+    '<div class="subtitle">Ancient patterns generated by pure math. Listen and let them land.</div></div>'
+  out += '<div class="pattern-grid fade-in-d1">'
+  for (var i = 0; i < PATTERNS.length; i++) {
+    out += '<div class="pattern-btn ' + (i===S.patternIdx?'selected':'') + '" onclick="selPat('+i+')">' +
+      '<div class="p-name">'+PATTERNS[i].name+'</div><div class="p-sig">'+PATTERNS[i].sig+'</div></div>'
+  }
+  out += '</div>'
+  out += '<div class="card fade-in-d2"><div class="card-label">PATTERN: '+pat.name+'</div>' +
+    '<div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:10px">'+pat.origin+' / '+pat.pulses+' hits in '+pat.steps+' steps</div>' +
+    renderSeq(seq, 'on', 'explore-seq') +
+    '<div class="transport">' +
+    '<div class="tempo-display"><span>'+S.bpm+'</span> bpm</div>' +
+    '<button class="play-btn" onclick="toggleEx()">' +
+    (S.playing
+      ? '<svg width="20" height="20" viewBox="0 0 20 20"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>'
+      : '<svg width="20" height="20" viewBox="0 0 20 20"><polygon points="5,2 18,10 5,18"/></svg>') +
+    '</button>' +
+    '<div class="tempo-display" style="visibility:hidden"><span>'+S.bpm+'</span></div>' +
+    '</div></div>' +
+    '<div class="btn-row fade-in-d3"><button class="btn btn-primary btn-full" onclick="nextStep()">Ready for the challenge &#8594;</button></div>'
+  return out
+}
+
+// --- STEP 1 ---
+function renderStep1() {
+  if (!S.cp) S.cp = genChallenge()
+  var cp = S.cp
+  var scored = S.cScore !== null
+  var out = '<div class="fade-in"><div class="title">Tap the pattern</div>' +
+    '<div class="subtitle">A rhythm you have never heard. Listen, then reproduce it.</div></div>'
+  out += '<div class="card fade-in-d1"><div class="card-label">GENERATED: E('+cp.pulses+','+cp.steps+')</div>' +
+    renderSeq(cp.pattern, 'on-blue', 'challenge-seq') +
+    '<div style="text-align:center;margin-top:12px">'
+  if (!S.cListened && !S.cPlaying) {
+    out += '<button class="btn btn-blue" onclick="startCListen()">&#9654; Listen (plays twice)</button>'
+  } else if (S.cPlaying && !S.cTapping) {
+    out += '<div class="pulse-anim" style="font-weight:500;font-size:13px;color:var(--blue)">Listening... focus on the pattern</div>'
+  } else if (S.cListened && !scored && !S.cTapping) {
+    out += '<button class="btn btn-blue" onclick="startCTap()">&#129345; Now reproduce it</button>'
+  } else if (S.cTapping) {
+    out += '<div class="pulse-fast" style="font-weight:500;font-size:13px;color:var(--blue)">GO! Match the beats</div>'
+  }
+  out += '</div></div>'
+
+  if (S.cTapping) {
+    out += renderToggle()
+    if (S.inputMode === 'tap') {
+      out += '<div class="tap-zone challenge-mode fade-in" id="chalTapZone">' +
+        '<div class="tap-icon">&#129345;</div><div class="tap-text">' + S.cTaps.length + ' taps</div>' +
+        '<div class="tap-hint">Spacebar or tap here</div></div>'
+    } else if (micPermissionGranted) {
+      out += '<div class="mic-zone challenge-mode listening fade-in">' +
+        '<div class="onset-ring"></div><div class="mic-icon">&#127908;</div>' +
+        '<div class="mic-text">Listening...</div><div class="mic-hint">Clap, tap, or vocalize</div>' +
+        '<div class="level-meter-wrap"><div class="level-meter-fill" style="width:0%"></div></div></div>'
+    } else {
+      out += '<div class="mic-permission fade-in"><div class="mp-icon">&#127908;</div>' +
+        (micAvailable
+          ? '<div class="mp-text">Mic access needed to hear your rhythm.</div><button class="btn btn-green" onclick="enableMicChal()">Allow microphone</button>'
+          : '<div class="mp-text">Mic requires HTTPS. Use tap mode for now, or serve from localhost.</div>') +
+        '</div>'
+    }
+  }
+
+  if (scored) {
+    var sc = S.cScore > 70 ? 'var(--green)' : (S.cScore > 40 ? 'var(--accent)' : 'var(--red)')
+    out += '<div class="score-display fade-in"><div class="score-big" style="color:'+sc+'">'+S.cScore+'%</div>' +
+      '<div class="score-label">timing accuracy</div></div>'
+    out += '<div class="challenge-feedback fade-in-d1">'
+    for (var i = 0; i < S.cResults.length; i++) out += '<div class="fb-dot '+S.cResults[i]+'"></div>'
+    out += '</div>'
+    var interp = ''
+    if (S.cScore > 70) interp = 'High precision. You locked onto the grid. Your motor system prioritizes <strong style="color:var(--green)">timing accuracy</strong>.'
+    else if (S.cScore > 40) interp = 'Selective hits. You caught the groove but added your own feel. Your motor system <strong style="color:var(--accent)">interprets</strong> rather than copies.'
+    else interp = 'Free interpretation. You made it yours. High <strong style="color:var(--red)">expression weight</strong>.'
+    out += '<div class="card fade-in-d2"><div style="font-size:13px;color:var(--text2);line-height:1.6">'+interp+
+      '<br><br><span style="color:var(--text3)">That was constrained behavior. Next: what you create freely.</span></div></div>'
+    out += '<div class="btn-row fade-in-d3"><button class="btn btn-secondary" onclick="resetChal()">Try again</button>' +
+      '<button class="btn btn-primary" style="flex:1" onclick="nextStep()">Free play &#8594;</button></div>'
+  } else if (!S.cTapping) {
+    out += '<div class="btn-row fade-in-d2"><button class="btn btn-secondary" onclick="newChal()">&#8635; New pattern</button></div>'
+  }
+  return out
+}
+
+// --- STEP 2 ---
+function renderStep2() {
+  var ct = S.fTaps.length
+  var enough = ct >= 10
+  var out = '<div class="fade-in"><div class="title">Now, just you.</div>' +
+    '<div class="subtitle">No pattern. No guide. Any rhythm, any speed.</div></div>'
+  out += renderToggle()
+  if (S.inputMode === 'tap') {
+    out += '<div class="tap-zone fade-in-d1" id="freeTapZone">' +
+      '<div class="tap-icon">&#128075;</div>' +
+      '<div class="tap-text">'+(ct===0?'Tap here':ct+' taps')+'</div>' +
+      '<div class="tap-hint">'+(ct<10?'Keep going, at least 10 taps':'Looking good. Keep going or continue.')+'</div></div>'
+  } else if (!micPermissionGranted) {
+    out += '<div class="mic-permission fade-in-d1"><div class="mp-icon">&#127908;</div>' +
+      (micAvailable
+        ? '<div class="mp-text">Blizbeat needs your microphone to hear your rhythm.</div><button class="btn btn-green" onclick="enableMicFree()">Allow microphone</button>'
+        : '<div class="mp-text">Mic requires HTTPS. Use tap mode, or open via localhost.</div>') +
+      '</div>'
+  } else {
+    out += '<div class="mic-zone listening fade-in-d1">' +
+      '<div class="onset-ring"></div><div class="mic-icon">&#127908;</div>' +
+      '<div class="mic-text">'+(ct===0?'Make some noise':ct+' beats detected')+'</div>' +
+      '<div class="mic-hint">'+(ct<10?'Clap, snap, or vocalize.':'Your rhythm is taking shape.')+'</div>' +
+      '<div class="level-meter-wrap"><div class="level-meter-fill" style="width:0%"></div></div></div>'
+  }
+  out += '<div class="tap-timeline fade-in-d2"></div>'
+  out += '<div class="card fade-in-d2"><div class="card-label">YOUR TIMELINE</div>' +
+    '<div style="font-size:13px;color:var(--text2);line-height:1.5">' +
+    (ct===0?'Each mark is a beat. Patterns emerge from your choices.'
+      :ct<10?'Keep going. More beats, clearer signature.'
+        :ct+' beats. Two sources now: how you interpreted the challenge and what you chose freely.') +
+    '</div></div>'
+  out += '<div class="btn-row fade-in-d3"><button class="btn btn-secondary" onclick="resetFree()">Reset</button>' +
+    '<button class="btn btn-primary" style="flex:1" onclick="nextStep()" '+(enough?'':'disabled')+'>Discover my rhythm &#8594;</button></div>'
+  return out
+}
+
+// --- STEP 3 ---
+function renderStep3() {
+  if (!S.weights) S.weights = computeWeights()
+  if (!S.sigPat) S.sigPat = genSignature(S.weights)
+  var w = S.weights
+  var sig = S.sigPat
+  var generic = bjorklund(4, 16)
+  var keys = ['precision','groove','complexity','swing','density']
+  var cls = {
+    precision: w.precision>0.6?'TRAIT':'MIXED', groove:'TRAIT',
+    complexity: w.complexity>0.5?'MIXED':'TRAIT', swing:'STATE', density:'STATE'
+  }
+  var colors = { precision:'var(--accent)', groove:'var(--green)', complexity:'var(--blue)', swing:'var(--pink)', density:'var(--red)' }
+  var interp = ''
+  if (w.precision > 0.65) interp = '&#127919; <strong style="color:var(--accent)">Grid-locked.</strong> Your beats land on time. Tight, controlled.'
+  else if (w.groove > 0.6) interp = '&#127754; <strong style="color:var(--green)">Groove-driven.</strong> Your timing drifts with intent. Expression over precision.'
+  else interp = '&#9889; <strong style="color:var(--blue)">Balanced.</strong> Precision when needed, swing when wanted.'
+
+  var out = '<div class="result-hero fade-in"><div class="result-icon">&#128302;</div>' +
+    '<div class="result-title">Your rhythmic DNA</div>' +
+    '<div class="result-sub">Two contexts. One identity.</div></div>'
+  out += '<div class="card fade-in-d1"><div class="card-label">MOTOR COST WEIGHTS</div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.5">Blended from challenge (constrained) + free play (unconstrained)</div>'
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i]
+    out += '<div class="weight-row"><div class="weight-label">'+k+'</div>' +
+      '<div class="weight-track"><div class="weight-fill" style="width:'+(w[k]*100)+'%;background:'+colors[k]+'"></div></div>' +
+      '<div class="weight-val">'+w[k].toFixed(2)+'</div>' +
+      '<span class="weight-badge badge-'+cls[k].toLowerCase()+'">'+cls[k]+'</span></div>'
+  }
+  out += '</div>'
+  out += '<div class="card fade-in-d2"><div class="card-label">WHAT THIS MEANS</div>' +
+    '<div style="font-size:13px;color:var(--text2);line-height:1.7">'+interp+
+    '<br><br><strong style="color:var(--green)">TRAIT</strong> = stable across both contexts. ' +
+    '<strong style="color:var(--red)">STATE</strong> = shifted between challenge and free play.</div></div>'
+
+  out += '<div class="compare-row fade-in-d3">' +
+    '<div class="compare-card generic generic-card"><div class="cc-label">GENERIC</div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Same for everyone</div>' +
+    renderSeq(generic, 'on-blue', '') +
+    '<button class="btn btn-secondary" style="width:100%;margin-top:10px;font-size:12px;padding:8px" onclick="playOnce(\''+JSON.stringify(generic)+'\',\'generic-card\')">&#9654; Listen</button></div>' +
+    '<div class="compare-card yours yours-card"><div class="cc-label">YOURS</div>' +
+    '<div style="font-size:11px;color:var(--accent);margin-bottom:8px">E('+sig.pulses+','+sig.steps+') from your weights</div>' +
+    renderSeq(sig.pattern, 'on', '') +
+    '<button class="btn btn-primary" style="width:100%;margin-top:10px;font-size:12px;padding:8px" onclick="playOnce(\''+JSON.stringify(sig.pattern)+'\',\'yours-card\')">&#9654; Listen</button></div></div>'
+
+  out += '<div class="card fade-in-d4" style="border-color:var(--accent);background:var(--accent-dim)">' +
+    '<div style="font-size:13px;color:var(--text);line-height:1.7;text-align:center">' +
+    '<strong>This is RAST.</strong><br>Observe in two contexts &#8594; extract intent &#8594; decompose trait vs. state &#8594; generate in a new context.<br>' +
+    '<span style="color:var(--text2)">The same pipeline that personalizes astronaut training and cardiac rehabilitation.</span></div></div>'
+
+  out += '<div class="btn-row fade-in-d4"><button class="btn btn-secondary" onclick="goTo(0)">Start over</button>' +
+    '<button class="btn btn-primary" style="flex:1" onclick="alert(\'Coming soon\')">Share &#8599;</button></div>'
+  return out
+}
+
+// ===================================================================
+// ACTIONS
+// ===================================================================
+function selPat(i) { stopSeq(); S.patternIdx = i; render() }
+function toggleEx() { if (S.playing) stopSeq(); else startSeq(); render() }
+function resetChal() {
+  S.cp = genChallenge(); S.cListened = false; S.cScore = null
+  S.cTaps = []; S.cResults = []; stopChal(); stopMicListening(); render()
+}
+function newChal() { resetChal() }
+function resetFree() {
+  stopMicListening(); S.fTaps = []; S.fRecording = true; S.fStart = performance.now()
+  if (S.inputMode === 'mic' && micPermissionGranted) startFreeRec()
+  render()
+}
+
+function setMode(mode) {
+  stopMicListening()
+  S.inputMode = mode
+  if (mode === 'mic' && !micPermissionGranted && !S.micRequested) {
+    S.micRequested = true
+    requestMic(function(ok) {
+      if (!ok) S.inputMode = 'tap'
+      render()
+      if (ok && S.step === 2) startFreeRec()
+    })
+    return
+  }
+  render()
+  if (mode === 'mic' && micPermissionGranted && S.step === 2) {
+    setTimeout(function() { startFreeRec() }, 50)
+  }
+}
+
+function enableMicChal() {
+  requestMic(function(ok) {
+    if (!ok) { S.inputMode = 'tap'; render(); return }
+    render()
+  })
+}
+function enableMicFree() {
+  requestMic(function(ok) {
+    if (!ok) { S.inputMode = 'tap'; render(); return }
+    startFreeRec()
+    render()
+  })
+}
+
+function nextStep() {
+  stopSeq(); stopChal(); stopMicListening()
+  if (S.step === 2) { S.weights = computeWeights(); S.sigPat = genSignature(S.weights) }
+  S.step = Math.min(3, S.step + 1)
+  if (S.step === 2 && !S.fRecording) { S.fRecording = true; S.fStart = performance.now() }
+  render()
+  if (S.step === 2 && S.inputMode === 'mic' && micPermissionGranted) {
+    setTimeout(function() { startFreeRec() }, 100)
+  }
+}
+
+function goTo(s) {
+  stopSeq(); stopChal(); stopMicListening()
+  if (s === 0) {
+    S.weights = null; S.sigPat = null; S.fTaps = []
+    S.cScore = null; S.cp = null; S.cListened = false
+    S.cTaps = []; S.cResults = []
+  }
+  S.step = s; render()
+}
+
+// ===================================================================
+// TOUCH HANDLERS (delegated)
+// ===================================================================
+document.addEventListener('touchstart', function(e) {
+  var el = e.target
+  // Walk up to find tap zone
+  while (el && el !== document.body) {
+    if (el.id === 'chalTapZone') { e.preventDefault(); recChalTap(); return }
+    if (el.id === 'freeTapZone') { e.preventDefault(); recFreeTap(); return }
+    if (el.classList && el.classList.contains('tap-zone')) {
+      e.preventDefault()
+      if (S.step === 1) recChalTap()
+      else if (S.step === 2) recFreeTap()
+      return
+    }
+    el = el.parentElement
+  }
+}, { passive: false })
+
+// Click fallback for desktop
+document.addEventListener('mousedown', function(e) {
+  var el = e.target
+  while (el && el !== document.body) {
+    if (el.id === 'chalTapZone' || (el.classList && el.classList.contains('tap-zone') && S.step === 1 && S.inputMode === 'tap')) {
+      recChalTap(); return
+    }
+    if (el.id === 'freeTapZone' || (el.classList && el.classList.contains('tap-zone') && S.step === 2 && S.inputMode === 'tap')) {
+      recFreeTap(); return
+    }
+    el = el.parentElement
+  }
+})
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space' || e.key === ' ') {
+    e.preventDefault()
+    if (S.step === 1 && S.cTapping && S.inputMode === 'tap') recChalTap()
+    else if (S.step === 2 && S.inputMode === 'tap') recFreeTap()
+  }
+})
+
+function renderBanner() {
+  return '<div class="demo-banner">' +
+    'This is a simplified demo of the rhythm identity pipeline. ' +
+    'For the full experience with pattern challenges, microphone input, and personalized Euclidean rhythm generation, try ' +
+    '<a href="https://blizbeat.yumaniq.com">blizbeat.yumaniq.com</a>' +
+    '</div>'
+}
+
+// ===================================================================
+// MAIN RENDER
+// ===================================================================
+function render() {
+  var fns = [renderStep0, renderStep1, renderStep2, renderStep3]
+  document.getElementById('app').innerHTML = renderHeader() + renderStepBar() + fns[S.step]() + renderBanner()
+  if (S.step === 2) updateFreeTimeline()
+}
+
+render()
+
+} catch(err) {
+  // Show error visually
+  document.getElementById('app').innerHTML =
+    '<div style="padding:40px 20px;color:#dd5544;font-family:monospace;font-size:13px;line-height:1.6">' +
+    '<strong>Error:</strong> ' + err.message + '<br><br>' + (err.stack || '') + '</div>'
+}
+</script>
+</body>
+</html>
