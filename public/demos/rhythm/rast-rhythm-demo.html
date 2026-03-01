@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>Blizbeat</title>
+<title>MoveIt</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -883,7 +883,7 @@ function h(tag, cls, inner) { return '<div class="' + (cls||'') + '">' + (inner|
 function renderHeader() {
   return '<div class="header"><div class="brand">' +
     '<div class="brand-icon">B</div>' +
-    '<div><div class="brand-name">Blizbeat</div><div class="brand-tag">RHYTHMIC IDENTITY</div></div>' +
+    '<div><div class="brand-name">MoveIt</div><div class="brand-tag">RHYTHMIC IDENTITY</div></div>' +
     '</div></div>'
 }
 
@@ -1019,7 +1019,7 @@ function renderStep2() {
   } else if (!micPermissionGranted) {
     out += '<div class="mic-permission fade-in-d1"><div class="mp-icon">&#127908;</div>' +
       (micAvailable
-        ? '<div class="mp-text">Blizbeat needs your microphone to hear your rhythm.</div><button class="btn btn-green" onclick="enableMicFree()">Allow microphone</button>'
+        ? '<div class="mp-text">MoveIt needs your microphone to hear your rhythm.</div><button class="btn btn-green" onclick="enableMicFree()">Allow microphone</button>'
         : '<div class="mp-text">Mic requires HTTPS. Use tap mode, or open via localhost.</div>') +
       '</div>'
   } else {
