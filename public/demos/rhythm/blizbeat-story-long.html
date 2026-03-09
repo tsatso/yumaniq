@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Every Move You Make - Blizbeat</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Playfair Display', Georgia, serif;
+    background: #0a0908;
+    color: #c8bfb0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d4a84322; border-radius: 2px; }
+
+  /* Entry screen */
+  #entry {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #0a0908;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    cursor: pointer;
+    transition: opacity 1.2s ease, visibility 1.2s ease;
+  }
+  #entry.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  #entry h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-style: italic;
+    font-weight: 400;
+    color: #e8d5b0;
+    text-align: center;
+    line-height: 1.2;
+  }
+  #entry .hint {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: #6a6055;
+    margin-top: 2rem;
+    font-style: italic;
+  }
+  #entry .play-btn {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #d4a84344;
+    border-radius: 50%;
+    margin-top: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  #entry .play-btn::after {
+    content: '';
+    width: 0; height: 0;
+    border-left: 12px solid #d4a843;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    margin-left: 4px;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+  }
+
+  /* Fixed overlays */
+  .gradient-top {
+    position: fixed; top: 0; left: 0; right: 0; height: 120px;
+    background: linear-gradient(to bottom, #0a0908, transparent);
+    pointer-events: none; z-index: 10;
+  }
+  .gradient-bottom {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+    background: linear-gradient(to top, #0a0908, transparent);
+    pointer-events: none; z-index: 10;
+  }
+
+  /* Audio indicator */
+  .audio-indicator {
+    position: fixed; top: 20px; right: 24px; z-index: 20;
+    display: flex; align-items: flex-end; gap: 3px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .audio-indicator.active { opacity: 0.4; }
+  .audio-indicator .bar {
+    width: 2px; background: #d4a843; border-radius: 1px;
+  }
+  .audio-indicator .bar:nth-child(1) { animation: bar1 1.1s ease-in-out infinite; }
+  .audio-indicator .bar:nth-child(2) { animation: bar2 1.2s ease-in-out infinite; }
+  .audio-indicator .bar:nth-child(3) { animation: bar3 1.3s ease-in-out infinite; }
+  @keyframes bar1 { 0%,100% { height: 8px; } 50% { height: 16px; } }
+  @keyframes bar2 { 0%,100% { height: 13px; } 50% { height: 6px; } }
+  @keyframes bar3 { 0%,100% { height: 16px; } 50% { height: 10px; } }
+
+  /* Story container */
+  #story {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 8vw, 4rem);
+    opacity: 0;
+    transition: opacity 1.5s ease 0.5s;
+  }
+  #story.visible { opacity: 1; }
+
+  /* Section base */
+  .section {
+    opacity: 0;
+    transform: translateY(35px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Section types */
+  .s-title {
+    padding: 22vh 0 2vh;
+    text-align: center;
+  }
+  .s-title h1 {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 400;
+    font-style: italic;
+    color: #e8d5b0;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+  }
+
+  .s-subtitle {
+    text-align: center;
+    padding-bottom: 32vh;
+  }
+  .s-subtitle p {
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #8a7e6b;
+    font-style: italic;
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+  }
+
+  .s-act {
+    padding: 16vh 0 8vh;
+    text-align: center;
+  }
+  .s-act span {
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #d4a843;
+    letter-spacing: 0.35em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d4a84355;
+  }
+
+  .s-story {
+    padding: 0.8rem 0;
+    max-width: 640px;
+  }
+  .s-story p {
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    color: #c8bfb0;
+    line-height: 1.85;
+  }
+
+  .s-emphasis {
+    padding: 2.2rem 0;
+    max-width: 640px;
+  }
+  .s-emphasis p {
+    font-size: clamp(1.15rem, 3.2vw, 1.45rem);
+    color: #e8d5b0;
+    line-height: 1.75;
+    font-style: italic;
+    border-left: 2px solid #d4a84366;
+    padding-left: 1.5rem;
+  }
+
+  .s-revelation {
+    padding: 6vh 0;
+    text-align: center;
+  }
+  .s-revelation p {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: #d4a843;
+    font-style: italic;
+    font-weight: 400;
+    text-shadow: 0 0 80px #d4a84333;
+  }
+
+  .s-divider {
+    padding: 5vh 0;
+    text-align: center;
+  }
+  .s-divider span {
+    color: #d4a84344;
+    font-size: 1.2rem;
+    letter-spacing: 1.5rem;
+  }
+
+  .s-closing {
+    padding: 0.6rem 0;
+    max-width: 580px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .s-closing p {
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    color: #a09888;
+    line-height: 1.85;
+    font-style: italic;
+  }
+
+  .s-closingbreak { height: 6vh; }
+
+  .s-final {
+    padding: 0.4rem 0;
+    text-align: center;
+  }
+  .s-final p {
+    font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+    color: #e8d5b0;
+    line-height: 1.75;
+    font-style: italic;
+  }
+
+  .s-brand {
+    padding: 14vh 0 8vh;
+    text-align: center;
+  }
+  .s-brand .name {
+    font-family: Arial, sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1B2A4A;
+    letter-spacing: 0.08em;
+  }
+  .s-brand .company {
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    color: #5a5347;
+    letter-spacing: 0.15em;
+    margin-top: 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- Entry Screen -->
+<div id="entry" onclick="startExperience()">
+  <h1>Every Move You Make</h1>
+  <p class="hint">tap to begin &middot; use headphones</p>
+  <div class="play-btn"></div>
+</div>
+
+<!-- Fixed UI -->
+<div class="gradient-top"></div>
+<div class="gradient-bottom"></div>
+<div class="audio-indicator" id="audioIndicator">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+</div>
+
+<!-- Story -->
+<div id="story"></div>
+
+<script>
+// ─── Story Content ───────────────────────────────────────
+const sections = [
+  { type: "title", html: "<h1>Every Move You Make</h1>", zone: "silence" },
+  { type: "subtitle", html: "<p>A story about the music trapped inside your body</p>" },
+
+  { type: "act", html: "<span>THE GAP</span>", zone: "gap" },
+  { type: "story", html: "<p>David drives home from rehearsal with the windows down, replaying the same moment.</p>" },
+  { type: "story", html: "<p>The bridge in the second song. He heard the bass line in his head, clear as a bell. A warm, syncopated phrase that would have locked perfectly with the drummer\u2019s hi-hat.</p>" },
+  { type: "emphasis", html: "<p>His fingers played something else.</p>" },
+  { type: "story", html: "<p>He is 45 years old. Two years ago he bought a bass guitar because something in him needed to make music. Not listen to it. Make it. He found a teacher. He practiced scales, learned patterns, followed tabs.</p>" },
+  { type: "story", html: "<p>He can play. That is not the problem.</p>" },
+  { type: "emphasis", html: "<p>The problem is that what comes out of his hands has nothing to do with what lives in his body.</p>" },
+  { type: "story", html: "<p>When David hears a great bass line, his whole body responds. His head bobs to the right place. His shoulders land on the pocket. His foot finds beat one before the drummer does.</p>" },
+  { type: "emphasis", html: "<p>His body is a musician. His fingers are not.</p>" },
+
+  { type: "divider", html: "<span>\u2022\u2003\u2003\u2022\u2003\u2003\u2022</span>" },
+
+  { type: "story", html: "<p>Debby sings in a band. She has been dancing since she was four. When she moves to music, something happens that she cannot explain and does not need to.</p>" },
+  { type: "story", html: "<p>Six months ago the bass player in her band left. She volunteered to fill in. She had been studying bass for exactly this moment.</p>" },
+  { type: "story", html: "<p>By the fourth rehearsal, the guitarist started giving her a look. Not mean. Worse. Patient. The kind of patience people offer when they have stopped expecting you to get it right.</p>" },
+  { type: "emphasis", html: "<p>She would rather not play at all than keep hearing herself fail to be herself.</p>" },
+
+  { type: "act", html: "<span>THE UNGUARDED MOMENT</span>", zone: "unguarded" },
+  { type: "story", html: "<p>A Tuesday night. David is alone. Bad rehearsal. Half a glass of wine. His bass sits in the corner like an accusation.</p>" },
+  { type: "story", html: "<p>He puts on a track and his body starts moving before he decides to move.</p>" },
+  { type: "story", html: "<p>He is not performing. He is not practicing. He is just being musical. In the kitchen, in socks, with nobody watching. His hips find the groove. His shoulders phrase the melody. His hands, free from the fretboard, move exactly the way music moves.</p>" },
+  { type: "emphasis", html: "<p>Fluid. Confident. His.</p>" },
+  { type: "story", html: "<p>He catches himself and stops. This is who he is as a musician. This body. These movements. This feel. And none of it reaches his instrument.</p>" },
+
+  { type: "divider", html: "<span>\u2022\u2003\u2003\u2022\u2003\u2003\u2022</span>" },
+
+  { type: "story", html: "<p>Debby is in her car, stuck in traffic, singing a bass line. Not humming a melody. Singing the bass.</p>" },
+  { type: "story", html: "<p>Her voice can do what her fingers refuse to do. Her voice and her body are one system, and that system knows music. It is only the instrument that rejects her.</p>" },
+  { type: "emphasis", html: "<p>She arrives home and the bass line dies with the ignition.</p>" },
+
+  { type: "act", html: "<span>THE SOUND INSIDE</span>", zone: "recognition" },
+  { type: "story", html: "<p>David is standing in his living room. His phone is propped against a stack of books. A backing track plays.</p>" },
+  { type: "story", html: "<p>He closes his eyes because that is the only way to stop judging himself. And the moment his eyes close, his body remembers what it knows.</p>" },
+  { type: "story", html: "<p>Fifteen seconds in, he hears bass.</p>" },
+  { type: "story", html: "<p>Not from his hands. From the speakers. And something about it stops him mid-movement. Because the bass is not generic. It sits behind the beat the way he sits behind the beat. It breathes where he breathes. It phrases the way his shoulders phrase.</p>" },
+  { type: "revelation", html: "<p>That is me.</p>" },
+  { type: "story", html: "<p>Not a bass line generated by an algorithm. The musician who has lived in his body for 45 years, the one who never had a way out through his fingers, and he is hearing that musician play bass for the first time.</p>" },
+
+  { type: "divider", html: "<span>\u2022\u2003\u2003\u2022\u2003\u2003\u2022</span>" },
+
+  { type: "story", html: "<p>Debby tries the other mode. She sings and moves at the same time. Of course she does. She has never been able to sing without her body joining in.</p>" },
+  { type: "story", html: "<p>The playback is a bass guitar performing her line. Her notes. Her rhythm. Her phrasing. But it is more than what she sang. The groove from her body is in there too.</p>" },
+  { type: "emphasis", html: "<p>Her voice gave it the melody. Her body gave it the soul.</p>" },
+  { type: "story", html: "<p>She plays it back three times. The third time, she is already moving again, her body responding to her own bass line, and she is laughing because it is so obviously her that it is almost embarrassing.</p>" },
+  { type: "story", html: "<p>She wipes her eyes. She picks up her bass.</p>" },
+  { type: "story", html: "<p>She does not play perfectly. Her fingers still stumble. But something is different. For the first time, she knows exactly what she is reaching for. Not a teacher\u2019s version of correct. Her own sound.</p>" },
+  { type: "emphasis", html: "<p>The gap is no longer a wall. It is a distance. And distances can be closed.</p>" },
+
+  { type: "act", html: "<span></span>", zone: "silence" },
+  { type: "closing", html: "<p>Everyone who has ever felt music in their body and failed to get it through their fingers knows this gap.</p>" },
+  { type: "closing", html: "<p>It is not about talent. It is not about practice hours.</p>" },
+  { type: "closing", html: "<p>It is about the distance between who you are as a musician and what your hands can do.</p>" },
+  { type: "closingbreak", html: "" },
+  { type: "final", html: "<p>The music was never missing. It was always there.</p>" },
+  { type: "final", html: "<p>It just needed a way out.</p>" },
+  { type: "brand", html: '<div class="name">blizbeat</div><div class="company">YUMANIQ</div>' },
+];
+
+// ─── Audio Engine ────────────────────────────────────────
+let synth, pad, bassLoop, currentZone = null, audioStarted = false;
+
+async function initAudio() {
+  if (audioStarted) return;
+  await Tone.start();
+  audioStarted = true;
+
+  synth = new Tone.MonoSynth({
+    oscillator: { type: "triangle" },
+    envelope: { attack: 0.02, decay: 0.3, sustain: 0.4, release: 0.8 },
+    filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.5, baseFrequency: 80, octaves: 2.5 },
+  }).toDestination();
+  synth.volume.value = -14;
+
+  pad = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "sine" },
+    envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 4 },
+  }).toDestination();
+  pad.volume.value = -30;
+
+  document.getElementById("audioIndicator").classList.add("active");
+}
+
+function setZone(zone) {
+  if (!audioStarted || zone === currentZone) return;
+  currentZone = zone;
+
+  if (bassLoop) { bassLoop.stop(); bassLoop.dispose(); bassLoop = null; }
+  Tone.getTransport().stop();
+  Tone.getTransport().cancel();
+
+  if (zone === "gap") {
+    synth.filterEnvelope.octaves = 1.2;
+    synth.envelope.release = 0.15;
+    Tone.getTransport().bpm.value = 88;
+    let beat = 0;
+    bassLoop = new Tone.Loop((time) => {
+      synth.triggerAttackRelease("E2", "8n", time, 0.45);
+      beat++;
+    }, "4n");
+    bassLoop.start(0);
+    Tone.getTransport().start();
+
+  } else if (zone === "unguarded") {
+    if (pad) pad.triggerAttackRelease(["D3", "A3", "F#4"], 10);
+
+  } else if (zone === "recognition") {
+    synth.filterEnvelope.octaves = 2.5;
+    synth.envelope.release = 0.6;
+    Tone.getTransport().bpm.value = 96;
+    let step = 0;
+    const pattern = [
+      { n: "D2", d: "8n", v: 0.8 },
+      { n: null },
+      { n: "D3", d: "16n", v: 0.35 },
+      { n: "A2", d: "8n", v: 0.7 },
+      { n: "E2", d: "8n.", v: 0.6 },
+      { n: null },
+      { n: "F#2", d: "8n", v: 0.6 },
+      { n: "G2", d: "4n", v: 0.75 },
+      { n: null },
+      { n: "A2", d: "16n", v: 0.35 },
+      { n: "D2", d: "8n", v: 0.8 },
+      { n: "B1", d: "8n", v: 0.65 },
+      { n: "A1", d: "4n", v: 0.55 },
+      { n: null },
+      { n: "D2", d: "16n", v: 0.3 },
+      { n: "E2", d: "8n", v: 0.7 },
+    ];
+    bassLoop = new Tone.Loop((time) => {
+      const s = pattern[step % pattern.length];
+      if (s.n) synth.triggerAttackRelease(s.n, s.d, time, s.v);
+      step++;
+    }, "8n");
+    bassLoop.start(0);
+    Tone.getTransport().start();
+  }
+  // "silence" just stops everything (already done above)
+}
+
+// ─── Build DOM ───────────────────────────────────────────
+const storyEl = document.getElementById("story");
+
+// Build zone map
+const zoneMap = {};
+let cz = "silence";
+sections.forEach((s, i) => {
+  if (s.zone) cz = s.zone;
+  zoneMap[i] = cz;
+});
+
+// Create section elements
+sections.forEach((s, i) => {
+  const div = document.createElement("div");
+  div.className = `section s-${s.type}`;
+  div.innerHTML = s.html;
+  div.dataset.idx = i;
+  storyEl.appendChild(div);
+});
+
+// ─── Scroll Observer ─────────────────────────────────────
+const sectionEls = document.querySelectorAll(".section");
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+    }
+  });
+
+  // Find highest visible section for audio zone
+  if (!audioStarted) return;
+  let maxVisible = -1;
+  sectionEls.forEach((el) => {
+    if (el.classList.contains("visible")) {
+      const idx = parseInt(el.dataset.idx);
+      if (idx > maxVisible) maxVisible = idx;
+    }
+  });
+  if (maxVisible >= 0 && zoneMap[maxVisible]) {
+    setZone(zoneMap[maxVisible]);
+  }
+}, {
+  threshold: 0.15,
+  rootMargin: "0px 0px -8% 0px"
+});
+
+// ─── Entry Handler ───────────────────────────────────────
+async function startExperience() {
+  await initAudio();
+  document.getElementById("entry").classList.add("hidden");
+  storyEl.classList.add("visible");
+
+  // Start observing after a beat
+  setTimeout(() => {
+    sectionEls.forEach((el) => observer.observe(el));
+  }, 300);
+}
+</script>
+
+</body>
+</html>
