@@ -605,14 +605,32 @@ function TransferSection() {
     setIsCustom(true);
 
     try {
+      // ── DIAGNOSTIC: log exactly what we're sending ──
+      const keyPreview = ANTHROPIC_API_KEY ? (ANTHROPIC_API_KEY.substring(0, 12) + "..." + ANTHROPIC_API_KEY.substring(ANTHROPIC_API_KEY.length - 4)) : "EMPTY";
+      const keyLength = ANTHROPIC_API_KEY ? ANTHROPIC_API_KEY.length : 0;
+      const keyType = typeof ANTHROPIC_API_KEY;
+      const keyCharCodes = ANTHROPIC_API_KEY ? Array.from(ANTHROPIC_API_KEY.substring(0, 5)).map(c => c.charCodeAt(0)).join(",") : "none";
+      console.log("=== TRANSFER API DIAGNOSTIC ===");
+      console.log("Key preview:", keyPreview);
+      console.log("Key length:", keyLength);
+      console.log("Key type:", keyType);
+      console.log("Key first 5 char codes:", keyCharCodes);
+      console.log("Key starts with sk-ant:", ANTHROPIC_API_KEY.startsWith("sk-ant"));
+      console.log("Key has whitespace:", ANTHROPIC_API_KEY !== ANTHROPIC_API_KEY.trim());
+      console.log("Key has BOM/zero-width:", /[\u200B\u200C\u200D\uFEFF\u00A0]/.test(ANTHROPIC_API_KEY));
+      console.log("===============================");
+
+      const headers = {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY.trim(),
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      };
+      console.log("Headers being sent:", JSON.stringify(Object.fromEntries(Object.entries(headers).map(([k,v]) => [k, k === "x-api-key" ? keyPreview : v]))));
+
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
+        headers: headers,
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 1000,
