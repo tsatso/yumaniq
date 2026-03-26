@@ -1,10 +1,12 @@
-// File: app/api/anthropic/route.js
+// File: src/app/api/anthropic/route.ts
 
-export async function POST(request) {
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
-    return Response.json(
+    return NextResponse.json(
       { error: "ANTHROPIC_API_KEY not configured on server" },
       { status: 500 }
     );
@@ -24,8 +26,9 @@ export async function POST(request) {
     });
 
     const data = await response.json();
-    return Response.json(data, { status: response.status });
-  } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(data, { status: response.status });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
