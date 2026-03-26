@@ -592,6 +592,12 @@ function TransferSection() {
   async function submitCustomCondition(text) {
     const query = text || customInput.trim();
     if (!query || loading) return;
+
+    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === "YOUR-API-KEY-HERE") {
+      alert("Set your Anthropic API key in the HTML file.\nLine: const ANTHROPIC_API_KEY = \"YOUR-API-KEY-HERE\"\nGet one at console.anthropic.com → API Keys");
+      return;
+    }
+
     setCustomInput("");
     setLoading(true);
     setIsCustom(true);
@@ -613,7 +619,14 @@ function TransferSection() {
         })
       });
       const data = await response.json();
+      console.log("API response:", JSON.stringify(data, null, 2));
+
+      if (data.error) {
+        throw new Error("API error: " + (data.error.message || JSON.stringify(data.error)));
+      }
+
       const raw = data.content?.map(b => b.type === "text" ? b.text : "").join("") || "";
+      console.log("Raw text:", raw);
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
       // Ensure required fields
@@ -631,9 +644,10 @@ function TransferSection() {
         points: null, // will use generated path
       });
     } catch (err) {
+      console.error("Transfer error:", err);
       setDynamicResult({
         label: query,
-        description: "Transfer analysis could not be generated. The RAST Solver would analyze the dynamics model for this condition and generate an adapted trajectory preserving the expert's trait weights (fill efficiency 0.87, machine compliance 0.74, smoothness 0.62) while re-optimizing state weights for the new physics.",
+        description: "Error: " + err.message + " — Open browser console (F12) for full details.",
         rastFill: 75, lfdFill: 30,
         rastNote: "Strategy transfer attempted — requires dynamics model for precise prediction.",
         lfdNote: "Copied trajectory unlikely to succeed in novel conditions.",
@@ -792,6 +806,12 @@ function ExploreSection() {
   const sendMessage = useCallback(async (text) => {
     const userMsg = text || input.trim();
     if (!userMsg || loading) return;
+
+    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === "YOUR-API-KEY-HERE") {
+      alert("Set your Anthropic API key in the HTML file.\nLine: const ANTHROPIC_API_KEY = \"YOUR-API-KEY-HERE\"\nGet one at console.anthropic.com → API Keys");
+      return;
+    }
+
     setInput("");
 
     const newMessages = [...messages, { role: "user", content: userMsg }];
