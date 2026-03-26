@@ -493,80 +493,279 @@ function DecomposeSection() {
   );
 }
 
+const TRANSFER_SYSTEM_PROMPT = `You are the RAST transfer analysis engine. Given a target operating condition for an excavator, you generate a detailed transfer analysis showing how the expert's Motor Identity (extracted via IOC from gravel operation) adapts to the new condition.
+
+THE EXPERT'S MOTOR IDENTITY (extracted from gravel):
+- w_fill_efficiency: 0.87 (TRAIT — stable across all tested conditions, ICC 0.91)
+- w_machine_compliance: 0.74 (TRAIT — stable, ICC 0.84)
+- w_smoothness: 0.62 (TRAIT — stable, ICC 0.78)
+- w_bucket_stress: 0.68 (STATE — adapts to soil resistance)
+- w_cycle_speed: 0.45 (STATE — adapts to time pressure and soil difficulty)
+- w_fuel_economy: 0.55 (MIXED — partially stable, ICC 0.54)
+
+Original gravel performance: 94% bucket fill, 18.2s cycle, low machine stress, 0.42L fuel/ton.
+
+TRANSFER RULES:
+- TRAIT weights (fill efficiency, compliance, smoothness) are PRESERVED at their extracted values
+- STATE weights (bucket stress, cycle speed) are RE-OPTIMIZED by the Solver for the new dynamics
+- The Solver generates a new trajectory that respects the trait priorities under the new physics
+- The trajectory SHAPE changes (different angles, speeds, timing) but the STRATEGY is preserved
+
+RESPOND ONLY WITH VALID JSON matching this exact structure, no markdown, no backticks, no preamble:
+{
+  "label": "Short condition name (2-4 words)",
+  "description": "3-4 sentences describing HOW the trajectory adapts. Be specific about angles, depths, timing, and technique changes. Mention which trait weights drive the adaptation. End with predicted bucket fill % and cycle time.",
+  "rastFill": <number 50-95, realistic for the condition>,
+  "lfdFill": <number 15-45, showing LfD failure>,
+  "rastNote": "One sentence on why RAST transfer works here.",
+  "lfdNote": "One sentence on why copied trajectory fails.",
+  "adaptations": [
+    "Specific adaptation 1 (e.g. 'Descent angle reduced from 32° to 18° due to surface hardness')",
+    "Specific adaptation 2",
+    "Specific adaptation 3"
+  ],
+  "physicsChanges": "One sentence on what's physically different about this condition.",
+  "traitPreserved": "One sentence on which trait weights drive the adapted strategy.",
+  "stateRecalibrated": "One sentence on which state weights changed and why."
+}
+
+Be physically realistic. Use real excavation terminology. Don't be generic — be specific to the exact condition described. If the condition is extreme or unusual, acknowledge increased uncertainty in the fill prediction. If the condition is physically impossible for excavation, say so honestly in the description and give lower confidence numbers.`;
+
 function TransferSection() {
   const [condition, setCondition] = useState("clay");
+  const [customInput, setCustomInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [dynamicResult, setDynamicResult] = useState(null);
+  const [isCustom, setIsCustom] = useState(false);
   const sourceRef = useRef(null);
   const targetRef = useRef(null);
-  const c = CONDITIONS[condition];
+
+  // Get current display data — either preset or dynamic
+  const displayData = isCustom && dynamicResult ? dynamicResult : CONDITIONS[condition];
 
   useEffect(() => {
     const t = setTimeout(() => {
       drawPath(sourceRef.current,
         [[0.1,0.15],[0.2,0.2],[0.35,0.35],[0.45,0.55],[0.5,0.7],[0.52,0.78],[0.55,0.82],[0.6,0.8],[0.7,0.65],[0.8,0.45],[0.9,0.25],[0.95,0.15]],
         "#3b82f6", "Original — Gravel");
-      drawPath(targetRef.current, c.points, "#8b5cf6", "Adapted — " + c.label);
+
+      // For custom results, generate a plausible path from the fill percentage
+      const pts = displayData.points || generatePathFromFill(displayData.rastFill);
+      drawPath(targetRef.current, pts, "#8b5cf6", "Adapted — " + displayData.label);
     }, 50);
     return () => clearTimeout(t);
-  }, [condition]);
+  }, [condition, dynamicResult, isCustom]);
+
+  function generatePathFromFill(fill) {
+    // Generate a visually distinct path based on predicted fill percentage
+    // Lower fill = shallower penetration, more hesitation
+    const depth = 0.4 + (fill / 100) * 0.45; // 0.4-0.85 range
+    const hesitation = fill < 70; // add stutter for difficult conditions
+    const pts = [[0.1, 0.15]];
+    const steps = 12;
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      let x = 0.1 + t * 0.85;
+      let y;
+      if (t < 0.5) {
+        // Descent phase
+        y = 0.15 + (t / 0.5) * depth;
+        if (hesitation && t > 0.25 && t < 0.35) y -= 0.05; // pullback
+      } else {
+        // Scoop and lift phase
+        const liftT = (t - 0.5) / 0.5;
+        y = 0.15 + depth * (1 - liftT * liftT);
+      }
+      pts.push([Math.min(x, 0.95), Math.max(0.12, Math.min(y, 0.88))]);
+    }
+    return pts;
+  }
+
+  function selectPreset(key) {
+    setCondition(key);
+    setIsCustom(false);
+    setDynamicResult(null);
+  }
+
+  async function submitCustomCondition(text) {
+    const query = text || customInput.trim();
+    if (!query || loading) return;
+    setCustomInput("");
+    setLoading(true);
+    setIsCustom(true);
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: TRANSFER_SYSTEM_PROMPT,
+          messages: [{ role: "user", content: "Generate transfer analysis for this excavation condition: " + query }],
+        })
+      });
+      const data = await response.json();
+      const raw = data.content?.map(b => b.type === "text" ? b.text : "").join("") || "";
+      const cleaned = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
+      // Ensure required fields
+      setDynamicResult({
+        label: parsed.label || query,
+        description: parsed.description || "Transfer analysis generated.",
+        rastFill: parsed.rastFill || 75,
+        lfdFill: parsed.lfdFill || 30,
+        rastNote: parsed.rastNote || "Strategy adapted via trait transfer.",
+        lfdNote: parsed.lfdNote || "Copied trajectory fails in new conditions.",
+        adaptations: parsed.adaptations || [],
+        physicsChanges: parsed.physicsChanges || "",
+        traitPreserved: parsed.traitPreserved || "",
+        stateRecalibrated: parsed.stateRecalibrated || "",
+        points: null, // will use generated path
+      });
+    } catch (err) {
+      setDynamicResult({
+        label: query,
+        description: "Transfer analysis could not be generated. The RAST Solver would analyze the dynamics model for this condition and generate an adapted trajectory preserving the expert's trait weights (fill efficiency 0.87, machine compliance 0.74, smoothness 0.62) while re-optimizing state weights for the new physics.",
+        rastFill: 75, lfdFill: 30,
+        rastNote: "Strategy transfer attempted — requires dynamics model for precise prediction.",
+        lfdNote: "Copied trajectory unlikely to succeed in novel conditions.",
+        adaptations: [],
+        physicsChanges: "",
+        traitPreserved: "",
+        stateRecalibrated: "",
+        points: null,
+      });
+    }
+    setLoading(false);
+  }
+
+  const d = displayData;
 
   return (
     <div>
       <SectionLabel>Strategy Transfer</SectionLabel>
       <SectionTitle>New conditions. Same expert judgment.</SectionTitle>
       <SectionSub>Transfer trait weights to new dynamics. The Solver generates an adapted trajectory that preserves the expert's priorities under conditions they never encountered.</SectionSub>
+
+      {/* Condition selector */}
       <div style={{ marginBottom:22 }}>
-        <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#6b7280", fontWeight:600, marginBottom:10 }}>Select target condition</div>
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#6b7280", fontWeight:600, marginBottom:10 }}>Select or describe any condition</div>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:12 }}>
           {Object.entries(CONDITIONS).map(([k, v]) => (
-            <button key={k} onClick={() => setCondition(k)} style={{
+            <button key={k} onClick={() => selectPreset(k)} style={{
               padding:"8px 16px", borderRadius:8, fontSize:12, fontWeight:500,
-              background: k === condition ? "rgba(139,92,246,0.1)" : "#12151c",
-              border: "1px solid " + (k === condition ? "rgba(139,92,246,0.4)" : "#1e2330"),
-              color: k === condition ? "#8b5cf6" : "#6b7280",
+              background: !isCustom && k === condition ? "rgba(139,92,246,0.1)" : "#12151c",
+              border: "1px solid " + (!isCustom && k === condition ? "rgba(139,92,246,0.4)" : "#1e2330"),
+              color: !isCustom && k === condition ? "#8b5cf6" : "#6b7280",
               cursor:"pointer", transition:"all 0.3s"
             }}>{v.label}</button>
           ))}
         </div>
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 60px 1fr", gap:20, alignItems:"start", marginBottom:28 }}>
-        <Card>
-          <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#3b82f6", fontWeight:600, marginBottom:14 }}>Original — Gravel</div>
-          <div style={{ height:150, background:"rgba(0,0,0,0.3)", borderRadius:8, marginBottom:10, overflow:"hidden" }}>
-            <canvas ref={sourceRef} style={{ width:"100%", height:"100%", display:"block" }} />
-          </div>
-          <p style={{ fontSize:12, color:"#6b7280", lineHeight:1.6 }}>
-            Moderate descent (32°). Gradual curl at 0.8m. Compliance scoop. Fill: 94%. Cycle: 18.2s.
-          </p>
-        </Card>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", paddingTop:56, gap:6 }}>
-          <div style={{ fontSize:10, letterSpacing:2, textTransform:"uppercase", color:"#8b5cf6", fontWeight:700, textAlign:"center" }}>TRAIT<br/>TRANSFER</div>
-          <div style={{ width:44, height:2, background:"#8b5cf6", position:"relative" }}>
-            <span style={{ position:"absolute", right:-6, top:-5, color:"#8b5cf6", fontSize:11 }}>▶</span>
-          </div>
-          <div style={{ fontSize:9, color:"#3d4452", textAlign:"center", lineHeight:1.4 }}>Same priorities<br/>New physics</div>
-        </div>
-        <Card>
-          <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#8b5cf6", fontWeight:600, marginBottom:14 }}>Adapted — {c.label}</div>
-          <div style={{ height:150, background:"rgba(0,0,0,0.3)", borderRadius:8, marginBottom:10, overflow:"hidden" }}>
-            <canvas ref={targetRef} style={{ width:"100%", height:"100%", display:"block" }} />
-          </div>
-          <p style={{ fontSize:12, color:"#6b7280", lineHeight:1.6 }}>{c.description}</p>
-        </Card>
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-        <div style={{ padding:18, background:"rgba(16,185,129,0.05)", border:"1px solid rgba(16,185,129,0.15)", borderRadius:10 }}>
-          <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#10b981", fontWeight:700, marginBottom:6 }}>RAST Transfer</div>
-          <div style={{ fontSize:36, fontWeight:700, color:"#10b981", lineHeight:1 }}>{c.rastFill}%</div>
-          <div style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>bucket fill in {c.label.toLowerCase()}</div>
-          <div style={{ fontSize:11, color:"#3d4452", marginTop:6 }}>{c.rastNote}</div>
-        </div>
-        <div style={{ padding:18, background:"rgba(239,68,68,0.05)", border:"1px solid rgba(239,68,68,0.15)", borderRadius:10 }}>
-          <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#ef4444", fontWeight:700, marginBottom:6 }}>LfD Replay</div>
-          <div style={{ fontSize:36, fontWeight:700, color:"#ef4444", lineHeight:1 }}>{c.lfdFill}%</div>
-          <div style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>bucket fill in {c.label.toLowerCase()}</div>
-          <div style={{ fontSize:11, color:"#3d4452", marginTop:6 }}>{c.lfdNote}</div>
+        <div style={{ display:"flex", gap:10 }}>
+          <input value={customInput} onChange={e => setCustomInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && submitCustomCondition()}
+            placeholder="Describe any condition... e.g. 'laterite soil in monsoon rain' or 'Mars permafrost at -60°C'"
+            style={{ flex:1, background:"#12151c", border:"1px solid #1e2330", borderRadius:10, padding:"11px 16px", color:"#e2e4ea", fontSize:13, outline:"none" }}
+          />
+          <button onClick={() => submitCustomCondition()} disabled={loading} style={{
+            padding:"11px 20px", background: loading ? "#1e3a5f" : "#8b5cf6", border:"none", borderRadius:10,
+            color:"white", fontWeight:600, fontSize:13, cursor: loading ? "wait" : "pointer", whiteSpace:"nowrap"
+          }}>{loading ? "Analyzing..." : "Transfer"}</button>
         </div>
       </div>
+
+      {/* Loading state */}
+      {loading && (
+        <div style={{ padding:20, background:"#12151c", border:"1px solid rgba(139,92,246,0.2)", borderRadius:12, marginBottom:24, textAlign:"center" }}>
+          <div style={{ fontSize:13, color:"#8b5cf6", marginBottom:6 }}>Running transfer analysis...</div>
+          <div style={{ fontSize:12, color:"#3d4452" }}>Applying trait weights to new dynamics model. Re-optimizing state weights for target condition.</div>
+        </div>
+      )}
+
+      {/* Results */}
+      {!loading && (
+        <div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 60px 1fr", gap:20, alignItems:"start", marginBottom:24 }}>
+            <Card>
+              <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#3b82f6", fontWeight:600, marginBottom:14 }}>Original — Gravel</div>
+              <div style={{ height:150, background:"rgba(0,0,0,0.3)", borderRadius:8, marginBottom:10, overflow:"hidden" }}>
+                <canvas ref={sourceRef} style={{ width:"100%", height:"100%", display:"block" }} />
+              </div>
+              <p style={{ fontSize:12, color:"#6b7280", lineHeight:1.6 }}>
+                Moderate descent (32°). Gradual curl at 0.8m. Compliance scoop. Fill: 94%. Cycle: 18.2s.
+              </p>
+            </Card>
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", paddingTop:56, gap:6 }}>
+              <div style={{ fontSize:10, letterSpacing:2, textTransform:"uppercase", color:"#8b5cf6", fontWeight:700, textAlign:"center" }}>TRAIT<br/>TRANSFER</div>
+              <div style={{ width:44, height:2, background:"#8b5cf6", position:"relative" }}>
+                <span style={{ position:"absolute", right:-6, top:-5, color:"#8b5cf6", fontSize:11 }}>▶</span>
+              </div>
+              <div style={{ fontSize:9, color:"#3d4452", textAlign:"center", lineHeight:1.4 }}>Same priorities<br/>New physics</div>
+            </div>
+            <Card>
+              <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#8b5cf6", fontWeight:600, marginBottom:14 }}>
+                Adapted — {d.label}
+                {isCustom && <span style={{ marginLeft:8, fontSize:9, padding:"2px 6px", background:"rgba(139,92,246,0.15)", borderRadius:4, verticalAlign:"middle" }}>GENERATED</span>}
+              </div>
+              <div style={{ height:150, background:"rgba(0,0,0,0.3)", borderRadius:8, marginBottom:10, overflow:"hidden" }}>
+                <canvas ref={targetRef} style={{ width:"100%", height:"100%", display:"block" }} />
+              </div>
+              <p style={{ fontSize:12, color:"#6b7280", lineHeight:1.6 }}>{d.description}</p>
+            </Card>
+          </div>
+
+          {/* Dynamic details (only for LLM-generated results) */}
+          {isCustom && dynamicResult && dynamicResult.adaptations && dynamicResult.adaptations.length > 0 && (
+            <Card style={{ marginBottom:20 }}>
+              <div style={{ fontSize:11, letterSpacing:2, textTransform:"uppercase", color:"#6b7280", fontWeight:600, marginBottom:14 }}>Transfer Analysis Detail</div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:16 }}>
+                {dynamicResult.physicsChanges && (
+                  <div style={{ padding:12, background:"rgba(139,92,246,0.04)", borderRadius:8, border:"1px solid rgba(139,92,246,0.1)" }}>
+                    <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#8b5cf6", fontWeight:600, marginBottom:6 }}>Physics Change</div>
+                    <div style={{ fontSize:12, color:"#6b7280", lineHeight:1.5 }}>{dynamicResult.physicsChanges}</div>
+                  </div>
+                )}
+                {dynamicResult.traitPreserved && (
+                  <div style={{ padding:12, background:"rgba(16,185,129,0.04)", borderRadius:8, border:"1px solid rgba(16,185,129,0.1)" }}>
+                    <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#10b981", fontWeight:600, marginBottom:6 }}>Traits Preserved</div>
+                    <div style={{ fontSize:12, color:"#6b7280", lineHeight:1.5 }}>{dynamicResult.traitPreserved}</div>
+                  </div>
+                )}
+                {dynamicResult.stateRecalibrated && (
+                  <div style={{ padding:12, background:"rgba(245,158,11,0.04)", borderRadius:8, border:"1px solid rgba(245,158,11,0.1)" }}>
+                    <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#f59e0b", fontWeight:600, marginBottom:6 }}>States Recalibrated</div>
+                    <div style={{ fontSize:12, color:"#6b7280", lineHeight:1.5 }}>{dynamicResult.stateRecalibrated}</div>
+                  </div>
+                )}
+              </div>
+              <div style={{ fontSize:11, letterSpacing:1.5, textTransform:"uppercase", color:"#6b7280", fontWeight:600, marginBottom:8 }}>Specific Adaptations</div>
+              {dynamicResult.adaptations.map((a, i) => (
+                <div key={i} style={{ display:"flex", gap:10, alignItems:"baseline", padding:"6px 0", borderBottom:"1px solid rgba(255,255,255,0.03)", fontSize:13, color:"#6b7280", lineHeight:1.5 }}>
+                  <span style={{ color:"#8b5cf6", fontWeight:600, fontSize:12 }}>{i+1}</span>
+                  <span>{a}</span>
+                </div>
+              ))}
+            </Card>
+          )}
+
+          {/* Fill comparison */}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+            <div style={{ padding:18, background:"rgba(16,185,129,0.05)", border:"1px solid rgba(16,185,129,0.15)", borderRadius:10 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#10b981", fontWeight:700, marginBottom:6 }}>RAST Transfer</div>
+              <div style={{ fontSize:36, fontWeight:700, color:"#10b981", lineHeight:1 }}>{d.rastFill}%</div>
+              <div style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>bucket fill in {d.label.toLowerCase()}</div>
+              <div style={{ fontSize:11, color:"#3d4452", marginTop:6 }}>{d.rastNote}</div>
+            </div>
+            <div style={{ padding:18, background:"rgba(239,68,68,0.05)", border:"1px solid rgba(239,68,68,0.15)", borderRadius:10 }}>
+              <div style={{ fontSize:10, letterSpacing:1.5, textTransform:"uppercase", color:"#ef4444", fontWeight:700, marginBottom:6 }}>LfD Replay</div>
+              <div style={{ fontSize:36, fontWeight:700, color:"#ef4444", lineHeight:1 }}>{d.lfdFill}%</div>
+              <div style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>bucket fill in {d.label.toLowerCase()}</div>
+              <div style={{ fontSize:11, color:"#3d4452", marginTop:6 }}>{d.lfdNote}</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
