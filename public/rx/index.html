@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAST Rx — Motor Intelligence for Physical AI</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:#0a0c10;color:#e2e4ea;overflow-x:hidden}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1e2330;border-radius:3px}
+  button{font-family:'DM Sans',sans-serif;cursor:pointer}input{font-family:'DM Sans',sans-serif}
+
+  /* ── Nav ── */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:center;gap:32px;padding:12px 24px;background:rgba(10,12,16,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06)}
+  .nav-logo{font-weight:800;font-size:14px;letter-spacing:2px;color:#4b5563;position:absolute;left:24px}
+  .nav-logo span{color:#3b82f6}
+  .nav-dots{display:flex;gap:8px;align-items:center}
+  .nav-dot{width:10px;height:10px;border-radius:50%;background:#1e2330;cursor:pointer;transition:all 0.3s;border:none;padding:0}
+  .nav-dot.active{background:#3b82f6;box-shadow:0 0 10px rgba(59,130,246,0.5)}
+  .nav-dot:hover{background:#3b82f6}
+  .nav-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#4b5563;font-weight:600;position:absolute;right:24px}
+
+  /* ── Hero screens (full bleed background) ── */
+  .hero-screen{position:relative;min-height:100vh;display:flex;align-items:flex-end;justify-content:center}
+  .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+  .hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,12,16,0.2) 0%,rgba(10,12,16,0.5) 40%,rgba(10,12,16,0.96) 100%)}
+  .hero-content{position:relative;z-index:1;width:100%;max-width:760px;padding:0 32px 48px}
+  .hero-big{font-size:40px;font-weight:800;line-height:1.15;margin-bottom:16px}
+  .hero-sub{font-size:17px;color:#9ca3af;line-height:1.65;margin-bottom:24px;max-width:580px}
+
+  /* ── Colors ── */
+  .c-red{color:#ef4444}.c-blue{color:#3b82f6}.c-green{color:#10b981}.c-amber{color:#f59e0b}.c-purple{color:#a78bfa}.c-white{color:#e2e4ea}
+  .tag{display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:4px;font-weight:700;margin-bottom:18px}
+  .tag-red{background:rgba(239,68,68,0.15);color:#ef4444}
+  .tag-amber{background:rgba(245,158,11,0.12);color:#f59e0b}
+  .next-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#9ca3af;font-size:14px;font-weight:500;transition:all 0.3s}
+  .next-btn:hover{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:#3b82f6}
+
+  /* ── Content screens (centered container) ── */
+  .cscreen{padding:72px 32px 48px;display:flex;flex-direction:column;align-items:center}
+  .cscreen-inner{width:100%;max-width:760px}
+  .cscreen .img-banner{position:relative;height:280px;border-radius:14px;overflow:hidden;margin-bottom:28px;background-size:cover;background-position:center;width:100%}
+  .cscreen .img-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,rgba(10,12,16,0.92) 100%)}
+  .cscreen .img-text{position:absolute;bottom:18px;left:22px;z-index:1;font-size:20px;font-weight:700}
+  .stag{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+  .stitle{font-size:30px;font-weight:800;line-height:1.2;margin-bottom:10px}
+  .ssub{font-size:16px;color:#6b7280;line-height:1.6;margin-bottom:28px;max-width:600px}
+  .card{background:#12151c;border:1px solid #1e2330;border-radius:12px;padding:22px;width:100%}
+  .callout{padding:16px 20px;border-radius:10px;font-size:14px;line-height:1.6;color:#9ca3af;margin-bottom:24px;width:100%}
+  .callout-red{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12)}
+  .callout-green{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.12)}
+
+  /* ── Weight bars ── */
+  .w-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .w-item:last-child{border-bottom:none}
+  .w-name{min-width:140px;font-size:14px;font-weight:500}
+  .w-track{flex:1;height:10px;background:rgba(255,255,255,0.04);border-radius:5px;position:relative;overflow:hidden}
+  .w-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px}
+  .w-val{font-family:'JetBrains Mono',monospace;font-size:14px;min-width:40px;text-align:right;color:#6b7280}
+  .wtag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:4px;min-width:50px;text-align:center}
+  .wtag-t{background:rgba(16,185,129,0.12);color:#10b981}
+  .wtag-s{background:rgba(245,158,11,0.12);color:#f59e0b}
+  .wtag-m{background:rgba(139,92,246,0.12);color:#a78bfa}
+
+  /* ── Dot plot ── */
+  .dot-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .dot-label{min-width:100px;font-size:12px;color:#6b7280}
+  .dot-track{flex:1;height:22px;position:relative}
+  .dot{position:absolute;width:10px;height:10px;border-radius:50%;top:6px}
+
+  /* ── Transfer ── */
+  .cbtn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .cbtn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:#12151c;border:1px solid #1e2330;color:#6b7280;transition:all 0.3s}
+  .cbtn.sel{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.08);color:#a78bfa}
+  .cbtn:hover{border-color:rgba(139,92,246,0.3);color:#a78bfa}
+  .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;width:100%}
+
+  /* ── Chat ── */
+  .chat-box{width:100%;max-width:700px}
+  .cmsg{padding:14px 18px;margin-bottom:10px;border-radius:12px;font-size:15px;line-height:1.65;white-space:pre-wrap}
+  .cm-s{background:#12151c;border:1px solid #1e2330;color:#6b7280}
+  .cm-u{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15);margin-left:60px}
+  .cm-a{background:#12151c;border:1px solid #1e2330;margin-right:60px}
+  .qbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .qbtns button{padding:7px 14px;background:#12151c;border:1px solid #1e2330;border-radius:18px;color:#6b7280;font-size:12px;transition:all 0.3s}
+  .qbtns button:hover{border-color:#3b82f6;color:#e2e4ea}
+
+  /* ── Mobile ── */
+  @media(max-width:768px){
+    .hero-content{padding:0 18px 32px}
+    .hero-big{font-size:26px}
+    .hero-sub{font-size:15px}
+    .cscreen{padding:56px 16px 32px}
+    .cscreen .img-banner{height:180px}
+    .stitle{font-size:22px}
+    .ssub{font-size:14px}
+    .rgrid{grid-template-columns:1fr}
+    .cm-u{margin-left:20px}.cm-a{margin-right:20px}
+    .nav-label{display:none}
+    .nav-logo{position:static}
+    .nav{justify-content:space-between}
+    .w-name{min-width:110px;font-size:13px}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const API="/api/anthropic";
+const{useState,useRef,useEffect,useCallback}=React;
+
+const SYS_PROMPT=`You are the RAST demo assistant for a domain expert in autonomous heavy equipment.
+
+CORE: Deploying physical AI at scale is medicine without prescription. 40-50% of expert operators retiring within 15 years. 700% productivity gap. $22K/min downtime. Everyone has guardrails. Nobody has a prescription.
+
+RAST CHAIN: Diagnosis (IOC extracts what expert optimizes for) → Prescription (decompose trait/state, transfer, generate expert-validated behavior) → Governance (Safety Governor 1kHz, audit trail). Only system that does all three.
+
+EXPERT IDENTITY (gravel): fill_efficiency 0.87 TRAIT, machine_compliance 0.74 TRAIT, smoothness 0.62 TRAIT, bucket_stress 0.68 STATE, cycle_speed 0.45 STATE.
+
+SCIENCE: OFC (Todorov & Jordan 2002), IOC, trait/state decomposition (novel, Berniker 2013 gap). RL learns what to DO. RAST learns what to CARE ABOUT.
+
+HONEST: IOC validated on synthetic/vocal data. Excavation is target, not demonstrated. Demo is interactive explanation, not running computation.
+
+STYLE: Lead with risk. Medicine/prescription framing. Direct, specific. Never overclaim.`;
+
+const TX_PROMPT=`RAST prescription engine for excavator ops. Expert: fill 0.87 TRAIT, compliance 0.74 TRAIT, smooth 0.62 TRAIT, stress 0.68 STATE, speed 0.45 STATE. Original: 94% fill, 18.2s. TRAIT preserved, STATE re-optimized. RESPOND ONLY JSON no markdown: {"label":"2-4 words","description":"3-4 sentences specific angles/depths/timing referencing traits. End fill% cycle.","rastFill":<50-95>,"lfdFill":<15-45>,"rastNote":"Why prescription works.","lfdNote":"Why no-prescription fails.","adaptations":["1","2","3"],"traitPreserved":"sentence","stateRecalibrated":"sentence"} Be physically realistic. Specific to condition.`;
+
+const CONDS={
+  clay:{label:"Dense Clay",desc:"Shallower descent (22°). Slower curl, higher compliance reliance. Micro-adjustments against adhesion.",rf:89,lf:41,rn:"Expert fill priority preserved.",ln:"Gravel trajectory jams."},
+  frozen:{label:"Frozen Ground",desc:"Break-and-scoop. Shallow pecking to fracture, then compliance scoop underneath.",rf:82,lf:28,rn:"Novel trajectory from same priorities.",ln:"Bucket bounces off."},
+  underwater:{label:"Underwater",desc:"Compensates drag/buoyancy. Force-dominant strategy replaces visual feedback.",rf:85,lf:35,rn:"Force-dominant. Fill priority preserved.",ln:"Drag causes overshoot."},
+  lunar:{label:"Lunar (0.16g)",desc:"Gentle curl prevents ejection. Compliance adapts to minimal gravity.",rf:78,lf:22,rn:"Transfers across gravity wells.",ln:"Earth trajectory ejects material."},
+  mars:{label:"Mars (0.38g)",desc:"Fine abrasive regolith. Curl timing adapted for reduced contact friction.",rf:83,lf:31,rn:"Adapted to novel physics.",ln:"Soil unrecognized."}
+};
+
+const WTS=[
+  {n:"Fill Efficiency",v:0.87,t:"trait"},{n:"Machine Compliance",v:0.74,t:"trait"},
+  {n:"Smoothness",v:0.62,t:"trait"},{n:"Bucket Stress",v:0.68,t:"state"},
+  {n:"Cycle Speed",v:0.45,t:"state"},{n:"Fuel Economy",v:0.55,t:"mixed"}
+];
+
+const DEC=[
+  {n:"Fill Efficiency",t:"trait",icc:0.91,d:[84,88,86,90]},
+  {n:"Compliance",t:"trait",icc:0.84,d:[72,76,70,78]},
+  {n:"Smoothness",t:"trait",icc:0.78,d:[60,58,64,66]},
+  {n:"Bucket Stress",t:"state",icc:0.38,d:[68,42,55,80]},
+  {n:"Cycle Speed",t:"state",icc:0.31,d:[45,28,35,62]},
+  {n:"Fuel Economy",t:"mixed",icc:0.54,d:[55,48,42,60]}
+];
+const DC=["#60a5fa","#34d399","#fbbf24","#f87171"],DL=["Gravel","Clay","Wet","Rocky"];
+const QQ=["How is this different from RL?","What sensors needed?","Works with signal delay?","Safety failures?","How long to extract?","What about different machine models?"];
+
+function Nav({cur,go}){
+  const L=["Risk","Diagnose","Loss","Decompose","Prescribe","Explore"];
+  return <nav className="nav">
+    <div className="nav-logo">RAST <span>Rx</span></div>
+    <div className="nav-dots">{L.map((l,i)=><button key={i} className={"nav-dot"+(i===cur?" active":"")} onClick={()=>go(i)} title={l}/>)}</div>
+    <div className="nav-label">{L[cur]}</div>
+  </nav>;
+}
+
+// ── Screen 1: Risk ──
+function S1({go}){return <div className="hero-screen">
+  <div className="hero-bg" style={{backgroundImage:"url(panel1_risk.png)"}}/>
+  <div className="hero-content">
+    <span className="tag tag-red">The Risk</span>
+    <div className="hero-big"><span className="c-red">$22K/minute</span> downtime.<br/>Guardrails won't save you.</div>
+    <div className="hero-sub">They stop disasters. They don't show the way. <strong className="c-white">40% of experts retiring. 700% productivity gap.</strong> Physical AI without expert strategy is <span className="c-red">medicine without prescription</span>.</div>
+    <button className="next-btn" onClick={()=>go(1)}>Before you prescribe, diagnose →</button>
+  </div></div>;}
+
+// ── Screen 2: Diagnosis ──
+function S2({go}){
+  const tc=t=>t==="trait"?"#3b82f6":t==="state"?"#f59e0b":"#a78bfa";
+  const tl=t=>t==="trait"?"wtag-t":t==="state"?"wtag-s":"wtag-m";
+  return <div className="cscreen"><div className="cscreen-inner">
+    <div className="img-banner" style={{backgroundImage:"url(panel2_diagnose.png)"}}>
+      <div className="img-text c-blue">Before you prescribe, diagnose.</div></div>
+    <div className="stag c-blue">Step 1: Diagnosis</div>
+    <div className="stitle">RAST captures what <span className="c-red">no telemetry can</span>.</div>
+    <div className="ssub">The expert's <strong className="c-white">actual optimization strategy</strong> — not what they did, but what they prioritized.</div>
+    <div className="card" style={{marginBottom:18}}>
+      {WTS.map(w=><div key={w.n} className="w-item">
+        <span className="w-name">{w.n}</span>
+        <div className="w-track"><div className="w-fill" style={{width:w.v*100+"%",background:tc(w.t)}}/></div>
+        <span className="w-val">{w.v.toFixed(2)}</span>
+        <span className={"wtag "+tl(w.t)}>{w.t}</span></div>)}
+    </div>
+    <div className="callout callout-red">
+      <strong className="c-red">Fill efficiency dominates. Experts don't rush.</strong> This hierarchy walks out the door when the expert retires. No manual encodes it. RAST extracts it.
+    </div>
+    <button className="next-btn" onClick={()=>go(2)}>What happens when the expert leaves →</button>
+  </div></div>;}
+
+// ── Screen 3: Loss ──
+function S3({go}){return <div className="hero-screen">
+  <div className="hero-bg" style={{backgroundImage:"url(panel3_skill.png)"}}/>
+  <div className="hero-content">
+    <span className="tag tag-amber">The Loss</span>
+    <div className="hero-big">His skill is <span className="c-amber">not in the manual</span>.</div>
+    <div className="hero-sub">When he leaves, the strategy leaves with him. <strong className="c-white">No telemetry captures it. No training encodes it.</strong> It exists only in his motor system. RAST extracts it before it disappears.</div>
+    <button className="next-btn" onClick={()=>go(3)}>But not everything transfers equally →</button>
+  </div></div>;}
+
+// ── Screen 4: Decompose ──
+function S4({go}){
+  const tl=t=>t==="trait"?"wtag-t":t==="state"?"wtag-s":"wtag-m";
+  return <div className="cscreen"><div className="cscreen-inner">
+    <div className="img-banner" style={{backgroundImage:"url(panel4_judgment.png)"}}>
+      <div className="img-text">Your judgment stays. <span className="c-amber">Your tools adapt.</span></div></div>
+    <div className="stag c-green">Step 2: Decompose</div>
+    <div className="stitle">Some priorities are <span className="c-green">the operator</span>. Some are <span className="c-amber">the situation</span>.</div>
+    <div className="ssub">Mix them up and the prescription fails. <strong className="c-white">Clustered = the operator. Scattered = the situation.</strong></div>
+    <div className="card" style={{marginBottom:18}}>
+      <div style={{display:"flex",gap:14,marginBottom:16,fontSize:12,color:"#6b7280"}}>
+        {DL.map((l,i)=><span key={l} style={{display:"flex",alignItems:"center",gap:5}}>
+          <span style={{width:9,height:9,borderRadius:"50%",background:DC[i],display:"inline-block"}}/>{l}</span>)}
+      </div>
+      {DEC.map(w=><div key={w.n} className="dot-row">
+        <span className="dot-label">{w.n}</span>
+        <div className="dot-track">{w.d.map((p,i)=><div key={i} className="dot" style={{left:p+"%",background:DC[i]}}/>)}</div>
+        <span className={"wtag "+tl(w.t)} style={{fontSize:9}}>{w.t}</span>
+        <span style={{fontFamily:"'JetBrains Mono'",fontSize:11,color:"#4b5563",minWidth:36}}>ICC {w.icc.toFixed(2)}</span></div>)}
+    </div>
+    <div className="callout callout-green">
+      <strong className="c-green">Without decomposition, you'd transfer gravel-specific responses into clay — and fail.</strong> With it, only stable judgment transfers. Prescription, not guess.
+    </div>
+    <button className="next-btn" onClick={()=>go(4)}>Write the prescription →</button>
+  </div></div>;}
+
+// ── Screen 5: Prescription ──
+function S5({go}){
+  const [cond,setCond]=useState("clay");
+  const [ci,setCi]=useState("");
+  const [ld,setLd]=useState(false);
+  const [dr,setDr]=useState(null);
+  const [ic,setIc]=useState(false);
+  const d=ic&&dr?dr:{label:CONDS[cond].label,description:CONDS[cond].desc,rastFill:CONDS[cond].rf,lfdFill:CONDS[cond].lf,rastNote:CONDS[cond].rn,lfdNote:CONDS[cond].ln,adaptations:[]};
+
+  function sp(k){setCond(k);setIc(false);setDr(null)}
+  async function sub(t){
+    const q=t||ci.trim();if(!q||ld)return;setCi("");setLd(true);setIc(true);
+    try{
+      const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:TX_PROMPT,messages:[{role:"user",content:"Prescription for: "+q}]})});
+      const data=await r.json();if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+      const raw=data.content?.map(b=>b.type==="text"?b.text:"").join("")||"";
+      const p=JSON.parse(raw.replace(/```json|```/g,"").trim());
+      setDr({label:p.label||q,description:p.description||"",rastFill:p.rastFill||75,lfdFill:p.lfdFill||30,rastNote:p.rastNote||"",lfdNote:p.lfdNote||"",adaptations:p.adaptations||[],traitPreserved:p.traitPreserved||"",stateRecalibrated:p.stateRecalibrated||""});
+    }catch(e){setDr({label:q,description:"Error: "+e.message,rastFill:75,lfdFill:30,rastNote:"—",lfdNote:"—",adaptations:[]})}
+    setLd(false);
+  }
+
+  return <div className="cscreen"><div className="cscreen-inner">
+    <div className="img-banner" style={{backgroundImage:"url(panel5_prescription.png)"}}>
+      <div className="img-text"><span className="c-green">Diagnosis done.</span> Prescription written.</div></div>
+    <div className="stag c-purple">Step 3: The Prescription</div>
+    <div className="stitle">Expert strategy for conditions <span className="c-purple">the expert never saw</span>.</div>
+    <div className="ssub">Describe <em>any</em> condition. Watch the prescription generate in real time.</div>
+    <div className="cbtn-row">
+      {Object.entries(CONDS).map(([k,v])=><button key={k} className={"cbtn"+(!ic&&k===cond?" sel":"")} onClick={()=>sp(k)}>{v.label}</button>)}
+    </div>
+    <div style={{display:"flex",gap:10,marginBottom:24}}>
+      <input value={ci} onChange={e=>setCi(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sub()}
+        placeholder="e.g. 'laterite in monsoon' or 'Mars permafrost -60°C'" style={{flex:1,background:"#12151c",border:"1px solid #1e2330",borderRadius:10,padding:"12px 16px",color:"#e2e4ea",fontSize:14,outline:"none"}}/>
+      <button onClick={()=>sub()} disabled={ld} style={{padding:"12px 22px",background:ld?"#1e3a5f":"#8b5cf6",border:"none",borderRadius:10,color:"white",fontWeight:600,fontSize:14,whiteSpace:"nowrap"}}>{ld?"...":"Prescribe"}</button>
+    </div>
+    {ld&&<div style={{padding:18,background:"#12151c",border:"1px solid rgba(139,92,246,0.15)",borderRadius:10,textAlign:"center",marginBottom:18}}><div style={{fontSize:14,color:"#a78bfa"}}>Writing prescription...</div></div>}
+    {!ld&&<div>
+      <div className="card" style={{marginBottom:18}}>
+        <div style={{fontSize:12,letterSpacing:1.5,textTransform:"uppercase",fontWeight:700,color:"#a78bfa",marginBottom:6}}>
+          {d.label}{ic&&dr&&<span style={{fontSize:9,padding:"2px 8px",background:"rgba(139,92,246,0.12)",borderRadius:3,marginLeft:8}}>GENERATED</span>}</div>
+        <div style={{fontSize:14,color:"#9ca3af",lineHeight:1.65}}>{d.description}</div>
+        {ic&&dr&&dr.adaptations?.length>0&&<div style={{marginTop:14,paddingTop:14,borderTop:"1px solid #1e2330"}}>
+          {dr.adaptations.map((a,i)=><div key={i} style={{fontSize:13,color:"#6b7280",padding:"5px 0",display:"flex",gap:10}}><span className="c-purple" style={{fontWeight:700}}>{i+1}</span><span>{a}</span></div>)}
+        </div>}
+      </div>
+      <div className="rgrid">
+        <div style={{padding:18,background:"rgba(16,185,129,0.04)",border:"1px solid rgba(16,185,129,0.12)",borderRadius:10}}>
+          <div style={{fontSize:11,letterSpacing:1.5,textTransform:"uppercase",color:"#10b981",fontWeight:700,marginBottom:6}}>RAST Prescription</div>
+          <div style={{fontSize:38,fontWeight:800,color:"#10b981"}}>{d.rastFill}%</div>
+          <div style={{fontSize:12,color:"#6b7280",marginTop:3}}>bucket fill</div>
+          <div style={{fontSize:12,color:"#4b5563",marginTop:6}}>{d.rastNote}</div></div>
+        <div style={{padding:18,background:"rgba(239,68,68,0.04)",border:"1px solid rgba(239,68,68,0.12)",borderRadius:10}}>
+          <div style={{fontSize:11,letterSpacing:1.5,textTransform:"uppercase",color:"#ef4444",fontWeight:700,marginBottom:6}}>Without Prescription</div>
+          <div style={{fontSize:38,fontWeight:800,color:"#ef4444"}}>{d.lfdFill}%</div>
+          <div style={{fontSize:12,color:"#6b7280",marginTop:3}}>bucket fill</div>
+          <div style={{fontSize:12,color:"#4b5563",marginTop:6}}>{d.lfdNote}</div></div>
+      </div></div>}
+    <div style={{marginTop:28}}><button className="next-btn" onClick={()=>go(5)}>Go deeper →</button></div>
+  </div></div>;}
+
+// ── Screen 6: Explore ──
+function S6(){
+  const [msgs,setMsgs]=useState([{role:"system",content:"Diagnosis → Prescription → Governance. The full chain. Ask anything."}]);
+  const [inp,setInp]=useState("");const [ld,setLd]=useState(false);const er=useRef(null);
+  useEffect(()=>{er.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
+  const send=useCallback(async(t)=>{
+    const q=t||inp.trim();if(!q||ld)return;setInp("");
+    const nm=[...msgs,{role:"user",content:q}];setMsgs(nm);setLd(true);
+    try{
+      const am=nm.filter(m=>m.role!=="system").map(m=>({role:m.role==="user"?"user":"assistant",content:m.content}));
+      const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:SYS_PROMPT,messages:am})});
+      const data=await r.json();const tx=data.content?.map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Error.";
+      setMsgs(p=>[...p,{role:"assistant",content:tx}]);
+    }catch(e){setMsgs(p=>[...p,{role:"assistant",content:"Error: "+e.message}])}
+    setLd(false);
+  },[inp,msgs,ld]);
+
+  return <div className="cscreen"><div className="cscreen-inner">
+    <div className="stag c-blue">Go Deeper</div>
+    <div className="stitle">The only system that <span className="c-blue">diagnoses</span>, <span className="c-green">prescribes</span>, and <span className="c-amber">governs</span>.</div>
+    <div className="ssub">Ask about methodology, science, business case, or operating conditions.</div>
+    <div className="chat-box">
+      <div className="qbtns">{QQ.map(q=><button key={q} onClick={()=>send(q)}>{q}</button>)}</div>
+      <div style={{maxHeight:420,overflowY:"auto",marginBottom:18}}>
+        {msgs.map((m,i)=><div key={i} className={"cmsg "+(m.role==="system"?"cm-s":m.role==="user"?"cm-u":"cm-a")}>{m.content}</div>)}
+        {ld&&<div className="cmsg cm-a" style={{color:"#6b7280"}}>Thinking...</div>}
+        <div ref={er}/></div>
+      <div style={{display:"flex",gap:10}}>
+        <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()}
+          placeholder="Ask anything..." style={{flex:1,background:"#12151c",border:"1px solid #1e2330",borderRadius:10,padding:"12px 16px",color:"#e2e4ea",fontSize:15,outline:"none"}}/>
+        <button onClick={()=>send()} disabled={ld} style={{padding:"12px 24px",background:ld?"#1e3a5f":"#3b82f6",border:"none",borderRadius:10,color:"white",fontWeight:600,fontSize:15}}>Send</button></div>
+      <div style={{textAlign:"center",marginTop:32,paddingTop:18,borderTop:"1px solid #1e2330"}}>
+        <div style={{fontSize:13,color:"#3d4452"}}>RAST Motor Intelligence — <a href="https://yumaniq.com" target="_blank" style={{color:"#3b82f6",textDecoration:"none"}}>yumaniq.com</a></div>
+        <div style={{fontSize:11,color:"#3d4452",marginTop:5}}>OFC (Todorov & Jordan, 2002). Decomposition under active validation.</div></div>
+    </div>
+  </div></div>;}
+
+function App(){
+  const [cur,setCur]=useState(0);
+  const go=i=>{setCur(i);window.scrollTo(0,0)};
+  const S=[S1,S2,S3,S4,S5,S6];const X=S[cur];
+  return <div><Nav cur={cur} go={go}/><div key={cur} style={{animation:"fadeIn 0.45s ease"}}><X go={go}/></div></div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
