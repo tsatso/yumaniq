@@ -35,9 +35,9 @@
   /* Screen layout */
   .scr{padding:52px 0 60px;display:flex;flex-direction:column;align-items:center}
   .si{width:100%;max-width:820px;padding:0 24px}
-  .banner{width:100%;height:180px;border-radius:10px;overflow:hidden;margin-bottom:20px;background-size:cover;background-position:center center;position:relative}
-  .banner::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(10,12,16,0.75) 0%,rgba(10,12,16,0.15) 40%,transparent 100%);pointer-events:none}
-  .banner-text{position:absolute;bottom:14px;left:18px;z-index:1;font-size:17px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,0.7)}
+  .banner{width:100%;height:140px;border-radius:10px;overflow:hidden;margin-bottom:20px;background-size:cover;background-position:center 30%;position:relative}
+  .banner::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(10,12,16,0.8) 0%,rgba(10,12,16,0.3) 50%,rgba(10,12,16,0.6) 100%);pointer-events:none}
+  .banner-text{position:absolute;bottom:12px;left:16px;z-index:1;font-size:15px;font-weight:700}
   .stag{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
   .st{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:8px}
   .ss{font-size:15px;color:#7f8694;line-height:1.6;margin-bottom:20px;max-width:640px}
@@ -166,7 +166,7 @@ function S1(){
   },100)},[]);
   return <div className="scr"><div className="si">
     <div className="banner" style={{backgroundImage:"url(panel1_risk.png)"}}>
-      <div className="banner-text"><span className="cr">$22K/min downtime.</span><br>Guardrails won't save you.</br></div></div>
+      <div className="banner-text"><span className="cr">$22K/min downtime.</span> Guardrails won't save you.</div></div>
     <div className="stag cr">The Risk</div>
     <div className="st"><span className="cr">700% gap.</span> 40% retiring. No capture.</div>
     <div className="ss">Physical AI without expert strategy is <span className="cr">medicine without prescription</span>. Your best operator's judgment isn't in any manual. When they leave, it's gone.</div>
@@ -232,7 +232,7 @@ function S3(){
   const tn=t=>t==="t"?"trait":t==="s"?"state":"mixed";
   return <div className="scr"><div className="si">
     <div className="banner" style={{backgroundImage:"url(panel4_judgment.png)"}}>
-      <div className="banner-text">Your judgment stays.<span className="ca"><br>Your tools adapt.</br></span></div></div>
+      <div className="banner-text">Your judgment stays. <span className="ca">Your tools adapt.</span></div></div>
     <div className="stag cg">Step 2: Decompose</div>
     <div className="st">Some priorities are <span className="cg">the operator</span>. Some are <span className="ca">the situation</span>.</div>
     <div className="ss">Mix them up and the prescription fails. <strong className="cw">Clustered = the operator. Scattered = the situation.</strong></div>
