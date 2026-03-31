@@ -130,12 +130,12 @@
           ]
         },
         {
-          "title": "Robotics and Teleoperation",
-          "body": "When the physics change, policies trained in one environment fail in another. Different gravity, communication latency, unfamiliar actuators.\n\nRAST captures expert motor intent on Earth and re-optimizes for target conditions. No retraining. No million-episode simulation. The operator's strategy transfers; the robot computes locally within explicit safety bounds.",
+          "title": "Heavy Equipment and Industrial Operations",
+          "body": "Your best excavator operator reads terrain instinctively, adjusts force for wet soil, protects the machine on unstable slopes. That expertise took 15 years to develop. It retires when they do.\n\nRAST extracts the operator's optimization strategy, not what they did, but what they were trying to achieve and how they traded off competing priorities. That strategy transfers to autonomous systems and new operators across conditions it was never trained on, with safety bounds enforced on every action.",
           "demos": [
             {
-              "label": "Explore the motor intelligence pipeline",
-              "href": "/demos/rast-c2/rast-c2-motor-intelligence.html"
+              "label": "Heavy Machinery Demo",
+              "href": "/rx/index.html"
             }
           ]
         },

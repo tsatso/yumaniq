@@ -31,6 +31,14 @@ export default function RastPage() {
             </ul>
           </div>
           <div className="flex flex-wrap gap-3 pt-4">
+            <a
+              href="/demos/rast-c2/rast-c2-motor-intelligence.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition border border-white/25 text-white hover:border-white/45"
+            >
+              The pipeline →
+            </a>
             <Button href="/#solutions" variant="secondary">
               See it work →
             </Button>
