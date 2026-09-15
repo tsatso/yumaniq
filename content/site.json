@@ -87,12 +87,6 @@
     "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."
   },
 
-  "chiefScientist": {
-    "name": "Tomer Sela",
-    "role": "Chief Scientist",
-    "bio": "I am an MSc in Autonomous System and Robotics from the Technion, focused on Deep RL and Control Theory in Complex environments. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael and The Technion advanced robotic lab."
-  },
-
   "collaborations": [
     "Technion BCI Lab - validation of motor intelligence inference",
     "Clinical partner in Israel - first deployment focus in a Cardiac Rehabilitation Center, with outcomes measurement"

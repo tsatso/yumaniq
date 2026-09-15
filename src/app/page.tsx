@@ -179,20 +179,6 @@ export default function HomePage() {
                 <div className="mt-1 text-sm text-white/70">{"Founder and CEO"}</div>
                 <p className="mt-3 text-sm text-white/80">{"I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."}</p>
               </div>
-           
-
-            {/* Divider */}
-            <div className="my-6 h-px bg-white/10" /> 
-
-            {/* Chief Scientist */}
-            
-              <div>
-                <div className="text-sm font-semibold">{"Tomer Sela"}</div>
-                <div className="mt-1 text-sm text-white/70">{"Chief Scientist"}</div>
-                <p className="mt-3 text-sm text-white/80">{"I am an MSc in Autonomous System and Robotics from the Technion, focused on Deep RL and Control Theory in Complex environments. I bridge scientific rigor with practical implementation, drawing on R&D experience at Rafael and The Technion advanced robotic lab."}</p>
-              </div>
-            
-
      
           </div>
                     {/* Collaborations */}
