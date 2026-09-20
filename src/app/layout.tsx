@@ -81,9 +81,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/privacy" className="hover:text-white">
                   Privacy
                 </Link>
-                <Link href="/licenses" className="hover:text-white">
-                  Licenses
-                </Link>
               </div>
             </div>
           </div>
