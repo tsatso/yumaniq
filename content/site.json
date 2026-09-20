@@ -69,7 +69,7 @@
       "Minimal-change corrections: adjust only what matters to the task and preserve the rest of the natural strategy.",
       "Hard safety limits: bounds enforced in the loop, with audit logs and predictable behavior."
     ],
-    "closing": "We do not claim magic. [[CONFIRM: public status line. Suggested: The method recovers known objectives on synthetic data and is being tested on real surgical recordings now.]]",
+    "closing": "We do not claim magic. We engineer the bridge from movement models to systems that run in the loop.",
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.2,
     "washOpacity": 0.42,
@@ -85,9 +85,6 @@
       "role": "Founder and CEO",
       "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter, as CTO of Oracle Israel's Enterprise Division and Chief Architect at Amdocs. Today I apply that mindset to Physical AI, turning movement science into software that runs in the loop, safely and measurably."
     },
-    "collaborations": [
-      "[[CONFIRM: collaborator name, institution and an accurate one-line scope. Publish only with their written okay. Delete this line to hide the block.]]"
-    ],
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.14,
     "washOpacity": 0.48,
@@ -101,17 +98,17 @@
     "items": [
       {
         "title": "Autonomous drones",
-        "body": "Skilled pilots handle what autopilots find hardest: changing payloads, gusts, tight spaces and fast, unpredictable targets. That skill stays with the pilot.\n\nRAST is being developed to infer a pilot's strategy and carry it into autonomous flight across airframes, payloads and conditions, with every command bounded by the safety layer.\n\n[[CONTENT: 1 to 2 lines naming the drone use cases you want to lead with]]",
+        "body": "Skilled pilots handle what autopilots find hardest: changing payloads, gusts, tight spaces and fast, unpredictable targets. That skill stays with the pilot.\n\nRAST is being developed to infer a pilot's strategy and carry it into autonomous flight across airframes, payloads and conditions, with every command bounded by the safety layer.\n\nFirst targets: carrying one pilot's strategy across airframes and payloads, close-proximity inspection in tight or GNSS-denied spaces, and terminal engagement against drones that evade.",
         "demos": []
       },
       {
         "title": "Robotic surgery",
-        "body": "Surgical robots record every motion of every expert. That makes them the best place to test whether an individual's motor strategy can be inferred, and split into what stays stable and what adapts to the task.\n\n[[CONTENT: specific surgical focus, and what a surgeon, hospital or robot maker gets from it]]",
+        "body": "Surgical robots record every motion of every expert. That makes them the best place to test whether an individual's motor strategy can be inferred, and split into what stays stable and what adapts to the task.\n\nWe are working from recorded expert surgical motion first, because it is the cleanest place to prove the method. The specific clinical and platform focus will follow.",
         "demos": []
       },
       {
         "title": "Blizbeat, just for fun",
-        "body": "The same engine, pointed at music. Blizbeat picks up how you groove and plays it back as a beat that sounds like you.\n\n[[CONTENT: confirm the one-liner matches what Blizbeat does today]]",
+        "body": "The same engine, pointed at music. Blizbeat reads how you move and turns it into a beat with your timing in it.\n\nNo science claims here. It is a toy that happens to share the core code.",
         "demos": [
           {
             "label": "Try Blizbeat",
