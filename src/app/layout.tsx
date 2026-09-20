@@ -3,6 +3,7 @@ import "./globals.css";
 import { Montserrat, Inter, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import { Analytics } from "@vercel/analytics/next";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
