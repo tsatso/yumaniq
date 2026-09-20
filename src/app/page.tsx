@@ -169,15 +169,15 @@ export default function HomePage() {
            {/* Founding team */}
           <div className="rounded-2xl border border-white/15 bg-white/7 p-6">
             <div className="text-sm font-semibold">
-              {"Founding team"}
+              {s.team.foundingTitle}
             </div>
 
             {/* Founder */}
             
               <div className="mt-5">
-                <div className="text-sm font-semibold">{"Nitsan Sharon"}</div>
-                <div className="mt-1 text-sm text-white/70">{"Founder and CEO"}</div>
-                <p className="mt-3 text-sm text-white/80">{"I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."}</p>
+                <div className="text-sm font-semibold">{s.team.founder.name}</div>
+                <div className="mt-1 text-sm text-white/70">{s.team.founder.role}</div>
+                <p className="mt-3 text-sm text-white/80">{s.team.founder.bio}</p>
               </div>
      
           </div>

@@ -5,7 +5,6 @@ export default function AboutPage() {
   const s = site as any;
 
   const founder = s.team?.founder;
-  const chief = s.team?.chiefScientist;
 
   return (
     <main>
@@ -38,20 +37,7 @@ export default function AboutPage() {
               </div>
             ) : null}
 
-            {/* Divider */}
-            {founder && chief ? <div className="my-6 h-px bg-white/10" /> : null}
-
-            {/* Chief Scientist */}
-            {chief ? (
-              <div>
-                <div className="text-sm font-semibold">{chief.name}</div>
-                <div className="mt-1 text-sm text-white/70">{chief.role}</div>
-                <p className="mt-3 text-sm text-white/80">{chief.bio}</p>
-              </div>
-            ) : null}
-
-            {/* Safety fallback if keys are missing */}
-            {!founder && !chief ? (
+            {!founder ? (
               <p className="mt-4 text-sm text-white/70">
                 Team details are not configured in site.json.
               </p>

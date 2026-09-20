@@ -1,11 +1,11 @@
 {
   "brand": "Yumaniq",
-  "tagline": "Motor Intelligence Infrastructure for Physical AI",
+  "tagline": "Expert motor intent for autonomous machines",
   "hero": {
     "kicker": "Yumaniq",
-    "headline": "Motor Intelligence Infrastructure for Physical AI",
-    "body": "We build the execution layer that makes physical AI systems actually work,\nacross changing environments, with safety guarantees, personalized to each\nuser.",
-    "underTheHood": "Under the hood: state-aware control, objective inference from expert behavior, and hard safety limits, so systems keep working when the body, environment, or dynamics change.",
+    "headline": "Expert motor intent, carried into autonomous machines",
+    "body": "RAST infers what skilled operators optimize for when they move, then computes actions from that intent as bodies, payloads and physics change.\nWe are applying it to autonomous drones and robotic surgery.",
+    "underTheHood": "Under the hood: inverse optimal control to infer the objective, optimal feedback control to act on it, and deterministic safety limits on every command.",
     "primaryCta": {
       "label": "Talk to us",
       "href": "/contact"
@@ -22,54 +22,54 @@
   },
   "problem": {
     "kicker": "The Problem",
-    "headline": "Physical AI has a transfer problem",
+    "headline": "Skill breaks when the dynamics change",
     "body": [
-      "Physical AI can look impressive in a controlled setting, until the dynamics change.",
-      "Different bodies. Different environments. Different constraints. Small shifts in dynamics create big failures.",
-      "The gap is not more AI. It is the missing execution layer: a system that adapts actions in real time to the dynamics that actually exist, while staying safe and auditable."
+      "A drone picks up a payload and its inertia changes mid-flight. The wind shifts. A new airframe handles differently. A surgical robot moves to a new instrument or a new task.",
+      "Behavior that was demonstrated or trained under one set of dynamics is brittle under the next. Expert operators adapt without thinking. Their machines do not.",
+      "The missing piece is the intent behind the skill: what the expert was optimizing for. Intent is the part worth transferring."
     ],
-    "backgroundImage": "/art/problem-transfer-motor-minimal.png",
-    "watermarkOpacity": 0.50,
+    "backgroundImage": "/art/problem-transfer-clean.png",
+    "watermarkOpacity": 0.40,
     "washOpacity": 0.70,
     "blurPx": 0,
     "position": "center"
   },
-    "product": {
+  "product": {
     "kicker": "The Product",
     "headline": "RAST, the execution layer",
-    "intro": "RAST is a software stack that runs alongside an existing control system. It converts expert demonstrations into a compact intent package, then computes actions continuously from live state while enforcing hard safety limits.",
+    "intro": "RAST runs alongside an existing control stack. It turns expert demonstrations into a compact intent package, then computes actions from live state and that intent, inside hard safety limits.",
     "cards": [
       {
         "title": "Intent Studio",
-        "body": "Offline tooling that infers the motor objective behind expert behavior from demonstrations, and exports a deployable intent package."
+        "body": "Offline tooling that infers the objective behind expert behavior, separates stable traits from context-dependent adjustments, and exports a deployable intent package."
       },
       {
         "title": "RAST Runtime",
-        "body": "On-device execution that recomputes actions from live state and intent, staying aligned as operating conditions shift instead of replaying a brittle policy."
+        "body": "On-device execution that recomputes actions from live state and intent as conditions shift. It decides, trait by trait, how much of the expert's strategy to carry into a new setting."
       },
       {
         "title": "Safety Guardian",
-        "body": "Deterministic constraint enforcement. Clamps unsafe actions, monitors execution, and produces audit logs for safety-critical use."
+        "body": "Deterministic constraint enforcement. Clamps unsafe commands, monitors execution and writes audit logs."
       }
     ],
-    "deepLine": "Not a policy library. A state aware execution loop with hard constraint projection.",
+    "deepLine": "Not a policy library. An execution loop driven by inferred intent, with hard constraint projection.",
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.22,
     "washOpacity": 0.42,
     "blurPx": 0,
     "position": "center"
   },
-
   "technology": {
     "kicker": "Technology",
     "headline": "State-aware control, in the loop",
     "bullets": [
-      "State-aware action computation: actions are computed continuously from live state, not selected from a static script.",
       "Objective inference from experts: infer what experts optimize for, not only what they did.",
-      "Minimal-change corrections: adjust only what matters to the task, preserve the rest of the natural strategy.",
-      "Hard safety limits: bounds enforced in the loop with auditability and predictable behavior."
+      "Trait and state: separate what stays stable in an operator's strategy from what adapts to the situation. The stable part is what we transfer.",
+      "State-aware action computation: actions are computed continuously from live state, not replayed from a script.",
+      "Minimal-change corrections: adjust only what matters to the task and preserve the rest of the natural strategy.",
+      "Hard safety limits: bounds enforced in the loop, with audit logs and predictable behavior."
     ],
-    "closing": "We do not claim magic. We engineer the bridge from mathematical movement models to deployable systems.",
+    "closing": "We do not claim magic. [[CONFIRM: public status line. Suggested: The method recovers known objectives on synthetic data and is being tested on real surgical recordings now.]]",
     "backgroundImage": "/art/approach-decoupling.jpeg",
     "watermarkOpacity": 0.2,
     "washOpacity": 0.42,
@@ -77,95 +77,71 @@
     "position": "center"
   },
   "team": {
-  "kicker": "Team",
-  "headline": "Team",
-  "foundingTitle": "Founding team",
-
-  "founder": {
-    "name": "Nitsan Sharon",
-    "role": "Founder and CEO",
-    "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter. Today I apply that mindset to Physical AI, turning rigorous movement science into software that can run in the loop, safely and measurably, in the real world."
+    "kicker": "Team",
+    "headline": "Team",
+    "foundingTitle": "Founder",
+    "founder": {
+      "name": "Nitsan Sharon",
+      "role": "Founder and CEO",
+      "bio": "I have spent decades building high-reliability systems where correctness and operational reality matter, as CTO of Oracle Israel's Enterprise Division and Chief Architect at Amdocs. Today I apply that mindset to Physical AI, turning movement science into software that runs in the loop, safely and measurably."
+    },
+    "collaborations": [
+      "[[CONFIRM: collaborator name, institution and an accurate one-line scope. Publish only with their written okay. Delete this line to hide the block.]]"
+    ],
+    "backgroundImage": "/art/approach-decoupling.jpeg",
+    "watermarkOpacity": 0.14,
+    "washOpacity": 0.48,
+    "blurPx": 0,
+    "position": "center"
   },
-
-  "collaborations": [
-    "Technion BCI Lab - validation of motor intelligence inference",
-    "Clinical partner in Israel - first deployment focus in a Cardiac Rehabilitation Center, with outcomes measurement"
-  ],
-
-  "backgroundImage": "/art/approach-decoupling.jpeg",
-  "watermarkOpacity": 0.14,
-  "washOpacity": 0.48,
-  "blurPx": 0,
-  "position": "center"
-},
   "solutions": {
-      "kicker": "Solutions",
-      "headline": "One engine. Four ways conditions change.",
-      "intro": "",
-      "items": [
-        {
-          "title": "Health and Rehabilitation",
-          "body": "When the body changes after cardiac events, surgery, or neurological injury, rehabilitation means learning to move within new physical constraints. Generic protocols ignore the motor strategy each patient already has.\n\nRAST extracts individual movement priorities and guides progression that respects them: objective baselines, dose-aware targets, and safety limits enforced in the loop. The therapist stays in charge. The dosing gets precise.",
-          "demos": [
-            {
-              "label": "RAST Cardiac Rehab Demo",
-              "href": "/demos/rast-cr/rast-cr-with-cmg.html"
-            }
-          ]
-        },
-        {
-          "title": "Driver Safety and ADAS",
-          "body": "When the situation changes, a pedestrian steps out, traction breaks, reaction time compresses. Your driving strategy faces conditions it wasn't practiced for.\n\nRAST models the motor strategy behind normal driving and infers how each driver balances precision, reaction, and risk. That profile can inform predictive safety systems and personalize ADAS response to how you actually drive, not a population average.",
-          "demos": [
-            {
-              "label": "ADAS Demo",
-              "href": "/demos/adas/rast-adas.html"
-            }
-          ]
-        },
-        {
-          "title": "Heavy Equipment and Industrial Operations",
-          "body": "Your best excavator operator reads terrain instinctively, adjusts force for wet soil, protects the machine on unstable slopes. That expertise took 15 years to develop. It retires when they do.\n\nRAST extracts the operator's optimization strategy, not what they did, but what they were trying to achieve and how they traded off competing priorities. That strategy transfers to autonomous systems and new operators across conditions it was never trained on, with safety bounds enforced on every action.",
-          "demos": [
-            {
-              "label": "Heavy Machinery Demo",
-              "href": "/demos/heavy-machinery/"
-            }
-          ]
-        },
-        {
-          "title": "Music and Expression",
-          "body": "When the environment changes, from practice room to stage, from studio control to live response, musical performance demands the same intent under different physical and acoustic conditions.\n\nRAST captures the motor signature of musical expression: how you shape pitch, dynamics, and rhythm. Not what you played, but how you meant it.",
-          "demos": [
-            {
-              "label": "Voice Demo",
-              "href": "/demos/voice/rast-artech-voice.html"
-            },
-            {
-              "label": "Rhythm Demo",
-              "href": "/demos/rhythm/rast-rhythm-demo.html"
-            },
-            {
-              "label": "Blizbeat story",
-              "href": "/demos/rhythm/blizbeat-story.html"
-            },
-            {
-              "label": "Try Blizbeat",
-              "href": "https://blizbeat.yumaniq.com"
-            }
-          ]
-        }
-      ],
-      "backgroundImage": "/art/problem-transfer-motor-minimal.png",
-      "watermarkOpacity": 0.06,
-      "washOpacity": 0.70,
-      "blurPx": 1,
-      "position": "center"
+    "kicker": "Applications",
+    "headline": "One engine. Three places we are pointing it.",
+    "intro": "",
+    "items": [
+      {
+        "title": "Autonomous drones",
+        "body": "Skilled pilots handle what autopilots find hardest: changing payloads, gusts, tight spaces and fast, unpredictable targets. That skill stays with the pilot.\n\nRAST is being developed to infer a pilot's strategy and carry it into autonomous flight across airframes, payloads and conditions, with every command bounded by the safety layer.\n\n[[CONTENT: 1 to 2 lines naming the drone use cases you want to lead with]]",
+        "demos": []
+      },
+      {
+        "title": "Robotic surgery",
+        "body": "Surgical robots record every motion of every expert. That makes them the best place to test whether an individual's motor strategy can be inferred, and split into what stays stable and what adapts to the task.\n\n[[CONTENT: specific surgical focus, and what a surgeon, hospital or robot maker gets from it]]",
+        "demos": []
+      },
+      {
+        "title": "Blizbeat, just for fun",
+        "body": "The same engine, pointed at music. Blizbeat picks up how you groove and plays it back as a beat that sounds like you.\n\n[[CONTENT: confirm the one-liner matches what Blizbeat does today]]",
+        "demos": [
+          {
+            "label": "Try Blizbeat",
+            "href": "https://blizbeat.yumaniq.com"
+          },
+          {
+            "label": "Blizbeat story",
+            "href": "/demos/rhythm/blizbeat-story.html"
+          },
+          {
+            "label": "Rhythm demo",
+            "href": "/demos/rhythm/rast-rhythm-demo.html"
+          },
+          {
+            "label": "Voice demo",
+            "href": "/demos/voice/rast-artech-voice.html"
+          }
+        ]
+      }
+    ],
+    "backgroundImage": "/art/problem-transfer-clean.png",
+    "watermarkOpacity": 0.06,
+    "washOpacity": 0.70,
+    "blurPx": 1,
+    "position": "center"
   },
   "contact": {
     "kicker": "Contact",
     "headline": "Contact",
-    "line": "If you are building a system where intent meets dynamics - robotics, rehab, or safety-critical automation - let's talk about deployment paths and pilot design.",
+    "line": "Building autonomous drones or surgical robots, and want expert skill to survive new conditions? Let's talk about data, pilots and integration.",
     "email": "info@yumaniq.com",
     "backgroundImage": "/art/hero-motor-intelligence-minimal.png",
     "watermarkOpacity": 0.10,
@@ -185,7 +161,7 @@
   "insights": {
     "kicker": "Insights",
     "headline": "Insights",
-    "backgroundImage": "/art/problem-transfer-motor-minimal.png",
+    "backgroundImage": "/art/problem-transfer-clean.png",
     "watermarkOpacity": 0.08,
     "washOpacity": 0.72,
     "blurPx": 0,

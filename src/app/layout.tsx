@@ -26,7 +26,8 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata = {
   title: "Yumaniq",
-  description: "Motor Intelligence Infrastructure for Physical AI",
+  description: "Expert motor intent for autonomous drones and robotic surgery",
+  // [[IMAGE: add openGraph.images with a 1200x630 preview once the new art exists]]
   icons: {
     apple: "/apple-touch-icon.png",
     icon: "/favicon.ico"
@@ -53,14 +54,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Link>
             <nav className="flex items-center gap-6 text-sm text-white/80">
               <Link href="/rast" className="hover:text-white">
-                Product
+                RAST
               </Link>
               <Link href="/#solutions" className="hover:text-white">
-                Solutions
+                Applications
               </Link>
-              <Link href="/blog" className="hover:text-white">
-                Insights
-              </Link>
+              {/* Insights hidden until there are at least two real posts */}
               <Link href="/about" className="hover:text-white">
                 About
               </Link>
